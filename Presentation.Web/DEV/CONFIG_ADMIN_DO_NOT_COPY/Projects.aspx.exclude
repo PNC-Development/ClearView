@@ -1,0 +1,104 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnImport_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        Requests oRequest = new Requests(0, dsn);
+        ResourceRequest oResourceRequest = new ResourceRequest(0, dsn);
+        string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=F:\\Projects.xls;Extended Properties=Excel 8.0;";
+        OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [Projects$]", strConn);
+        DataSet ds = new DataSet();
+        myCommand.Fill(ds, "ExcelInfo");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            if (dr[0].ToString().Trim() == "")
+            {
+                Response.Write("Break - " + intCount.ToString() + "<br/>");
+                break;
+            }
+            string strName = dr[0].ToString().Trim();
+            string strNumber = dr[1].ToString().Trim();
+            string strType = dr[2].ToString().Trim();
+            int intOrg = GetOrganization(dr[3].ToString().Trim());
+            int intSegment = 0;
+            DateTime datStart = DateTime.Parse(dr[4].ToString().Trim());
+            DateTime datEnd = DateTime.Parse(dr[5].ToString().Trim());
+            int intLead = GetUser(dr[6].ToString().Trim());
+            int intWorking = GetUser(dr[7].ToString().Trim());
+            int intExecutive = GetUser(dr[8].ToString().Trim());
+            int intTechnical = GetUser(dr[9].ToString().Trim());
+            int intEngineer = GetUser(dr[10].ToString().Trim());
+            int intStatus = 2;
+            int intProject = oProject.Add(strName, strType, strNumber, 15686, intOrg, intSegment, intStatus);
+            int intRequest = oRequest.Add(intProject, 15686, "Imported on " + DateTime.Today.ToShortDateString(), datStart, datEnd);
+            oProject.Update(intProject, intLead, intExecutive, intWorking, intTechnical, intEngineer, 0);
+            oResourceRequest.Add(intRequest, 0, 0, 1, "", intLead, 0, 0.00, intStatus, 0, 1, 1, 0, 0);
+            intCount++;
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Projects Imported");
+    }
+    private int GetOrganization(string _name)
+    {
+        if (_name == "")
+            return 0;
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_organizations WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+            return 0;
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["organizationid"].ToString());
+    }
+    private int GetSegment(string _name)
+    {
+        if (_name == "")
+            return 0;
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_segments WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+            return 0;
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetUser(string _name)
+    {
+        if (_name == "")
+            return 0;
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_users WHERE xid = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+            return 0;
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title>IMPORT</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+        <table>
+            <tr>
+                <td colspan="2" class="header">Import Projects</td>
+            </tr>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:Button ID="btnImport" runat="server" CssClass="default" Width="150" Text="Import Projects" OnClick="btnImport_Click" /></td>
+            </tr>
+        </table>
+</form>
+</body>
+</html>

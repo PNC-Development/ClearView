@@ -1,0 +1,122 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private string dsn = "data source=OHCLEIIS1152;uid=stealy;password=Alive122179;database=IIDatabase";
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        int intCount = 0;
+        string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=F:\\WanImport.xls;Extended Properties=Excel 8.0;";
+        OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", strConn);
+        DataSet ds = new DataSet();
+        myCommand.Fill(ds, "ExcelInfo");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            // Check Model
+            string strModel = dr[10].ToString().Trim();
+            if (strModel.Trim() != "")
+            {
+                DataSet dsModel = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM tblWANModelss WHERE Model = '" + strModel + "'");
+                if (dsModel.Tables[0].Rows.Count == 0)
+                {
+                    SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "INSERT INTO tblWANModelss VALUES ('" + strModel + "')");
+                    Response.Write("***** Added MODEL: " + strModel + "<br>");
+                }
+            }
+            // Check Asset
+            string strSerial = dr[11].ToString().Trim();
+            if (strSerial.Trim() != "")
+            {
+                DataSet dsItem = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM tblWANAsset WHERE Serial = '" + strSerial + "'");
+                if (dsItem.Tables[0].Rows.Count > 0)
+                {
+                    int intID = Int32.Parse(dsItem.Tables[0].Rows[0]["id"].ToString());
+                    CheckValue(intID, strSerial, "DeviceType", GetValue(dr[0].ToString().Trim()));
+                    CheckValue(intID, strSerial, "Model", GetValue(dr[10].ToString().Trim()));
+                    CheckValue(intID, strSerial, "Asset_Tag", GetValue(dr[12].ToString().Trim()));
+                    CheckValue(intID, strSerial, "SiteName", GetValue(dr[1].ToString().Trim()));
+                    CheckValue(intID, strSerial, "SiteAddress", GetValue(dr[2].ToString().Trim()));
+                    CheckValue(intID, strSerial, "SiteCity", GetValue(dr[3].ToString().Trim()));
+                    CheckValue(intID, strSerial, "SiteState", GetValue(dr[4].ToString().Trim()));
+                    CheckValue(intID, strSerial, "DeviceName", GetValue(dr[8].ToString().Trim()));
+                    CheckValue(intID, strSerial, "IPAddress", GetValue(dr[9].ToString().Trim()));
+                    CheckValue(intID, strSerial, "CommissionDate", GetValue(dr[5].ToString().Trim()));
+                    CheckValue(intID, strSerial, "Technician", GetTechnician(GetValue(dr[6].ToString().Trim())));
+                }
+                else
+                {
+                    Response.Write("Added SERIAL: " + strSerial + "<br>");
+                    intCount++;
+                    SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "INSERT INTO tblWANAsset VALUES ('" + GetValue(dr[0].ToString().Trim()) + "','IMPORT - 083107 - Healy','" + GetValue(dr[10].ToString().Trim()) + "','" + GetValue(dr[11].ToString().Trim()) + "','" + GetValue(dr[12].ToString().Trim()) + "',null,null,'" + GetValue(dr[1].ToString().Trim()) + "','" + GetValue(dr[2].ToString().Trim()) + "','" + GetValue(dr[3].ToString().Trim()) + "','" + GetValue(dr[4].ToString().Trim()) + "',null,null,'Production',null,'" + GetValue(dr[8].ToString().Trim()) + "','" + GetValue(dr[9].ToString().Trim()) + "',null,'" + GetValue(dr[5].ToString().Trim()) + "',null,null,null,null,null,null,'" + GetTechnician(GetValue(dr[6].ToString().Trim())) + "',null,null,null,null,null);");
+                }
+            }
+        }
+        Response.Write("DONE<br/>");
+        Response.Write("Total Added: " + intCount.ToString() + "<br/>");
+    }
+    private void CheckValue(int intID, string _serial, string _column, string _value)
+    {
+        DataSet dsNew = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM tblWANAsset WHERE id = " + intID.ToString());
+        if (dsNew.Tables[0].Rows.Count > 0)
+        {
+            string strOld = dsNew.Tables[0].Rows[0][_column].ToString();
+            if (strOld == "")
+            {
+                SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE tblWANAsset SET " + _column + " = '" + _value + "' WHERE id = " + intID.ToString());
+                Response.Write(" - Updated SERIAL: " + _serial + " (column: " + _column + ", value: " + _value + ")<br>");
+            }
+        }
+    }
+    private string GetValue(string _value)
+    {
+        return _value.Trim().Replace("'", "''");
+    }
+    private string GetTechnician(string _name)
+    {
+        if (_name.Contains("Schulz"))
+            return "Schulz, Jack";
+        else if (_name.Contains("Schultz"))
+            return "Schulz, Jack";
+        else if (_name.Contains("Lucas"))
+            return "Lucas, Jeanette";
+        else if (_name.Contains("Fischer"))
+            return "Fischer, Jeff";
+        else if (_name.Contains("Chartier"))
+            return "Chartier, Jerry";
+        else if (_name.Contains("Perusek"))
+            return "Fischer, Jeff";
+        else if (_name.Contains("Anderson"))
+            return "Anderson, Scott";
+        else if (_name.Contains("Brown"))
+            return "Brown, Will";
+        else
+            return "Healy, Steve";
+    }
+</script>
+<html>
+<head>
+<title>II Database WAN Import</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">II Database WAN Import</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

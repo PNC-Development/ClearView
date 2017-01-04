@@ -1,0 +1,1121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://Altiris.ASDK.DS.com" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://Altiris.ASDK.DS.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://Altiris.ASDK.DS.com">
+      <s:element name="GetJobIDs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobSearchPhrase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobIDsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobIDsResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="DSCredentialsHeader" type="tns:DSCredentialsHeader" />
+      <s:complexType name="DSCredentialsHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetJobInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobInfoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteJobResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteJobs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobIDs" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteJobsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteJobsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="newName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RenameJobResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobSchedules">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobSchedulesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobSchedulesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetJobDescription">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="description" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SetJobDescriptionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SetJobDescriptionResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobIDsByTask">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="taskTypeFilter" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="jobSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="folderID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobIDsByTaskResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobIDsByTaskResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobIDsInFolder">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="folderID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobIDsInFolderResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobIDsInFolderResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="folderID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveJobResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveJobs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobIDs" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="folderID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveJobsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveJobsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetJobResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateJobResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateJob">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="jobData" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateJobResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="UpdateJobResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ArrayOfInt" nillable="true" type="tns:ArrayOfInt" />
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="int" type="s:int" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetJobIDsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJobIDs" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobIDsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJobInfo" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteJob" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteJobs" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteJobsResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobSoapIn">
+    <wsdl:part name="parameters" element="tns:RenameJob" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobSoapOut">
+    <wsdl:part name="parameters" element="tns:RenameJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJobSchedules" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobSchedulesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionSoapIn">
+    <wsdl:part name="parameters" element="tns:SetJobDescription" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionSoapOut">
+    <wsdl:part name="parameters" element="tns:SetJobDescriptionResponse" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJobIDsByTask" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobIDsByTaskResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJobIDsInFolder" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobIDsInFolderResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveJob" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveJobs" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveJobsResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSoapIn">
+    <wsdl:part name="parameters" element="tns:GetJob" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSoapOut">
+    <wsdl:part name="parameters" element="tns:GetJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateJob" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateJob" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateJobResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsHttpGetIn">
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsHttpGetIn">
+    <wsdl:part name="jobIDs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="newName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="description" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskHttpGetIn">
+    <wsdl:part name="taskTypeFilter" type="s:string" />
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderHttpGetIn">
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsHttpGetIn">
+    <wsdl:part name="jobIDs" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobHttpGetIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobHttpGetIn">
+    <wsdl:part name="jobData" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobHttpGetIn">
+    <wsdl:part name="jobData" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsHttpPostIn">
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobInfoHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsHttpPostIn">
+    <wsdl:part name="jobIDs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobsHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="newName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobSchedulesHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="description" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="SetJobDescriptionHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskHttpPostIn">
+    <wsdl:part name="taskTypeFilter" type="s:string" />
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsByTaskHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderHttpPostIn">
+    <wsdl:part name="jobSearchPhrase" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobIDsInFolderHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsHttpPostIn">
+    <wsdl:part name="jobIDs" type="s:string" />
+    <wsdl:part name="folderID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveJobsHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetJobHttpPostIn">
+    <wsdl:part name="jobID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobHttpPostIn">
+    <wsdl:part name="jobData" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobHttpPostIn">
+    <wsdl:part name="jobData" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UpdateJobHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:portType name="JobManagementServiceSoap">
+    <wsdl:operation name="GetJobIDs">
+      <wsdl:input message="tns:GetJobIDsSoapIn" />
+      <wsdl:output message="tns:GetJobIDsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <wsdl:input message="tns:GetJobInfoSoapIn" />
+      <wsdl:output message="tns:GetJobInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <wsdl:input message="tns:DeleteJobSoapIn" />
+      <wsdl:output message="tns:DeleteJobSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <wsdl:input message="tns:DeleteJobsSoapIn" />
+      <wsdl:output message="tns:DeleteJobsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <wsdl:input message="tns:RenameJobSoapIn" />
+      <wsdl:output message="tns:RenameJobSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <wsdl:input message="tns:GetJobSchedulesSoapIn" />
+      <wsdl:output message="tns:GetJobSchedulesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <wsdl:input message="tns:SetJobDescriptionSoapIn" />
+      <wsdl:output message="tns:SetJobDescriptionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <wsdl:input message="tns:GetJobIDsByTaskSoapIn" />
+      <wsdl:output message="tns:GetJobIDsByTaskSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <wsdl:input message="tns:GetJobIDsInFolderSoapIn" />
+      <wsdl:output message="tns:GetJobIDsInFolderSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <wsdl:input message="tns:MoveJobSoapIn" />
+      <wsdl:output message="tns:MoveJobSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <wsdl:input message="tns:MoveJobsSoapIn" />
+      <wsdl:output message="tns:MoveJobsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <wsdl:input message="tns:GetJobSoapIn" />
+      <wsdl:output message="tns:GetJobSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <wsdl:input message="tns:CreateJobSoapIn" />
+      <wsdl:output message="tns:CreateJobSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <wsdl:input message="tns:UpdateJobSoapIn" />
+      <wsdl:output message="tns:UpdateJobSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="JobManagementServiceHttpGet">
+    <wsdl:operation name="GetJobIDs">
+      <wsdl:input message="tns:GetJobIDsHttpGetIn" />
+      <wsdl:output message="tns:GetJobIDsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <wsdl:input message="tns:GetJobInfoHttpGetIn" />
+      <wsdl:output message="tns:GetJobInfoHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <wsdl:input message="tns:DeleteJobHttpGetIn" />
+      <wsdl:output message="tns:DeleteJobHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <wsdl:input message="tns:DeleteJobsHttpGetIn" />
+      <wsdl:output message="tns:DeleteJobsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <wsdl:input message="tns:RenameJobHttpGetIn" />
+      <wsdl:output message="tns:RenameJobHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <wsdl:input message="tns:GetJobSchedulesHttpGetIn" />
+      <wsdl:output message="tns:GetJobSchedulesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <wsdl:input message="tns:SetJobDescriptionHttpGetIn" />
+      <wsdl:output message="tns:SetJobDescriptionHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <wsdl:input message="tns:GetJobIDsByTaskHttpGetIn" />
+      <wsdl:output message="tns:GetJobIDsByTaskHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <wsdl:input message="tns:GetJobIDsInFolderHttpGetIn" />
+      <wsdl:output message="tns:GetJobIDsInFolderHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <wsdl:input message="tns:MoveJobHttpGetIn" />
+      <wsdl:output message="tns:MoveJobHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <wsdl:input message="tns:MoveJobsHttpGetIn" />
+      <wsdl:output message="tns:MoveJobsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <wsdl:input message="tns:GetJobHttpGetIn" />
+      <wsdl:output message="tns:GetJobHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <wsdl:input message="tns:CreateJobHttpGetIn" />
+      <wsdl:output message="tns:CreateJobHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <wsdl:input message="tns:UpdateJobHttpGetIn" />
+      <wsdl:output message="tns:UpdateJobHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="JobManagementServiceHttpPost">
+    <wsdl:operation name="GetJobIDs">
+      <wsdl:input message="tns:GetJobIDsHttpPostIn" />
+      <wsdl:output message="tns:GetJobIDsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <wsdl:input message="tns:GetJobInfoHttpPostIn" />
+      <wsdl:output message="tns:GetJobInfoHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <wsdl:input message="tns:DeleteJobHttpPostIn" />
+      <wsdl:output message="tns:DeleteJobHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <wsdl:input message="tns:DeleteJobsHttpPostIn" />
+      <wsdl:output message="tns:DeleteJobsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <wsdl:input message="tns:RenameJobHttpPostIn" />
+      <wsdl:output message="tns:RenameJobHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <wsdl:input message="tns:GetJobSchedulesHttpPostIn" />
+      <wsdl:output message="tns:GetJobSchedulesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <wsdl:input message="tns:SetJobDescriptionHttpPostIn" />
+      <wsdl:output message="tns:SetJobDescriptionHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <wsdl:input message="tns:GetJobIDsByTaskHttpPostIn" />
+      <wsdl:output message="tns:GetJobIDsByTaskHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <wsdl:input message="tns:GetJobIDsInFolderHttpPostIn" />
+      <wsdl:output message="tns:GetJobIDsInFolderHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <wsdl:input message="tns:MoveJobHttpPostIn" />
+      <wsdl:output message="tns:MoveJobHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <wsdl:input message="tns:MoveJobsHttpPostIn" />
+      <wsdl:output message="tns:MoveJobsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <wsdl:input message="tns:GetJobHttpPostIn" />
+      <wsdl:output message="tns:GetJobHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <wsdl:input message="tns:CreateJobHttpPostIn" />
+      <wsdl:output message="tns:CreateJobHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <wsdl:input message="tns:UpdateJobHttpPostIn" />
+      <wsdl:output message="tns:UpdateJobHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="JobManagementServiceSoap" type="tns:JobManagementServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetJobIDs">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJobIDs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobIDsDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJobInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobInfoDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteJobs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteJobsDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/RenameJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:RenameJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJobSchedules" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobSchedulesDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/SetJobDescription" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:SetJobDescriptionDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJobIDsByTask" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobIDsByTaskDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJobIDsInFolder" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobIDsInFolderDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveJobs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveJobsDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/CreateJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/UpdateJob" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:UpdateJobDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="JobManagementServiceHttpGet" type="tns:JobManagementServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetJobIDs">
+      <http:operation location="/GetJobIDs" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <http:operation location="/GetJobInfo" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <http:operation location="/DeleteJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <http:operation location="/DeleteJobs" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <http:operation location="/RenameJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <http:operation location="/GetJobSchedules" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <http:operation location="/SetJobDescription" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <http:operation location="/GetJobIDsByTask" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <http:operation location="/GetJobIDsInFolder" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <http:operation location="/MoveJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <http:operation location="/MoveJobs" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <http:operation location="/GetJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <http:operation location="/CreateJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <http:operation location="/UpdateJob" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="JobManagementServiceHttpPost" type="tns:JobManagementServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetJobIDs">
+      <http:operation location="/GetJobIDs" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobInfo">
+      <http:operation location="/GetJobInfo" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJob">
+      <http:operation location="/DeleteJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteJobs">
+      <http:operation location="/DeleteJobs" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameJob">
+      <http:operation location="/RenameJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobSchedules">
+      <http:operation location="/GetJobSchedules" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SetJobDescription">
+      <http:operation location="/SetJobDescription" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsByTask">
+      <http:operation location="/GetJobIDsByTask" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJobIDsInFolder">
+      <http:operation location="/GetJobIDsInFolder" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJob">
+      <http:operation location="/MoveJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveJobs">
+      <http:operation location="/MoveJobs" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetJob">
+      <http:operation location="/GetJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJob">
+      <http:operation location="/CreateJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateJob">
+      <http:operation location="/UpdateJob" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="JobManagementService">
+    <wsdl:port name="JobManagementServiceSoap" binding="tns:JobManagementServiceSoap">
+      <soap:address location="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="JobManagementServiceHttpGet" binding="tns:JobManagementServiceHttpGet">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="JobManagementServiceHttpPost" binding="tns:JobManagementServiceHttpPost">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

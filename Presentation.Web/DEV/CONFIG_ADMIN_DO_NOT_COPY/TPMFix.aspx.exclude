@@ -1,0 +1,55 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT cv_users.fname + ' ' + cv_users.lname AS 'technicain', cv_projects.name AS 'projectname', cv_resource_requests.*, cv_service_requests.id AS SRID, cv_project_requests.id AS PRID FROM cv_resource_requests INNER JOIN cv_requests LEFT OUTER JOIN cv_projects ON cv_projects.projectid = cv_requests.projectid AND cv_projects.deleted = 0 ON cv_resource_requests.requestid = cv_requests.requestid AND cv_requests.deleted = 0 LEFT OUTER JOIN cv_users ON cv_resource_requests.userid = cv_users.userid AND cv_users.enabled = 1 AND cv_users.deleted = 0 INNER JOIN cv_request_items ON cv_resource_requests.itemid = cv_request_items.itemid AND cv_request_items.enabled = 1 AND cv_request_items.deleted = 0 AND cv_request_items.applicationid = 288 LEFT OUTER JOIN cv_service_requests ON cv_resource_requests.requestid = cv_service_requests.requestid AND cv_service_requests.deleted = 0 LEFT OUTER JOIN cv_project_requests ON cv_resource_requests.requestid = cv_project_requests.requestid AND cv_project_requests.deleted = 0");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            if (dr["PRID"].ToString() != "" && dr["solo"].ToString() == "1")
+            {
+                Response.Write("Updated project &quot;" + dr["projectname"].ToString() + "&quot; for technician &quot;" + dr["technicain"].ToString() + "&quot; (solo = 1)");
+                intCount++;
+                SqlHelper.ExecuteScalar(dsn, CommandType.Text, "UPDATE cv_resource_requests SET solo = 0 WHERE id = " + dr["id"].ToString());
+            }
+            if (dr["SRID"].ToString() != "" && dr["solo"].ToString() == "0")
+            {
+                Response.Write("Updated project &quot;" + dr["projectname"].ToString() + "&quot; for technician &quot;" + dr["technicain"].ToString() + "&quot; (solo = 0)");
+                intCount++;
+                SqlHelper.ExecuteScalar(dsn, CommandType.Text, "UPDATE cv_resource_requests SET solo = 1 WHERE id = " + dr["id"].ToString());
+            }
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected<br/>");
+    }
+</script>
+<html>
+<head>
+<title>Fix TPM Information</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Fix TPM Information</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

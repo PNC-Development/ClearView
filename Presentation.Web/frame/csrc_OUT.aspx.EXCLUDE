@@ -1,0 +1,781 @@
+<%@ Page Language="C#" %>
+<script runat="server">
+    private DataSet ds;
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intProfile;
+    private ProjectRequest oProjectRequest;
+    private Workload_TPM oWorkloadTPM;
+    private Projects oProject;
+    private ResourceRequest oResourceRequest;
+    private Organizations oOrganization;
+    private Users oUser;
+    private Documents oDocument;
+    private Variables oVariable;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oProjectRequest = new ProjectRequest(intProfile, dsn);
+        oWorkloadTPM = new Workload_TPM(intProfile, dsn);
+        oProject = new Projects(intProfile, dsn);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oOrganization = new Organizations(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oDocument = new Documents(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        if (Request.QueryString["rid"] != null && Request.QueryString["rid"] != "")
+        {
+            int intRequest = Int32.Parse(Request.QueryString["rid"]);
+            ds = oResourceRequest.Get(intRequest);
+            int intUser = Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+            if (intProfile == intUser)
+            {
+                int intProject = Int32.Parse(ds.Tables[0].Rows[0]["projectid"].ToString());
+                DataSet dsProject = oProject.Get(intProject);
+                lblProjectName.Text = dsProject.Tables[0].Rows[0]["name"].ToString();
+                lblNumber.Text = dsProject.Tables[0].Rows[0]["number"].ToString();
+                DataSet dsRequest = oProjectRequest.GetProject(intProject);
+                lblUnit.Text = oOrganization.GetName(Int32.Parse(dsRequest.Tables[0].Rows[0]["organization"].ToString()));
+                lblOrg.Text = "";
+                lblSponsor.Text = oUser.GetFullName(Int32.Parse(dsRequest.Tables[0].Rows[0]["executive"].ToString()));
+                lblSubmitted.Text = DateTime.Parse(dsRequest.Tables[0].Rows[0]["modified"].ToString()).ToLongDateString();
+                lblSummary.Text = dsRequest.Tables[0].Rows[0]["opportunity"].ToString();
+                ds = oWorkloadTPM.Get(intProject, intProfile);
+                DataSet dsDocuments = oDocument.Gets(intProject, 0);
+                foreach (DataRow dr in dsDocuments.Tables[0].Rows)
+                    lblStrategic.Text += "<a href=\"" + dr["path"].ToString() + "\" target=\"_blank\">" + dr["name"].ToString() + "</a><br/>";
+                if (lblStrategic.Text == "")
+                    lblStrategic.Text = "None";
+                try
+                {
+                    lblApproaches.Text = ds.Tables[0].Rows[0]["alt_app"].ToString();
+                    lblFinance.Text = ds.Tables[0].Rows[0]["risks"].ToString();
+                    lblDrivers.Text = ds.Tables[0].Rows[0]["drivers"].ToString();
+                    lblQuantifiable.Text = ds.Tables[0].Rows[0]["objectives"].ToString();
+                    lblLDRPS.Text = (ds.Tables[0].Rows[0]["ldprs"].ToString() == "1" ? "YES" : "NO");
+                    lblBudgeted.Text = (ds.Tables[0].Rows[0]["business_budgeted"].ToString() == "1" ? "YES" : "NO");
+                    lblMAD.Text = (ds.Tables[0].Rows[0]["mad"].ToString() == "1" ? "YES" : "NO");
+                    lblReplacement.Text = (ds.Tables[0].Rows[0]["replacement"].ToString() == "1" ? "YES" : "NO");
+                    lblManyApps.Text = ds.Tables[0].Rows[0]["number_replace"].ToString();
+                    lblFirstYear.Text = ds.Tables[0].Rows[0]["planned_first"].ToString();
+                    lblNonIS.Text = ds.Tables[0].Rows[0]["non_is"].ToString();
+                    lblProjectStart.Text = DateTime.Parse(ds.Tables[0].Rows[0]["proj_start"].ToString()).ToShortDateString();
+                    lblExpectedCompletion.Text = DateTime.Parse(ds.Tables[0].Rows[0]["app_proj_end"].ToString()).ToShortDateString();
+                }
+                catch { }
+            }
+        }
+        lblCategory.Text = "???";
+        lblExecutive.Text = "???";
+        lblCFO.Text = "???";
+        lblComptroller.Text = "???";
+        lblInformation.Text = "???";
+        lblCSRCApproval.Text = "???";
+        lblCSRCNumber.Text = "???";
+
+        lblLOB1.Text = "Information Systems";
+        lblLOB2.Text = "Select LOB";
+        lblLOB3.Text = "Select LOB";
+        lblLOBPercent1.Text = "100%";
+        lblLOBPercent2.Text = "0%";
+        lblLOBPercent3.Text = "0%";
+        lblLOBDollars1.Text = "100";
+        lblLOBDollars2.Text = "0";
+        lblLOBDollars3.Text = "0";
+        lblLOBBank1.Text = "2001";
+        lblLOBBank2.Text = "0000";
+        lblLOBBank3.Text = "0000";
+        lblLOBCost1.Text = "0000123";
+        lblLOBCost2.Text = "0000000";
+        lblLOBCost3.Text = "0000000";
+
+        lblDiscoveryFunding.Text = "100";
+        lblDiscoveryOutlay.Text = "0";
+        lblDiscoveryFrom.Text = "0";
+        lblDiscoveryTo.Text = "0";
+        lblDiscoveryFrom2.Text = "0";
+        lblDiscoveryTo2.Text = "0";
+        lblPlanningFunding.Text = "0";
+        lblPlanningOutlay.Text = "0";
+        lblPlanningFrom.Text = "0";
+        lblPlanningTo.Text = "0";
+        lblPlanningFrom2.Text = "0";
+        lblPlanningTo2.Text = "0";
+        lblExecutionFunding.Text = "0";
+        lblExecutionOutlay.Text = "0";
+        lblExecutionFrom.Text = "0";
+        lblExecutionTo.Text = "0";
+        lblExecutionFrom2.Text = "0";
+        lblExecutionTo2.Text = "0";
+        lblTotalFunding.Text = "100";
+        lblTotalOutlay.Text = "0";
+        lblTotalFrom.Text = "0";
+        lblTotalTo.Text = "0";
+        lblTotalFrom2.Text = "0";
+        lblTotalTo2.Text = "0";
+
+
+        lblApproach.Text = "Sponsor / Implementor enter here";
+        lblProcurement.Text = "No";
+        
+        lblPhase.Text = "Discovery";
+        lblPhaseStart.Text = "9/6/2006";
+        lblPhaseCompletion.Text = "10/6/2006";
+    }
+</script>
+<html>
+<head>
+<title>National City</title>
+<style type="text/css">
+<!--
+.header {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	font-weight: bold;
+}
+.smallheader {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 14px;
+	font-weight: bold;
+}
+.redback {
+    background-color: #FF0000;
+}
+.yellowback {
+    background-color: #FFFF00;
+}
+.greenback {
+    background-color: #00CC00;
+}
+.blueitalic {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0000FF;
+	font-size: 12px;
+	font-style: italic;
+	font-weight: bold;
+}
+.reditalic {
+	color: #FF0000;
+	font-style: italic;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+.smallreditalic {
+	color: #FF0000;
+	font-style: italic;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.default {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 12px;
+}
+.smalldefault {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+.underline {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	border-bottom: solid 1px #000000;
+}
+.blacktext {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.bluetext {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0000FF;
+	font-size: 12px;
+}
+.smallbluetext {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0000FF;
+	font-size: 10px;
+}
+-->
+</style>
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0" onload="LoadDemo();">
+<form runat="server">
+<table border="0" cellpadding="1" cellspacing="0">
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="header" width="100%" colspan="14">CSRC Project Approval Request (C1)</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="blueitalic" width="100%" colspan="14">Only enter cells that are blue</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="reditalic" width="100%" colspan="14">Please insert a page break so that a complete section appears on page 2</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14"><hr size="1" noshade /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td width="50%" valign="top">
+                        <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td nowrap class="default"><b>Program Name:</b></td>
+                                <td width="100%" class="underline">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Project Name:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblProjectName" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Business Unit:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblUnit" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Org Unit:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblOrg" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Project Sponsor:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblSponsor" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Date Submitted:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblSubmitted" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Project Number:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblNumber" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Project Category:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblCategory" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="50" height="1" /></td>
+                    <td width="50%" valign="top">
+                        <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td nowrap class="default"><b><u>Approval</u></b></td>
+                                <td width="100%" class="smallreditalic">Print Name and sign if required</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Line of Business Executive:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblExecutive" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Business/Functional CFO:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblCFO" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Corporate Comptroller:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblComptroller" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>Information Technology:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblInformation" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>CSRC Approval:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblCSRCApproval" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="default"><b>CSRC Number:</b></td>
+                                <td width="100%" class="underline"><asp:Label ID="lblCSRCNumber" runat="server" CssClass="bluetext" />&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="50" height="1" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14"><hr size="1" noshade /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td colspan="11" class="default"><b>LOB Discretionary Cost Center to be charged and line of credit impact:</b></td>
+                </tr>
+                <tr>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                    <td>
+                        <table width="100" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td width="100%" align="center"><asp:Label ID="lblLOB1" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" align="center"><asp:Label ID="lblLOB2" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" align="center"><asp:Label ID="lblLOB3" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                    <td>
+                        <table width="125" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td rowspan="3" nowrap valign="top" class="default"><b>Percent:</b></td>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBPercent1" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBPercent2" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBPercent3" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                    <td>
+                        <table width="125" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td rowspan="3" nowrap valign="top" class="default"><b>Dollars:</b></td>
+                                <td width="100%" class="underline" align="right">&nbsp;$&nbsp;<asp:Label ID="lblLOBDollars1" runat="server" CssClass="smalldefault" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;$&nbsp;<asp:Label ID="lblLOBDollars2" runat="server" CssClass="smalldefault" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;$&nbsp;<asp:Label ID="lblLOBDollars3" runat="server" CssClass="smalldefault" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                    <td>
+                        <table width="125" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td rowspan="3" nowrap valign="top" class="default"><b>Bank #:</b></td>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBBank1" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBBank2" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBBank3" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                    <td>
+                        <table width="125" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td rowspan="3" nowrap valign="top" class="default"><b>Cost Center:</b></td>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBCost1" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBCost2" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                            <tr>
+                                <td width="100%" class="underline" align="right">&nbsp;<asp:Label ID="lblLOBCost3" runat="server" CssClass="smallbluetext" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14"><hr size="1" noshade /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="2"><b>Approval Summary:</b></td>
+        <td class="smalldefault" colspan="12"><b><i>(Enter Dollars in Thousands)</i></b></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="blacktext">&nbsp;</td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right"><b>Requested</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right"><b>Actual</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="center" colspan="3" nowrap><b>Estimated Total Project Cost</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="center" colspan="3" nowrap><b>Estimated Financial Benefits</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><b><u>Phase</u></b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline" align="right"><b>Funding</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline" align="right"><b>Outlay</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline" align="right"><b>From</b></td>
+        <td class="underline"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline"><b>To</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline" align="right"><b>From</b></td>
+        <td class="underline"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="underline"><b>To</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><b>Discovery</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblDiscoveryFunding" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblDiscoveryOutlay" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblDiscoveryFrom" runat="server" CssClass="bluetext" /></td>
+        <td class="bluetext"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblDiscoveryTo" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblDiscoveryFrom2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblDiscoveryTo2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><b>Planning</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblPlanningFunding" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblPlanningOutlay" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblPlanningFrom" runat="server" CssClass="bluetext" /></td>
+        <td class="bluetext"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblPlanningTo" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblPlanningFrom2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblPlanningTo2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><b>Execution</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right" style="border-bottom:solid 1px #000000">$<asp:Label ID="lblExecutionFunding" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right" style="border-bottom:solid 1px #000000">$<asp:Label ID="lblExecutionOutlay" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblExecutionFrom" runat="server" CssClass="bluetext" /></td>
+        <td class="bluetext"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblExecutionTo" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext" align="right">$<asp:Label ID="lblExecutionFrom2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="bluetext">$<asp:Label ID="lblExecutionTo2" runat="server" CssClass="bluetext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><b>Total Project</b></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right" style="border-bottom:double 3px #000000">$<asp:Label ID="lblTotalFunding" runat="server" CssClass="blacktext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right" style="border-bottom:double 3px #000000">$<asp:Label ID="lblTotalOutlay" runat="server" CssClass="blacktext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right">$<asp:Label ID="lblTotalFrom" runat="server" CssClass="blacktext" /></td>
+        <td class="blacktext"><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext">$<asp:Label ID="lblTotalTo" runat="server" CssClass="blacktext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext" align="right">$<asp:Label ID="lblTotalFrom2" runat="server" CssClass="blacktext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+        <td class="blacktext">$<asp:Label ID="lblTotalTo2" runat="server" CssClass="blacktext" /></td>
+        <td><img src="/images/spacer.gif" border="0" width="25" height="1" /></td>
+    </tr>
+    <tr>
+        <td class="default" width="100%" colspan="17">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="3"><b>Non IS portion of the Project Cost:</b></td>
+        <td class="bluetext" align="right" style="border-bottom:solid 1px #000000">$<asp:Label ID="lblNonIS" runat="server" CssClass="bluetext" /></td>
+        <td class="default">&nbsp;</td>
+        <td class="default" colspan="3" nowrap><b>Planned IS first year support expense:</b></td>
+        <td class="bluetext" align="right" style="border-bottom:solid 1px #000000">$<asp:Label ID="lblFirstYear" runat="server" CssClass="bluetext" /></td>
+        <td class="default" colspan="5">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14"><hr size="1" noshade /></td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Project Summary:</span> <i>(Sponsor)</i> Describe what the project is and why it is needed. Describe in business terms the project scope and what will be accomplished when the project is completed <b>(problem statement)</b>.</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblSummary" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Linkage to Strategic Plan and/or Best in Class:</span> <i>(Sponsor)</i> Describe how project will affect current strategic plan or Best in Class effort.</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblStrategic" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Proposed Approach:</span> <i>(Sponsor & Implementor)</i> Describe proposed solution approach for the project.</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblApproach" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Alternative Approaches:</span> <i>(Sponsor & Implementor)</i></td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblApproaches" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Financial Analysis & Business Assessment or Risks:</span> <i>(Finance)</i> Include financial analysis and business risk (regulatory, organization change, etc).</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblFinance" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Business Activity Drivers:</span> <i>(Sponsor)</i> Describe ABC activity number(s) and anticipated impact (i.e. rate change or volume change)</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblDrivers" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Quantifiable Business Objectives:</span> <i>(Sponsor)</i> Describe Critical to Quality (measurable characteristics) information.</td>
+                </tr>
+                <tr>
+                    <td class="smallbluetext"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="smallbluetext" width="100%"><asp:Label ID="lblQuantifiable" runat="server" CssClass="smallbluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" colspan="14">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table width="100%" cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="10"><span class="smallheader">Business Continuity and Disaster Recovery Planning Approach:</span> <i>(Sponsor)</i> Answer the following questions:</td>
+                </tr>
+                <tr>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="default" align="right" valign="bottom"><b>Does the LDRPS need to be updated as a part of this project?</b></td>
+                    <td class="underline" valign="bottom"><asp:Label ID="lblLDRPS" runat="server" CssClass="bluetext" /></td>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="default" align="right" valign="bottom"><b>Has the business budgeted for these updates in the above estimate?</b></td>
+                    <td class="underline" valign="bottom"><asp:Label ID="lblBudgeted" runat="server" CssClass="bluetext" /></td>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+                    <td class="default" align="right" valign="bottom"><b>This project has been funded to meet a Maximum Allowable Downtime of:</b></td>
+                    <td class="underline" width="25" valign="bottom"><asp:Label ID="lblMAD" runat="server" CssClass="bluetext" /></td>
+                    <td class="default" valign="bottom">hours</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default"><span class="smallheader">Has procurement been consulted for the above estimates?</span></td>
+                    <td class="underline"><asp:Label ID="lblProcurement" runat="server" CssClass="bluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="redback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="yellowback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="greenback"><img src="/images/spacer.gif" border="0" width="10" height="10" /></td>
+        <td class="default" width="100%" colspan="14">
+            <table cellpadding="2" cellspacing="1" border="0">
+                <tr>
+                    <td class="default" colspan="2"><span class="smallheader">Is this a replacement application?</span></td>
+                    <td class="underline"><asp:Label ID="lblReplacement" runat="server" CssClass="bluetext" /></td>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="smallheader">How many applications will be replaced?</span></td>
+                    <td class="underline"><asp:Label ID="lblManyApps" runat="server" CssClass="bluetext" /></td>
+                </tr>
+                <tr>
+                    <td class="default" colspan="6">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="default" align="right"><b>Phase:</b></span></td>
+                    <td class="underline"><asp:Label ID="lblPhase" runat="server" CssClass="bluetext" /></td>
+                    <td class="default" colspan="3"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                </tr>
+                <tr>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="default" align="right"><b>Phase Start Date:</b></span></td>
+                    <td class="underline"><asp:Label ID="lblPhaseStart" runat="server" CssClass="bluetext" /></td>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="default" align="right"><b>Project Start Date:</b></span></td>
+                    <td class="underline"><asp:Label ID="lblProjectStart" runat="server" CssClass="bluetext" /></td>
+                </tr>
+                <tr>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="default" align="right"><b>Phase Completion Date:</b></span></td>
+                    <td class="underline"><asp:Label ID="lblPhaseCompletion" runat="server" CssClass="bluetext" /></td>
+                    <td class="default"><img src="/images/spacer.gif" border="0" width="50" height="10" /></td>
+                    <td class="default"><span class="default" align="right"><b>Expected Completion Date:</b></span></td>
+                    <td class="underline"><asp:Label ID="lblExpectedCompletion" runat="server" CssClass="bluetext" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</form>
+</body>
+</html>

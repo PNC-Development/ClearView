@@ -1,0 +1,827 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D3C6C8D7-EB82-4CE6-97E0-8CB010D23C61}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NCC.ClearView.Application.Core</RootNamespace>
+    <AssemblyName>NCC.ClearView.Application.Core</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DiffieHellman, Version=0.0.0.0, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\DiffieHellman.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.ActiveDs, Version=1.0.0.0, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Interop.ActiveDs.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.CDOEXM, Version=6.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Interop.CDOEXM.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.Microsoft.VirtualServer.Interop, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Interop.Microsoft.VirtualServer.Interop.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=4.0.8.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8.0\ReportViewer\Microsoft.ReportViewer.WebForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Services3, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Microsoft.Web.Services3.dll</HintPath>
+    </Reference>
+    <Reference Include="Org.Mentalis.Security, Version=1.0.13.715, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Org.Mentalis.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Tamir.SharpSSH.dll</HintPath>
+    </Reference>
+    <Reference Include="Vim25Service">
+      <HintPath>bin\Vim25Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Vim25Service.XmlSerializers">
+      <HintPath>bin\Vim25Service.XmlSerializers.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AD.cs" />
+    <Compile Include="AssetOrder.cs" />
+    <Compile Include="CMControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls.cs" />
+    <Compile Include="Applications.cs" />
+    <Compile Include="ColorLevels.cs" />
+    <Compile Include="AppPages.cs" />
+    <Compile Include="ADObject.cs" />
+    <Compile Include="AccountRequest.cs" />
+    <Compile Include="Asset.cs" />
+    <Compile Include="Classes.cs" />
+    <Compile Include="Cluster.cs" />
+    <Compile Include="BuildLocation.cs" />
+    <Compile Include="ConsistencyGroup.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Audit.cs" />
+    <Compile Include="AssetCategory.cs" />
+    <Compile Include="AssetSharedEnvOrder.cs" />
+    <Compile Include="Avamar.cs" />
+    <Compile Include="AvamarRegistration.cs" />
+    <Compile Include="AvamarActivation.cs" />
+    <Compile Include="AvamarBackup.cs" />
+    <Compile Include="Incident.cs" />
+    <Compile Include="Scheduler.cs" />
+    <Compile Include="Powershell.cs" />
+    <Compile Include="Resiliency.cs" />
+    <Compile Include="ServiceNow.cs" />
+    <Compile Include="VirtualCPU.cs" />
+    <Compile Include="DesignControl.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Design.cs" />
+    <Compile Include="Dells.cs" />
+    <Compile Include="CostCenters.cs" />
+    <Compile Include="Tokens.cs" />
+    <Compile Include="Web References\Proteus\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Zones.cs" />
+    <Compile Include="RacksNew.cs" />
+    <Compile Include="RoomsNew.cs" />
+    <Compile Include="InventoryManager.cs" />
+    <Compile Include="ManageSQLJobs.cs" />
+    <Compile Include="Web References\w08r2\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="WMServiceTasks.cs" />
+    <Compile Include="LTM.cs" />
+    <Compile Include="Errors.cs" />
+    <Compile Include="TelnetConnection.cs" />
+    <Compile Include="Solaris.cs" />
+    <Compile Include="DNS.cs" />
+    <Compile Include="Web References\ClearViewWS\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="WebServices.cs" />
+    <Compile Include="ServerDecommission.cs" />
+    <Compile Include="_deleted_Subscriptions.cs" />
+    <Compile Include="PNCTasks.cs" />
+    <Compile Include="Mnemonic.cs" />
+    <Compile Include="TSM.cs" />
+    <Compile Include="_deleted_New.cs" />
+    <Compile Include="PDFs.cs" />
+    <Compile Include="ServiceEditor.cs" />
+    <Compile Include="ResourceScheduling.cs" />
+    <Compile Include="Scheduling.cs" />
+    <Compile Include="Segment.cs" />
+    <Compile Include="Orders.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="OnDemandTasks.cs" />
+    <Compile Include="Restart.cs" />
+    <Compile Include="Scripts.cs" />
+    <Compile Include="Tabs.cs" />
+    <Compile Include="VMWare.cs" />
+    <Compile Include="VirtualRam.cs" />
+    <Compile Include="VirtualHDD.cs" />
+    <Compile Include="Host.cs" />
+    <Compile Include="Web References\altirisws\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\AltirisWS_Computer\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\AltirisWS_Group\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\AltirisWS_Job\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\AltirisWS_Schedule\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="WhatsNew.cs" />
+    <Compile Include="Workstations.cs" />
+    <Compile Include="Zeus.cs" />
+    <Compile Include="Storage.cs" />
+    <Compile Include="Servers.cs" />
+    <Compile Include="ServicePacks.cs" />
+    <Compile Include="CSMConfig.cs" />
+    <Compile Include="OnDemand.cs" />
+    <Compile Include="OperatingSystems.cs" />
+    <Compile Include="ModelsProperties.cs" />
+    <Compile Include="IPAddresses.cs" />
+    <Compile Include="MaintenanceWindow.cs" />
+    <Compile Include="GroupRequest.cs" />
+    <Compile Include="Supports.cs" />
+    <Compile Include="Domains.cs" />
+    <Compile Include="DomainController.cs" />
+    <Compile Include="ServerName.cs" />
+    <Compile Include="Icons.cs" />
+    <Compile Include="Rotator.cs" />
+    <Compile Include="Field.cs" />
+    <Compile Include="Customized.cs" />
+    <Compile Include="ServiceDetails.cs" />
+    <Compile Include="Sites.cs" />
+    <Compile Include="Banks.cs" />
+    <Compile Include="Environments.cs" />
+    <Compile Include="Racks.cs" />
+    <Compile Include="Models.cs" />
+    <Compile Include="Floor.cs" />
+    <Compile Include="Rooms.cs" />
+    <Compile Include="Shelf.cs" />
+    <Compile Include="Depot.cs" />
+    <Compile Include="Types.cs" />
+    <Compile Include="DepotRoom.cs" />
+    <Compile Include="Confidence.cs" />
+    <Compile Include="OnDemandSending.cs" />
+    <Compile Include="Locations.cs" />
+    <Compile Include="Solution.cs" />
+    <Compile Include="Forecast.cs" />
+    <Compile Include="DidYouKnow.cs" />
+    <Compile Include="Enhancements.cs" />
+    <Compile Include="ProjectsPending.cs" />
+    <Compile Include="DataPoint.cs" />
+    <Compile Include="WindowsService.cs" />
+    <Compile Include="SimpleLaunchWsh.cs" />
+    <Compile Include="Reports.cs" />
+    <Compile Include="ReportCredentials.cs" />
+    <Compile Include="Services.cs" />
+    <Compile Include="Web References\RELive\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\RSLive\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="WMIConnection.cs" />
+    <Compile Include="RequestFields.cs" />
+    <Compile Include="Search.cs" />
+    <Compile Include="TPM.cs" />
+    <Compile Include="ServiceRequests.cs" />
+    <Compile Include="Requests.cs" />
+    <Compile Include="RequestItems.cs" />
+    <Compile Include="Holidays.cs" />
+    <Compile Include="Upload.cs" />
+    <Compile Include="Users_At.cs" />
+    <Compile Include="Designer.cs" />
+    <Compile Include="Vacation.cs" />
+    <Compile Include="Documents.cs" />
+    <Compile Include="Projects.cs" />
+    <Compile Include="ProjectNumber.cs" />
+    <Compile Include="ResourceRequest.cs" />
+    <Compile Include="Organizations.cs" />
+    <Compile Include="ProjectRequest_Approval.cs" />
+    <Compile Include="StatusLevels.cs" />
+    <Compile Include="Groups.cs" />
+    <Compile Include="Roles.cs" />
+    <Compile Include="Templates.cs" />
+    <Compile Include="CustomReportCredentials.cs" />
+    <Compile Include="Functions.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="ProjectRequest.cs" />
+    <Compile Include="Costs.cs" />
+    <Compile Include="Platforms.cs" />
+    <Compile Include="Encryption.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="PageControls.cs" />
+    <Compile Include="Pages.cs" />
+    <Compile Include="Permissions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="Users.cs" />
+    <Compile Include="Variables.cs" />
+    <Compile Include="Web References\REDev\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\RSDev\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://10.20.72.50/Services/API%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Proteus\</RelPath>
+      <UpdateFromURL>http://10.20.72.50/Services/API%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCC_ClearView_Application_Core_Proteus_ProteusAPI</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://localhost:55030/ClearViewWebServices.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\ClearViewWS\</RelPath>
+      <UpdateFromURL>http://localhost:55030/ClearViewWebServices.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCC_ClearView_Application_Core_ClearViewWS_ClearViewWebServices</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://clearviewreports/ReportServer/ReportExecution2005.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\RELive\</RelPath>
+      <UpdateFromURL>http://clearviewreports/ReportServer/ReportExecution2005.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_RELive_ReportExecutionService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://clearviewreports/ReportServer/ReportService2005.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\RSLive\</RelPath>
+      <UpdateFromURL>http://clearviewreports/ReportServer/ReportService2005.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_RSLive_ReportingService2005</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://clearviewreportsdev/ReportServer/ReportExecution2005.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\REDev\</RelPath>
+      <UpdateFromURL>http://clearviewreportsdev/ReportServer/ReportExecution2005.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_REDev_ReportExecutionService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://clearviewreportsdev/ReportServer/ReportService2005.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\RSDev\</RelPath>
+      <UpdateFromURL>http://clearviewreportsdev/ReportServer/ReportService2005.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_RSDev_ReportExecutionService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\AltirisWS_Computer\</RelPath>
+      <UpdateFromURL>http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_AltirisWS_Computer_ComputerManagementService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\AltirisWS_Group\</RelPath>
+      <UpdateFromURL>http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_AltirisWS_Group_GroupManagementService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\AltirisWS_Job\</RelPath>
+      <UpdateFromURL>http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_AltirisWS_Job_JobManagementService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\AltirisWS_Schedule\</RelPath>
+      <UpdateFromURL>http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_AltirisWS_Schedule_ScheduleManagementService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://ohcleutl4035/dsjob/dsjob_fromurl.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\altirisws\</RelPath>
+      <UpdateFromURL>http://ohcleutl4035/dsjob/dsjob_fromurl.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCBClass_altirisws_dsjob</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://wcrdp100a.pnceng.pvt/wabebuild/BuildSubmit.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\w08r2\</RelPath>
+      <UpdateFromURL>http://wcrdp100a.pnceng.pvt/wabebuild/BuildSubmit.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>NCC_ClearView_Application_Core_w08r2_BuildSubmit</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\REDev\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\REDev\ReportExecution2005.wsdl" />
+    <None Include="Web References\RELive\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\RELive\ReportExecution2005.wsdl" />
+    <None Include="Web References\RSDev\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\RSDev\ReportService2005.wsdl" />
+    <None Include="Web References\RSLive\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\RSLive\ReportService2005.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="ADODB">
+      <Guid>{2A75196C-D9EB-4129-B803-931327F72D5C}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\altirisws\dsjob_fromurl.disco" />
+    <None Include="Web References\altirisws\dsjob_fromurl.wsdl" />
+    <None Include="Web References\altirisws\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\AltirisWS_Computer\ComputerManagementService.disco" />
+    <None Include="Web References\AltirisWS_Computer\ComputerManagementService.wsdl" />
+    <None Include="Web References\AltirisWS_Computer\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\AltirisWS_Group\GroupManagementService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\AltirisWS_Group\GroupManagementService.disco" />
+    <None Include="Web References\AltirisWS_Group\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\AltirisWS_Schedule\ScheduleManagementService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\AltirisWS_Schedule\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\AltirisWS_Schedule\ScheduleManagementService.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\AltirisWS_Job\JobManagementService.disco" />
+    <None Include="Web References\AltirisWS_Job\JobManagementService.wsdl" />
+    <None Include="Web References\AltirisWS_Job\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\REDev\DocumentMapNode1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\REDev\ExecutionInfo1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\REDev\Extension1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\REDev\Warning1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RELive\DocumentMapNode1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RELive\ExecutionInfo1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RELive\Extension1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RELive\Warning1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ActiveState1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\CatalogItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\DataRetrievalPlan1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\DataSetDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\DataSource1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\DataSourceDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\DataSourcePrompt1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Event1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ExecutionSettingEnum1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ExpirationDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Extension1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ExtensionParameter1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ExtensionSettings1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ItemTypeEnum1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Job1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ModelCatalogItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ModelDrillthroughReport1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ModelItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ParameterValue1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ParameterValueOrFieldReference1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Policy1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Property1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ReportHistorySnapshot1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ReportParameter1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Role1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Schedule1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\ScheduleDefinitionOrReference1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Subscription1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Task1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSDev\Warning1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ActiveState1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\CatalogItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\DataRetrievalPlan1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\DataSetDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\DataSource1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\DataSourceDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\DataSourcePrompt1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Event1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ExecutionSettingEnum1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ExpirationDefinition1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Extension1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ExtensionParameter1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ExtensionSettings1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ItemTypeEnum1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Job1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ModelCatalogItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ModelDrillthroughReport1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ModelItem1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ParameterValue1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ParameterValueOrFieldReference1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Policy1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Property1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ReportHistorySnapshot1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ReportParameter1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Role1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Schedule1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\ScheduleDefinitionOrReference1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Subscription1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Task1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\RSLive\Warning1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\DiffieHellman.dll" />
+    <Content Include="bin\Interop.ActiveDs.dll" />
+    <Content Include="bin\Interop.CDOEXM.dll" />
+    <Content Include="bin\Interop.Microsoft.VirtualServer.Interop.dll" />
+    <Content Include="bin\itextsharp.dll" />
+    <Content Include="bin\Microsoft.ApplicationBlocks.Data.dll" />
+    <Content Include="bin\Microsoft.ReportViewer.WebForms.dll" />
+    <Content Include="bin\Microsoft.Web.Services3.dll" />
+    <Content Include="bin\Org.Mentalis.Security.dll" />
+    <Content Include="bin\System.Management.Automation.dll" />
+    <Content Include="bin\Tamir.SharpSSH.dll" />
+    <Content Include="bin\Vim25Service.dll" />
+    <Content Include="bin\Vim25Service.XmlSerializers.dll" />
+    <None Include="Web References\Proteus\APIAccessRight.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Proteus\APIDeploymentOption.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Proteus\APIDeploymentRole.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Proteus\APIEntity.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Proteus\ProteusAPI.wsdl" />
+    <None Include="Web References\Proteus\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\w08r2\BuildSubmit.disco" />
+    <None Include="Web References\ClearViewWS\ClearViewWebServices.disco" />
+    <None Include="Web References\ClearViewWS\ClearViewWebServices.wsdl" />
+    <None Include="Web References\ClearViewWS\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\w08r2\BuildSubmit.wsdl" />
+    <None Include="Web References\w08r2\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.ApplicationBlocks.Data\Microsoft.ApplicationBlocks.Data.csproj">
+      <Project>{30933672-466E-4F67-A111-ABF267539146}</Project>
+      <Name>Microsoft.ApplicationBlocks.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="obj\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,26 @@
+<%@ Page Language="C#" Debug="false" EnableEventValidation="false" ValidateRequest="false" MasterPageFile="~/frame.Master" %>
+<script runat="server">
+    private void Page_Load()
+    {
+        if (!IsPostBack)
+        {
+            if (Request.QueryString["helpid"] != null)
+            {
+            }
+        }
+    }
+</script>
+<asp:Content ID="Content1" ContentPlaceHolderID="AllContent" Runat="Server">
+<table width="100%" cellpadding="2" cellspacing="0" border="0">
+    <tr>
+        <td class="frame">&nbsp;Help</td>
+        <td class="frame" align="right"><a href="javascript:void(0);" onclick="parent.HidePanel();"><img src="/images/close.gif" border="0" title="Close"></a></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <p>This is the help...</p>
+            <p>This is the help...</p>
+        </td>
+    </tr>
+</table>
+</asp:Content>

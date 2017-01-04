@@ -1,0 +1,488 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private string dsnIP = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["IpDSN"]].ConnectionString;
+    private string dsnZeus = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["ZeusDSN"]].ConnectionString;
+    private string dsnServiceEditor = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["ServiceEditorDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string strVirtual = ConfigurationManager.AppSettings["VirtualGatekeeper"];
+    private int intAssignPage = Int32.Parse(ConfigurationManager.AppSettings["AssignWorkload"]);
+    private int intResourceRequestApprove = Int32.Parse(ConfigurationManager.AppSettings["ResourceRequestApprove"]);
+    private int intMyWork = Int32.Parse(ConfigurationManager.AppSettings["MyWork"]);
+    private int intImplementorDistributed = Int32.Parse(ConfigurationManager.AppSettings["ITEMID_IMPLEMENTOR_DISTRIBUTED"]);
+    private int intImplementorMidrange = Int32.Parse(ConfigurationManager.AppSettings["ITEMID_IMPLEMENTOR_MIDRANGE"]);
+    private int intStorageItem = Int32.Parse(ConfigurationManager.AppSettings["ITEMID_STORAGE"]);
+    private int intBackupItem = Int32.Parse(ConfigurationManager.AppSettings["ITEMID_BACKUP"]);
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private int intProfile;
+    private Projects oProject;
+    private Functions oFunction;
+    private Users oUser;
+    private Pages oPage;
+    private ResourceRequest oResourceRequest;
+    private RequestItems oRequestItem;
+    private Requests oRequest;
+    private Services oService;
+    private RequestFields oRequestField;
+    private Applications oApplication;
+    private OnDemandTasks oOnDemandTasks;
+    private Delegates oDelegate;
+    private int intApplication = 0;
+    private int intPage = 0;
+    private int intProject = 0;
+    private bool boolDetails = false;
+    private bool boolExecution = false;
+    private int intRequest = 0;
+    private int intItem = 0;
+    private int intNumber = 0;
+    private ServiceRequests oServiceRequest;
+    private int intWorkloadPage = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private bool boolMove = false;
+    private double dbl1 = 1.00;
+    private double dbl2 = 1.00;
+    private double dbl3 = 1.00;
+    private double dbl4 = 3.00;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oProject = new Projects(intProfile, dsn);
+        oFunction = new Functions(intProfile, dsn, intEnvironment);
+        oUser = new Users(intProfile, dsn);
+        oPage = new Pages(intProfile, dsn);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oRequestItem = new RequestItems(intProfile, dsn);
+        oRequest = new Requests(intProfile, dsn);
+        oService = new Services(intProfile, dsn);
+        oRequestField = new RequestFields(intProfile, dsn);
+        oServiceRequest = new ServiceRequests(intProfile, dsn);
+        oApplication = new Applications(intProfile, dsn);
+        oOnDemandTasks = new OnDemandTasks(intProfile, dsn);
+        oDelegate = new Delegates(intProfile, dsn);
+        if (Request.QueryString["applicationid"] != null && Request.QueryString["applicationid"] != "")
+            intApplication = Int32.Parse(Request.QueryString["applicationid"]);
+        if (Request.QueryString["pageid"] != null && Request.QueryString["pageid"] != "")
+            intPage = Int32.Parse(Request.QueryString["pageid"]);
+        if (Request.Cookies["application"] != null && Request.Cookies["application"].Value != "")
+            intApplication = Int32.Parse(Request.Cookies["application"].Value);
+        if (Request.QueryString["rrid"] != null && Request.QueryString["rrid"] != "")
+        {
+            lblRequest.Text = Request.QueryString["rrid"];
+            int intResource = Int32.Parse(Request.QueryString["rrid"]);
+            DataSet ds = oResourceRequest.Get(intResource);
+            intRequest = Int32.Parse(ds.Tables[0].Rows[0]["requestid"].ToString());
+            intItem = Int32.Parse(ds.Tables[0].Rows[0]["itemid"].ToString());
+            intNumber = Int32.Parse(ds.Tables[0].Rows[0]["number"].ToString());
+            bool boolComplete = (ds.Tables[0].Rows[0]["status"].ToString() == "3");
+            int intJoined = Int32.Parse(ds.Tables[0].Rows[0]["joined"].ToString());
+            int intService = Int32.Parse(ds.Tables[0].Rows[0]["serviceid"].ToString());
+            lblService.Text = oService.Get(intService, "name");
+            txtCustom.Text = ds.Tables[0].Rows[0]["name"].ToString();
+            int intUser = Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+            int intApp = oRequestItem.GetItemApplication(intItem);
+            if (intProfile == intUser || oService.IsManager(intService, intProfile) || oDelegate.Get(intUser, intProfile) > 0 || (oApplication.IsManager(intApp, intProfile) && oApplication.Get(intApp, "disable_manager") != "1") || (oUser.IsManager(intUser, intProfile, true) && oApplication.Get(intApp, "disable_manager") != "1"))
+            {
+                double dblAllocated = double.Parse(ds.Tables[0].Rows[0]["allocated"].ToString());
+                double dblUsed = oResourceRequest.GetUsed(intResource);
+                lblUpdated.Text = oResourceRequest.GetUpdated(intResource);
+                dblUsed = (dblUsed / dblAllocated) * 100;
+                if (Request.QueryString["save"] != null && Request.QueryString["save"] != "")
+                    Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "saved", "<script type=\"text/javascript\">alert('Information Saved Successfully');<" + "/" + "script>");
+                if (Request.QueryString["status"] != null && Request.QueryString["status"] != "")
+                    Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "statusd", "<script type=\"text/javascript\">alert('Weekly Status has been Added');<" + "/" + "script>");
+                intProject = oRequest.GetProjectNumber(intRequest);
+                hdnTab.Value = "D";
+                panWorkload.Visible = true;
+                bool boolDone = LoadProject(intResource);
+                if (boolDone == true)
+                {
+                    if (boolComplete == false)
+                    {
+                        oFunction.ConfigureToolButton(btnComplete, "/images/tool_complete");
+                        btnComplete.Attributes.Add("onclick", "return confirm('Are you sure you want to mark this as completed and remove it from your workload?');");
+                    }
+                    else
+                    {
+                        oFunction.ConfigureToolButton(btnComplete, "/images/tool_complete");
+                        btnComplete.Attributes.Add("onclick", "alert('This task has already been marked COMPLETE. You can close this window.');return false;");
+                    }
+                    imgSuccess.ImageUrl = "/images/green_arrow.gif";
+                    btnSave.ImageUrl = "/images/tool_save.gif";
+                    btnSave.Enabled = false;
+                }
+                else
+                {
+                    btnComplete.ImageUrl = "/images/tool_complete_dbl.gif";
+                    btnComplete.Enabled = false;
+                    oFunction.ConfigureToolButton(btnSave, "/images/tool_save");
+                }
+            }
+            else
+                panDenied.Visible = true;
+        }
+        else
+            panDenied.Visible = true;
+        btnDenied.Attributes.Add("onclick", "return CloseWindow();");
+        oFunction.ConfigureToolButton(btnPrint, "/images/tool_print");
+        btnPrint.Attributes.Add("onclick", "return PrintWindow();");
+        oFunction.ConfigureToolButton(btnClose, "/images/tool_close");
+        btnClose.Attributes.Add("onclick", "return ExitWindow();");
+    }
+    private bool LoadProject(int _request)
+    {
+        if (intProject > 0)
+        {
+            lblName.Text = oProject.Get(intProject, "name");
+            lblNumber.Text = oProject.Get(intProject, "number");
+            lblType.Text = "Project";
+        }
+        else
+        {
+            lblName.Text = oResourceRequest.GetWorkflow(_request, "name");
+            lblNumber.Text = "CVT" + intRequest.ToString();
+            lblType.Text = "Task";
+        }
+        bool boolDone = false;
+        DataSet ds = oOnDemandTasks.GetVirtualII(intRequest, intItem, intNumber);
+        if (ds.Tables[0].Rows.Count > 0)
+        {
+            int intAnswer = Int32.Parse(ds.Tables[0].Rows[0]["answerid"].ToString());
+            btnView.Attributes.Add("onclick", "return OpenWindow('FORECAST_EQUIPMENT','?id=" + intAnswer.ToString() + "');");
+            lblView.Text = oOnDemandTasks.GetBody(intAnswer, intImplementorDistributed, intImplementorMidrange);
+            int intModel = Int32.Parse(ds.Tables[0].Rows[0]["modelid"].ToString());
+            ModelsProperties oModelsProperties = new ModelsProperties(intProfile, dsn);
+            intModel = Int32.Parse(oModelsProperties.Get(intModel, "modelid"));
+            Models oModel = new Models(intProfile, dsn);
+            int intType = Int32.Parse(oModel.Get(intModel, "typeid"));
+            Types oType = new Types(intProfile, dsn);
+            string strExecute = oType.Get(intType, "forecast_execution_path");
+            if (strExecute != "")
+                btnExecute.Attributes.Add("onclick", "return OpenWindow('FORECAST_EXECUTE','" + strExecute + "?id=" + intAnswer.ToString() + "');");
+            chk1.Checked = (ds.Tables[0].Rows[0]["chk1"].ToString() == "1");
+            chk2.Checked = (ds.Tables[0].Rows[0]["chk2"].ToString() == "1");
+            txtSCID.Text = ds.Tables[0].Rows[0]["scid"].ToString();
+            chk3.Checked = (ds.Tables[0].Rows[0]["chk3"].ToString() == "1");
+            chk4.Checked = (ds.Tables[0].Rows[0]["chk4"].ToString() == "1");
+            boolDone = (chk1.Checked && chk2.Checked && chk3.Checked && chk4.Checked);
+            img1.ImageUrl = "/images/green_arrow.gif";
+            if (chk1.Checked == true)
+            {
+                btnExecute.Enabled = false;
+                img1.ImageUrl = "/images/check.gif";
+                img2.ImageUrl = "/images/green_arrow.gif";
+                chk2.Enabled = true;
+                Servers oServer = new Servers(intProfile, dsn);
+                DataSet dsAnswer = oServer.GetAnswer(intAnswer);
+                foreach (DataRow drAnswer in dsAnswer.Tables[0].Rows)
+                {
+                    if (lbl1.Text != "")
+                        lbl1.Text += "<br/>";
+                    int intServerName = Int32.Parse(drAnswer["nameid"].ToString());
+                    ServerName oServerName = new ServerName(0, dsn);
+                    lbl1.Text += "Server Name: " + oservername.getname2(intServerName, 0) + "<br/>";
+                    int intServer = Int32.Parse(drAnswer["id"].ToString());
+                    Zeus oZeus = new Zeus(intProfile, dsnZeus);
+                    DataSet dsZeus = oZeus.GetBuildServer(intServer);
+                    if (dsZeus.Tables[0].Rows.Count > 0)
+                        lbl1.Text += "Serial Number: " + dsZeus.Tables[0].Rows[0]["serial"].ToString() + "<br/>";
+                    int intDomain = Int32.Parse(drAnswer["domainid"].ToString());
+                    Domains oDomain = new Domains(intProfile, dsn);
+                    boolMove = (oDomain.Get(intDomain, "move") == "1");
+                    if (boolMove == true)
+                        lbl1.Text += "DHCP Address: " + drAnswer["dhcp"].ToString() + "<br/>";
+                    int intIPAddress = 0;
+                    IPAddresses oIPAddresses = new IPAddresses(0, dsnIP, dsn);
+                    if (drAnswer["ipaddressid"].ToString() != "")
+                    {
+                        intIPAddress = Int32.Parse(drAnswer["ipaddressid"].ToString());
+                        lbl1.Text += "Assigned IP Address: " + oIPAddresses.GetName(intIPAddress, 0) + "<br/>";
+                    }
+                    if (drAnswer["ipaddressid_final"].ToString() != "")
+                    {
+                        intIPAddress = Int32.Parse(drAnswer["ipaddressid_final"].ToString());
+                        lbl1.Text += "Final IP Address: " + oIPAddresses.GetName(intIPAddress, 0) + "<br/>";
+                    }
+                }
+            }
+            if (boolMove == false)
+            {
+            }
+            if (chk2.Checked == true)
+            {
+                chk1.Enabled = false;
+                img2.ImageUrl = "/images/check.gif";
+                img3.ImageUrl = "/images/green_arrow.gif";
+                chk3.Enabled = true;
+            }
+            if (chk3.Checked == true)
+            {
+                chk2.Enabled = false;
+                img3.ImageUrl = "/images/check.gif";
+                img4.ImageUrl = "/images/green_arrow.gif";
+                chk4.Enabled = true;
+            }
+            if (chk4.Checked == true)
+            {
+                chk3.Enabled = false;
+                img4.ImageUrl = "/images/check.gif";
+            }
+        }
+        if (Request.QueryString["div"] != null)
+        {
+            switch (Request.QueryString["div"])
+            {
+                case "E":
+                    boolExecution = true;
+                    break;
+            }
+        }
+        if (boolDetails == false && boolExecution == false)
+            boolDetails = true;
+        return boolDone;
+    }
+    private void btnSave_Click(Object Sender, EventArgs e)
+    {
+        int intResource = Int32.Parse(lblRequest.Text);
+        oResourceRequest.Update(intResource, txtCustom.Text);
+        double dblHours = 0.00;
+        dblHours += (chk1.Checked ? dbl1 : 0.00);
+        dblHours += (chk2.Checked ? dbl2 : 0.00);
+        dblHours += (chk3.Checked ? dbl3 : 0.00);
+        dblHours += (chk4.Checked ? dbl4 : 0.00);
+        double dblUsed = oResourceRequest.GetUsed(intResource);
+        dblHours = (dblHours - dblUsed);
+        if (dblHours > 0.00)
+            oResourceRequest.UpdateHours(intResource, dblHours);
+        oOnDemandTasks.UpdateVirtualII(intRequest, intItem, intNumber, (chk1.Checked ? 1 : 0), (chk2.Checked ? 1 : 0), txtSCID.Text, (chk3.Checked ? 1 : 0), (chk4.Checked ? 1 : 0));
+        Response.Redirect(Request.Path + "?rrid=" + lblRequest.Text + "&div=E&save=true");
+    }
+    private void btnComplete_Click(Object Sender, EventArgs e)
+    {
+        int intResource = Int32.Parse(lblRequest.Text);
+        oResourceRequest.UpdateStatus(intResource, 3);
+        oOnDemandTasks.AddSuccess(intResource, "Physical", Int32.Parse(ddlSuccess.SelectedItem.Value), txtComments.Text);
+        oOnDemandTasks.UpdateVirtualIIComplete(intRequest, intItem, intNumber);
+        oResourceRequest.Close(intResource, intEnvironment, strBCC, 0, dsnServiceEditor);
+        oRequest.Close(intRequest, intEnvironment, strBCC);
+        Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "reload", "<script type=\"text/javascript\">RefreshOpeningWindow();window.close();<" + "/" + "script>");
+    }
+</script>
+<script type="text/javascript">
+    function ChangeFrame(oCell, oShow, oHide1, oHidden, strHidden) {
+        oShow = document.getElementById(oShow);
+        oShow.style.display = "inline";
+        oHide1 = document.getElementById(oHide1);
+        oHide1.style.display = "none";
+    	var oRow = oCell.parentElement;
+	    for (var yy=0; yy<oRow.children.length; yy++) {
+    		var oNot = oRow.getElementsByTagName("td").item(yy);
+    		if (oNot.className == "cmbutton")
+                oNot.style.border = "1px solid #94a6b5"
+    	}
+	    oCell.style.borderTop = "3px solid #6A8359"
+        oCell.style.borderBottom = "1px solid #FFFFFF"
+        oHidden = document.getElementById(oHidden);
+        oHidden.value = strHidden;
+    }
+</script>
+<asp:Panel ID="panWorkload" runat="server" Visible="false">
+    <table width="100%" border="0" cellSpacing="0" cellPadding="0" class="default">
+        <tr>
+            <td>
+                <table width="100%" border="0" cellSpacing="0" cellPadding="0">
+                    <tr>
+                        <td><asp:ImageButton ID="btnSave" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/tool_save.gif" OnClick="btnSave_Click" /></td>
+                        <td><asp:ImageButton ID="btnPrint" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/tool_print.gif" /></td>
+                        <td><asp:ImageButton ID="btnComplete" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/tool_complete.gif" OnClick="btnComplete_Click" /></td>
+                        <td width="100%">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td><img src="/images/tool_left.gif" border="0" width="6" height="26"></td>
+                                    <td nowrap background="/images/tool_back.gif" width="100%"><img src="/images/tool_back.gif" border="0" width="2" height="26"></td>
+                                    <td><img src="/images/tool_right.gif" border="0" width="6" height="26"></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td><asp:ImageButton ID="btnClose" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/tool_close.gif" /></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="default">
+                <table width="100%" border="0" cellSpacing="2" cellPadding="2" class="default">
+                    <tr>
+                        <td valign="top">
+                            <table border="0" cellpadding="3" cellspacing="2">
+                                <tr>
+                                    <td nowrap><b>Name:</b></td>
+                                    <td><asp:Label ID="lblName" runat="server" CssClass="default" /></td>
+                                </tr>
+                                <tr>
+                                    <td nowrap><b>Number:</b></td>
+                                    <td><asp:Label ID="lblNumber" runat="server" CssClass="default" /></td>
+                                </tr>
+                                <tr>
+                                    <td nowrap><b>Type:</b></td>
+                                    <td><asp:Label ID="lblType" runat="server" CssClass="default" /></td>
+                                </tr>
+                                <tr>
+                                    <td nowrap><b>Service:</b></td>
+                                    <td><asp:Label ID="lblService" runat="server" CssClass="default" /></td>
+                                </tr>
+                                <tr>
+                                    <td nowrap><b>Last Updated:</b></td>
+                                    <td><asp:Label ID="lblUpdated" runat="server" CssClass="default" /></td>
+                                </tr>
+                                <tr>
+                                    <td nowrap><b>Nickname:</b></td>
+                                    <td><asp:TextBox ID="txtCustom" runat="server" CssClass="default" Width="300" MaxLength="100" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td valign="top" align="right"><iframe src="/frame/did_you_know.aspx" frameborder="0" scrolling="no" width="300" height="125"></iframe></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr height="16">
+            <td><img src="/images/spacer.gif" border="0" height="16" width="1" /></td>
+        </tr>
+        <tr>
+            <td>
+                    <table width="100%" height="100%" border="0" cellSpacing="0" cellPadding="0" class="default">
+                        <tr>
+                            <td class="cmbutton" style='<%=boolDetails == true ? "display:inline;border-bottom:1px solid #FFFFFF;border-top:3px solid orange;" : "" %>' onclick="ChangeFrame(this,'divDetails','divExecution','<%=hdnTab.ClientID %>','D');">Request Details</td>
+                            <td class="cmbuttonspace">&nbsp;</td>
+                            <td class="cmbutton" style='<%=boolExecution == true ? "display:inline;border-bottom:1px solid #FFFFFF;border-top:3px solid orange;" : "" %>' onclick="ChangeFrame(this,'divExecution','divDetails','<%=hdnTab.ClientID %>','E');">Execution</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" align="center" class="cmcontents">
+                                <table width="100%" height="100%" border="0" cellSpacing="2" cellPadding="2" class="default">
+                                    <tr> 
+                                        <td valign="top">
+		                                    <div id="divDetails" style='<%=boolDetails == true ? "display:inline" : "display:none" %>'>
+		                                        <br />
+                                                <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                                                    <tr>
+                                                        <td><img src="/images/check.gif" border="0" align="absmiddle" /> <asp:LinkButton ID="btnView" runat="server" Text="Click Here to View the Original Design" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="greentableheader">Request Details</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><asp:Label ID="lblView" runat="server" CssClass="default" /></td>
+                                                    </tr>
+                                                </table>
+                                                <p>&nbsp;</p>
+		                                    </div>
+		                                    <div id="divExecution" style='<%=boolExecution == true ? "display:inline" : "display:none" %>'>
+		                                        <br />
+                                                <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                                                    <tr>
+                                                        <td nowrap><asp:CheckBox ID="chk1" runat="server" CssClass="default" /></td>
+                                                        <td nowrap><asp:Image ID="img1" runat="server" ImageAlign="absMiddle" ImageUrl="/images/spacer.gif" /></td>
+                                                        <td width="100%">Execute Request: <asp:Button ID="btnExecute" runat="server" CssClass="default" Text="Execute" Width="125" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap></td>
+                                                        <td nowrap></td>
+                                                        <td width="100%"><asp:Label ID="lbl1" runat="server" CssClass="default" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap><asp:CheckBox ID="chk2" runat="server" CssClass="default" Enabled="false" /></td>
+                                                        <td nowrap><asp:Image ID="img2" runat="server" ImageAlign="absMiddle" ImageUrl="/images/spacer.gif" /></td>
+                                                        <td width="100%">Submit Service Center Request</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap></td>
+                                                        <td nowrap></td>
+                                                        <td width="100%">Service Center ID: <asp:TextBox ID="txtSCID" runat="server" CssClass="default" Width="100" MaxLength="30" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap><asp:CheckBox ID="chk3" runat="server" CssClass="default" Enabled="false" /></td>
+                                                        <td nowrap><asp:Image ID="img3" runat="server" ImageAlign="absMiddle" ImageUrl="/images/spacer.gif" /></td>
+                                                        <td width="100%">Update Service Center Request</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap><asp:CheckBox ID="chk4" runat="server" CssClass="default" Enabled="false" /></td>
+                                                        <td nowrap><asp:Image ID="img4" runat="server" ImageAlign="absMiddle" ImageUrl="/images/spacer.gif" /></td>
+                                                        <td width="100%">Validate Auto-Provisioning Process</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="3">&nbsp;</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap></td>
+                                                        <td nowrap><asp:Image ID="imgSuccess" runat="server" ImageAlign="absMiddle" ImageUrl="/images/spacer.gif" /></td>
+                                                        <td width="100%" class="bold">Auto-Provisioning Survey</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap></td>
+                                                        <td nowrap></td>
+                                                        <td width="100%">
+                                                            <table cellpadding="2" cellspacing="2" border="0">
+                                                                <tr>
+                                                                    <td>Did the auto-provisioning tool work?</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <asp:DropDownList ID="ddlSuccess" runat="server" CssClass="default">
+                                                                            <asp:ListItem Value="-- SELECT --" />
+                                                                            <asp:ListItem Value="1" Text="Yes (no problems)" />
+                                                                            <asp:ListItem Value="0" Text="Yes (minor problems)" />
+                                                                            <asp:ListItem Value="-1" Text="Yes (major problems)" />
+                                                                            <asp:ListItem Value="-2" Text="No (could not complete)" />
+                                                                        </asp:DropDownList>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td valign="top">If there were problems, please explain:</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td><asp:TextBox ID="txtComments" runat="server" CssClass="default" Width="600" Rows="12" TextMode="multiline" /></td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+		                                    </div>
+		                                </td>
+		                            </tr>
+		                        </table>
+		                    </td>
+	                    </tr>
+	                </table>
+            </td>
+        </tr>
+    </table>
+</asp:Panel>
+<asp:Panel ID="panDenied" runat="server" Visible="false">
+    <table width="100%" cellpadding="2" cellspacing="2" border="0">
+        <tr>
+            <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+            <td class="header"><img src="/images/bigX.gif" border="0" align="absmiddle" /> Access Denied</td>
+        </tr>
+        <tr><td colspan="2">&nbsp;</td></tr>
+        <tr>
+            <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+            <td>You do not have rights to view this item.</td>
+        </tr>
+        <tr><td colspan="2">&nbsp;</td></tr>
+        <tr>
+            <td colspan="2"><hr size="1" noshade /></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td class="footer"></td>
+                        <td align="right"><asp:Button ID="btnDenied" runat="server" CssClass="default" Width="75" Text="Close" /></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</asp:Panel>
+<asp:Label ID="lblRequest" runat="server" Visible="false" />
+<asp:HiddenField ID="hdnTab" runat="server" />

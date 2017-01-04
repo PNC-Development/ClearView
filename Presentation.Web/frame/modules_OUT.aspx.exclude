@@ -1,0 +1,215 @@
+<%@ Page Language="C#" Debug="false" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intProfile;
+    private Asset oAsset;
+    private Users oUser;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oAsset = new Asset(intProfile, dsnAsset);
+        oUser = new Users(intProfile, dsn);
+        if (!IsPostBack)
+        {
+            if (Request.QueryString["parent"] != null && Request.QueryString["parent"] != "")
+            {
+                int intParent = Int32.Parse(Request.QueryString["parent"]);
+                lblName.Text = oAsset.Get(intParent, "name");
+                lblParent.Text = intParent.ToString();
+                panCommission.Visible = true;
+                imgCommission.Attributes.Add("onclick", "return OpenCalendar('" + txtCommission.ClientID + "');");
+                btnSubmit.Text += "Commission";
+                btnSubmit.Attributes.Add("onclick", "return ValidateText('" + txtSerial.ClientID + "','Please enter a serial number')" +
+                    " && ValidateNumber0('" + txtPorts.ClientID + "','Please enter a valid number for the number of ports')" +
+                    " && ValidateNumber0('" + txtSlot.ClientID + "','Please enter a valid number for the slot position')" +
+                    " && ValidateDate('" + txtCommission.ClientID + "','Please enter a valid date')" +
+                    ";");
+            }
+            else if (Request.QueryString["id"] != null && Request.QueryString["id"] != "")
+            {
+                int intId = Int32.Parse(Request.QueryString["id"]);
+                DataSet ds = oAsset.GetWanModule(intId);
+                if (ds.Tables[0].Rows.Count > 0 && Request.QueryString["type"] == "e")
+                {
+                    panEdit.Visible = true;
+                    lblSerial2.Text = ds.Tables[0].Rows[0]["serial"].ToString();
+                    txtPorts2.Text = ds.Tables[0].Rows[0]["ports"].ToString();
+                    txtSlot2.Text = ds.Tables[0].Rows[0]["slot"].ToString();
+                    lblOn2.Text = DateTime.Parse(ds.Tables[0].Rows[0]["commissionedon"].ToString()).ToLongDateString();
+                    lblBy2.Text = oUser.GetFullName(Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString()));
+                    btnSubmit.Text += "Update";
+                    btnSubmit.Attributes.Add("onclick", "return ValidateNumber0('" + txtPorts2.ClientID + "','Please enter a valid number for the number of ports')" +
+                        " && ValidateNumber0('" + txtSlot2.ClientID + "','Please enter a valid number for the slot position')" +
+                        ";");
+                }
+                if (ds.Tables[0].Rows.Count > 0 && Request.QueryString["type"] == "d")
+                {
+                    panDecommission.Visible = true;
+                    imgDecommission.Attributes.Add("onclick", "return OpenCalendar('" + txtDecommission.ClientID + "');");
+                    lblSerial.Text = ds.Tables[0].Rows[0]["serial"].ToString();
+                    lblPorts.Text = ds.Tables[0].Rows[0]["ports"].ToString();
+                    lblSlot.Text = ds.Tables[0].Rows[0]["slot"].ToString();
+                    lblOn.Text = DateTime.Parse(ds.Tables[0].Rows[0]["commissionedon"].ToString()).ToLongDateString();
+                    lblBy.Text = oUser.GetFullName(Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString()));
+                    btnSubmit.Text += "Decommission";
+                    btnSubmit.Attributes.Add("onclick", "return ValidateText('" + txtReason.ClientID + "','Please enter a reason')" +
+                        " && ValidateDate('" + txtDecommission.ClientID + "','Please enter a valid date')" +
+                        ";");
+                }
+            }
+        }
+    }
+    private void btnSubmit_Click(Object Sender, EventArgs e)
+    {
+        if (lblParent.Text != "")
+            oAsset.CommissionWanModule(Int32.Parse(lblParent.Text), txtSerial.Text, Int32.Parse(txtPorts.Text), Int32.Parse(txtSlot.Text), DateTime.Parse(txtCommission.Text), intProfile);
+        else
+        {
+            if (Request.QueryString["type"] != null)
+            {
+                if (Request.QueryString["type"] == "e")
+                    oAsset.UpdateWanModule(Int32.Parse(Request.QueryString["id"]), Int32.Parse(txtPorts2.Text), Int32.Parse(txtSlot2.Text));
+                else
+                    oAsset.DecommissionWanModule(Int32.Parse(Request.QueryString["id"]), txtReason.Text, DateTime.Parse(txtDecommission.Text), intProfile);
+            }
+        }
+        Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "reload", "<script type=\"text/javascript\">window.top.location.reload();<" + "/" + "script>");
+    }
+</script>
+<html>
+<head>
+<title>Asset Module</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+<table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr height="9"> 
+        <td><img src="/images/frame_top_left.gif" width="9" height="9"></td>
+        <td background="/images/frame_top.gif" width="100%"><img src="/images/frame_top.gif" width="9" height="9"></td>
+        <td><img src="/images/frame_top_right.gif" width="9" height="9"></td>
+    </tr>
+    <tr> 
+        <td background="/images/frame_left.gif"><img src="/images/frame_left.gif" width="9" height="9"></td>
+        <td valign="top" width="100%" height="100%" bgcolor="#FFFFFF">
+            <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                <tr height="1">
+                    <td class="frame">&nbsp;Asset Module</td>
+                    <td class="frame" align="right"><a href="javascript:void(0);" onclick="parent.HidePanel();"><img src="/images/close.gif" border="0" title="Close"></a></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div style="height:100%; width:100%; overflow:auto">
+                        <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                            <tr height="1">
+                                <td colspan="2">
+                                    <asp:Panel ID="panCommission" runat="server" Visible="false">
+                                    <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                                        <tr>
+                                            <td nowrap>Device:</td>
+                                            <td width="100%"><asp:Label ID="lblName" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Serial Number:</td>
+                                            <td width="100%"><asp:TextBox ID="txtSerial" runat="server" CssClass="default" Width="150" MaxLength="50" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Ports:</td>
+                                            <td width="100%"><asp:TextBox ID="txtPorts" runat="server" CssClass="default" Width="50" MaxLength="3" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Slot #:</td>
+                                            <td width="100%"><asp:TextBox ID="txtSlot" runat="server" CssClass="default" Width="50" MaxLength="3" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Commissioned On:</td>
+                                            <td width="100%"><asp:TextBox ID="txtCommission" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCommission" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                        </tr>
+                                    </table>
+                                    </asp:Panel>
+                                    <asp:Panel ID="panDecommission" runat="server" Visible="false">
+                                    <table width="100%" cellpadding="3" cellspacing="2" border="0">
+                                        <tr>
+                                            <td nowrap>Serial Number:</td>
+                                            <td width="100%"><asp:Label ID="lblSerial" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Ports:</td>
+                                            <td width="100%"><asp:Label ID="lblPorts" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Slot #:</td>
+                                            <td width="100%"><asp:Label ID="lblSlot" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Commissioned On:</td>
+                                            <td width="100%"><asp:Label ID="lblOn" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Commissioned By:</td>
+                                            <td width="100%"><asp:Label ID="lblBy" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap valign="top">Reason:</td>
+                                            <td width="100%" valign="top"><asp:TextBox ID="txtReason" runat="server" CssClass="default" Width="200" TextMode="MultiLine" Rows="5" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Decommissioned On:</td>
+                                            <td width="100%"><asp:TextBox ID="txtDecommission" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgDecommission" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                        </tr>
+                                    </table>
+                                    </asp:Panel>
+                                    <asp:Panel ID="panEdit" runat="server" Visible="false">
+                                    <table width="100%" cellpadding="3" cellspacing="2" border="0">
+                                        <tr>
+                                            <td nowrap>Serial Number:</td>
+                                            <td width="100%"><asp:Label ID="lblSerial2" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Ports:</td>
+                                            <td width="100%"><asp:TextBox ID="txtPorts2" runat="server" CssClass="default" Width="50" MaxLength="3" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Slot #:</td>
+                                            <td width="100%"><asp:TextBox ID="txtSlot2" runat="server" CssClass="default" Width="50" MaxLength="3" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Commissioned On:</td>
+                                            <td width="100%"><asp:Label ID="lblOn2" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td nowrap>Commissioned By:</td>
+                                            <td width="100%"><asp:Label ID="lblBy2" runat="server" CssClass="default" /></td>
+                                        </tr>
+                                    </table>
+                                    </asp:Panel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr height="1">
+                                <td></td>
+                                <td align="right"><asp:LinkButton ID="btnSubmit" runat="server" OnClick="btnSubmit_Click" Text="<img src='/images/bigCheckBox.gif' border='0' align='absmiddle'/><img src='/images/spacer.gif' border='0' width='10' height='20' align='absmiddle'/>" /></td>
+                            </tr>
+                        </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td background="/images/frame_right.gif"><img src="/images/frame_right.gif" width="9" height="9"></td>
+    </tr>
+    <tr height="9"> 
+        <td><img src="/images/frame_bottom_left.gif" width="9" height="9"></td>
+        <td background="/images/frame_bottom.gif" width="100%"><img src="/images/frame_bottom.gif" width="9" height="9"></td>
+        <td><img src="/images/frame_bottom_right.gif" width="9" height="9"></td>
+    </tr>
+</table>
+<asp:Label ID="lblParent" runat="server" Visible="false" />
+</form>
+</body>
+</html>

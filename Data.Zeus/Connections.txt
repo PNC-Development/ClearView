@@ -1,0 +1,4 @@
+DBRefFolders found in your dbp file
+Connect String: Data Source=ohcleiis4569;Initial Catalog=ClearViewZeus;Persist Security Info=True;User ID=cvuser
+Provider: Microsoft SQL Server
+

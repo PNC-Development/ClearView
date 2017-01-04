@@ -1,0 +1,885 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intViewRequest = Int32.Parse(ConfigurationManager.AppSettings["ViewRequest"]);
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private Pages oPage;
+    private RequestItems oRequestItem;
+    private ServiceRequests oServiceRequest;
+    private Applications oApplication;
+    private Variables oVariable;
+    private RequestFields oRequestField;
+    private Services oService;
+    private Users oUser;
+    private Customized oCustomized;
+    private Requests oRequest;
+    private ResourceRequest oResourceRequest;
+    private Projects oProject;
+    private ProjectsPending oProjectsPending;
+    private Asset oAsset;
+    private Servers oServer;
+    private Storage oStorage;
+    private Models oModel;
+    private ModelsProperties oModelsProperties;
+    private Classes oClass;
+    private int intProfile;
+    private int intPage = 0;
+    private int intApplication = 0;
+    private string strStorage = "";
+    private bool boolOldModel = false;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oPage = new Pages(intProfile, dsn);
+        oRequestItem = new RequestItems(intProfile, dsn);
+        oServiceRequest = new ServiceRequests(intProfile, dsn);
+        oApplication = new Applications(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        oRequestField = new RequestFields(intProfile, dsn);
+        oService = new Services(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oCustomized = new Customized(intProfile, dsn);
+        oRequest = new Requests(intProfile, dsn);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oProject = new Projects(intProfile, dsn);
+        oProjectsPending = new ProjectsPending(intProfile, dsn, intEnvironment);
+        oAsset = new Asset(intProfile, dsnAsset);
+        oServer = new Servers(intProfile, dsn);
+        oStorage = new Storage(intProfile, dsn);
+        oModel = new Models(intProfile, dsn);
+        oModelsProperties = new ModelsProperties(intProfile, dsn);
+        oClass = new Classes(intProfile, dsn);
+        if (Request.QueryString["applicationid"] != null && Request.QueryString["applicationid"] != "")
+            intApplication = Int32.Parse(Request.QueryString["applicationid"]);
+        if (Request.QueryString["pageid"] != null && Request.QueryString["pageid"] != "")
+            intPage = Int32.Parse(Request.QueryString["pageid"]);
+        if (Request.Cookies["application"] != null && Request.Cookies["application"].Value != "")
+            intApplication = Int32.Parse(Request.Cookies["application"].Value);
+        if (Request.QueryString["rid"] != "" && Request.QueryString["rid"] != null)
+        {
+            LoadValues();
+            LoadRequest();
+            imgStart.Attributes.Add("onclick", "return ShowCalendar('" + txtStart.ClientID + "');");
+            imgEnd.Attributes.Add("onclick", "return ShowCalendar('" + txtEnd.ClientID + "');");
+            // Custom Loads
+            int intItem = Int32.Parse(lblItem.Text);
+            int intApp = oRequestItem.GetItemApplication(intItem);
+            string strDeliverable = oApplication.Get(intApp, "deliverables_doc");
+            if (strDeliverable != "")
+            {
+                panDeliverable.Visible = true;
+                btnDeliverable.Attributes.Add("onclick", "return OpenWindow('NEW_WINDOW','" + strDeliverable + "');");
+            }
+            txtDevice.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'200','195','" + divDevice.ClientID + "','" + lstDevice.ClientID + "','" + hdnDevice.ClientID + "','" + oVariable.URL() + "/frame/ajax/ajax_servernames.aspx',2);");
+            lstDevice.Attributes.Add("ondblclick", "AJAXClickRow();");
+            chkNew.Attributes.Add("onclick", "ShowHideDiv('" + divNew.ClientID + "','inline');ShowHideDiv('" + divExisting.ClientID + "','none');");
+            chkExisting.Attributes.Add("onclick", "ShowHideDiv('" + divExisting.ClientID + "','inline');ShowHideDiv('" + divNew.ClientID + "','none');");
+        }
+        btnCancel1.Attributes.Add("onclick", "return confirm('Are you sure you want to delete this service request?');");
+    }
+    private void LoadValues()
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        DataSet dsItems = oRequestItem.GetForms(intRequest);
+        if (dsItems.Tables[0].Rows.Count > 0)
+        {
+            foreach (DataRow drItem in dsItems.Tables[0].Rows)
+            {
+                if (drItem["done"].ToString() == "-1")
+                {
+                    lblItem.Text = drItem["itemid"].ToString();
+                    lblNumber.Text = drItem["number"].ToString();
+                    lblService.Text = drItem["serviceid"].ToString();
+                    break;
+                }
+            }
+        }
+    }
+    private void LoadRequest()
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        int intProject = oRequest.GetProjectNumber(intRequest);
+        if (Request.QueryString["d"] != "" && Request.QueryString["d"] != null)
+        {
+            panFound.Visible = true;
+            int intServer = Int32.Parse(Request.QueryString["d"]);
+            bool boolProduction = (oClass.Get(Int32.Parse(oAsset.GetServerOrBlade(intServer, "classid")), "prod") == "1");
+            int intModel = Int32.Parse(oAsset.GetServerOrBlade(intServer, "modelid"));
+            if (oModelsProperties.IsStorageDB_BootLocal(intModel) == true)
+            {
+                panOldModel.Visible = true;
+                btnNext.Attributes.Add("onclick", "return ConfirmStorageAdd('" + chkNew.ClientID + "','" + chkExisting.ClientID + "','" + txtAmount.ClientID + "','" + txtEnd.ClientID + "','" + txtStart.ClientID + "','" + chkOldHigh.ClientID + "','" + chkOldStandard.ClientID + "','" + chkOldLow.ClientID + "','" + hdnLun.ClientID + "','" + hdnMount.ClientID + "')" +
+                    " && EnsureStorage3('" + chkNew.ClientID + "','" + chkOldHigh.ClientID + "','" + txtOldHighRequire.ClientID + "','" + txtOldHighRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",null,null)" +
+                    " && EnsureStorage3('" + chkNew.ClientID + "','" + chkOldStandard.ClientID + "','" + txtOldStandardRequire.ClientID + "','" + txtOldStandardRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",'" + ddlOldStandardReplicated.ClientID + "','" + txtOldStandardReplicated.ClientID + "')" +
+                    " && EnsureStorage3('" + chkNew.ClientID + "','" + chkOldLow.ClientID + "','" + txtOldLowRequire.ClientID + "','" + txtOldLowRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",null,null)" +
+                    ";");
+                chkOldHigh.Attributes.Add("onclick", "ShowHideDivCheck('" + divOldHigh.ClientID + "',this);");
+                chkOldStandard.Attributes.Add("onclick", "ShowHideDivCheck('" + divOldStandard.ClientID + "',this);");
+                ddlOldStandardReplicated.Attributes.Add("onchange", "ShowHideDivDDL('" + divOldStandardReplicated.ClientID + "',this,'Yes');");
+                chkOldLow.Attributes.Add("onclick", "ShowHideDivCheck('" + divOldLow.ClientID + "',this);");
+            }
+            if (oModelsProperties.IsStorageDB_BootSANWindows(intModel) == true)
+            {
+                panNewModel.Visible = true;
+                btnNext.Attributes.Add("onclick", "return ConfirmStorageAdd('" + chkNew.ClientID + "','" + chkExisting.ClientID + "','" + txtAmount.ClientID + "','" + txtEnd.ClientID + "','" + txtStart.ClientID + "','" + chkHigh.ClientID + "','" + chkStandard.ClientID + "','" + chkLow.ClientID + "','" + hdnLun.ClientID + "','" + hdnMount.ClientID + "')" +
+                    " && EnsureStorage2('" + chkNew.ClientID + "','" + chkHigh.ClientID + "','" + txtHighRequire.ClientID + "','" + txtHighRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",'" + ddlHighReplicated.ClientID + "','" + txtHighReplicated.ClientID + "','" + ddlHighLevel.ClientID + "')" +
+                    " && EnsureStorage2('" + chkNew.ClientID + "','" + chkStandard.ClientID + "','" + txtStandardRequire.ClientID + "','" + txtStandardRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",'" + ddlStandardReplicated.ClientID + "','" + txtStandardReplicated.ClientID + "','" + ddlStandardLevel.ClientID + "')" +
+                    " && EnsureStorage2('" + chkNew.ClientID + "','" + chkLow.ClientID + "','" + txtLowRequire.ClientID + "','" + txtLowRequireTest.ClientID + "'," + (boolProduction ? "true" : "false") + ",'" + ddlLowReplicated.ClientID + "','" + txtLowReplicated.ClientID + "','" + ddlLowLevel.ClientID + "')" +
+                    ";");
+                chkHigh.Attributes.Add("onclick", "ShowHideDivCheck('" + divHigh.ClientID + "',this);");
+                ddlHighReplicated.Attributes.Add("onchange", "ShowHideDivDDL('" + divHighReplicated.ClientID + "',this,'Yes');");
+                chkStandard.Attributes.Add("onclick", "ShowHideDivCheck('" + divStandard.ClientID + "',this);");
+                ddlStandardReplicated.Attributes.Add("onchange", "ShowHideDivDDL('" + divStandardReplicated.ClientID + "',this,'Yes');");
+                chkLow.Attributes.Add("onclick", "ShowHideDivCheck('" + divLow.ClientID + "',this);");
+                ddlLowReplicated.Attributes.Add("onchange", "ShowHideDivDDL('" + divLowReplicated.ClientID + "',this,'Yes');");
+                ddlHighLevel.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+                ddlStandardLevel.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+                ddlLowLevel.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+            }
+            lblServer.Text = oAsset.GetServerOrBlade(intServer, "name");
+            DataSet ds = oServer.GetAsset(intServer);
+            if (ds.Tables[0].Rows.Count > 0) 
+            {
+                int intA = Int32.Parse(ds.Tables[0].Rows[0]["answerid"].ToString());
+                ds = oStorage.GetLuns(intA);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    bool boolOther = false;
+                    int intRow = 0;
+                    foreach (DataRow dr in ds.Tables[0].Rows)
+                    {
+                        if (Int32.Parse(dr["driveid"].ToString()) > 0)
+                        {
+                            intRow++;
+                            boolOther = !boolOther;
+                            strStorage += "<tr" + (boolOther ? " bgcolor=\"F6F6F6\"" : "") + ">";
+                            strStorage += "<td><input type=\"radio\" class=\"default\" name=\"SelectLUN\" onclick=\"UpdateRadio('" + hdnLun.ClientID + "','" + hdnMount.ClientID + "','" + dr["id"].ToString() + "');\"/></td>";
+                            strStorage += "<td>" + intRow + "</td>";
+                            string strLetter = dr["letter"].ToString();
+                            if (strLetter == "")
+                            {
+                                if (dr["driveid"].ToString() == "-1000")
+                                    strLetter = "E";
+                                else if (dr["driveid"].ToString() == "-100")
+                                    strLetter = "F";
+                                else if (dr["driveid"].ToString() == "-10")
+                                    strLetter = "P";
+                                else if (dr["driveid"].ToString() == "-1")
+                                    strLetter = "Q";
+                            }
+                            strStorage += "<td>" + strLetter + ":" + dr["path"].ToString() + "</td>";
+                            strStorage += "<td>" + dr["performance"].ToString() + "</td>";
+                            strStorage += "<td>" + dr["size"].ToString() + " GB</td>";
+                            strStorage += "<td>" + dr["size_test"].ToString() + " GB</td>";
+                            strStorage += "<td>" + (dr["replicated"].ToString() == "1" ? "Yes" : "No") + "</td>";
+                            strStorage += "<td>" + (dr["high_availability"].ToString() == "1" ? "Yes" : "No") + "</td>";
+                            strStorage += "</tr>";
+                            // Add Mount Points
+                            DataSet dsPoints = oStorage.GetMountPoints(Int32.Parse(dr["id"].ToString()));
+                            int intPoint = 0;
+                            foreach (DataRow drPoint in dsPoints.Tables[0].Rows)
+                            {
+                                intRow++;
+                                intPoint++;
+                                boolOther = !boolOther;
+                                strStorage += "<tr" + (boolOther ? " bgcolor=\"F6F6F6\"" : "") + ">";
+                                strStorage += "<td><input type=\"radio\" class=\"default\" name=\"SelectLUN\" onclick=\"UpdateRadio('" + hdnMount.ClientID + "','" + hdnLun.ClientID + "','" + drPoint["id"].ToString() + "');\"/></td>";
+                                strStorage += "<td>" + intRow + "</td>";
+                                strStorage += "<td>" + strLetter + ":\\SH" + dr["driveid"].ToString() + "VOL" + (intPoint < 10 ? "0" : "") + intPoint.ToString() + "</td>";
+                                strStorage += "<td>" + drPoint["performance"].ToString() + "</td>";
+                                strStorage += "<td>" + drPoint["size"].ToString() + " GB</td>";
+                                strStorage += "<td>" + drPoint["size_test"].ToString() + " GB</td>";
+                                strStorage += "<td>" + (drPoint["replicated"].ToString() == "1" ? "Yes" : "No") + "</td>";
+                                strStorage += "<td>" + (drPoint["high_availability"].ToString() == "1" ? "Yes" : "No") + "</td>";
+                                strStorage += "</tr>";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    strStorage += "<tr><td colspan=\"7\"><img src=\"/images/alert.gif\" border=\"0\" align=\"absmiddle\"/> There is no storage associated to this server</td></tr>";
+                    chkExisting.Enabled = false;
+                    chkNew.Checked = true;
+                    divNew.Style["display"] = "inline";
+                }
+            }
+        }
+        else
+        {
+            panDevice.Visible = true;
+            btnNext.Enabled = false;
+            btnSearch.Attributes.Add("onclick", "return ValidateHidden('" + hdnDevice.ClientID + "','" + txtDevice.ClientID + "','Please enter the server name')" +
+                ";");
+        }
+    }
+    private void btnSearch_Click(Object Sender, EventArgs e)
+    {
+        Response.Redirect(oPage.GetFullLink(intPage) + "?rid=" + Request.QueryString["rid"] + "&d=" + Request.Form[hdnDevice.UniqueID]);
+    }
+    private void btnBack_Click(Object Sender, EventArgs e)
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        oRequestItem.UpdateForm(intRequest, false);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?rid=" + intRequest.ToString());
+    }
+    private void btnNext_Click(Object Sender, EventArgs e)
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        int intServer = Int32.Parse(Request.QueryString["d"]);
+        int intItem = Int32.Parse(lblItem.Text);
+        int intNumber = Int32.Parse(lblNumber.Text);
+        int intLun = 0;
+        int intMount = 0;
+        double dblAmount = 0.00;
+        if (Request.Form[hdnLun.UniqueID] != "") 
+        {
+            dblAmount = double.Parse(txtAmount.Text);
+            intLun = Int32.Parse(Request.Form[hdnLun.UniqueID]);
+        }
+        if (Request.Form[hdnMount.UniqueID] != "") 
+        {
+            dblAmount = double.Parse(txtAmount.Text);
+            intMount = Int32.Parse(Request.Form[hdnMount.UniqueID]);
+        }
+        if (boolOldModel == false)
+        {
+            int intHigh = (chkHigh.Checked ? 1 : 0);
+            double dblHighTotal = 0.00;
+            double dblHighTest = 0.00;
+            double dblHighReplicated = 0.00;
+            string strHighLevel = "";
+            if (chkNew.Checked == true && intHigh == 1)
+            {
+                dblHighTotal = double.Parse(txtHighRequire.Text);
+                if (panHighProduction.Visible == true)
+                {
+                    dblHighTest = double.Parse(txtHighRequireTest.Text);
+                    if (ddlHighReplicated.SelectedIndex == (ddlHighReplicated.Items.Count - 1))
+                        dblHighReplicated = double.Parse(txtHighReplicated.Text);
+                    strHighLevel = ddlHighLevel.SelectedItem.Value;
+                }
+            }
+            int intStandard = (chkStandard.Checked ? 1 : 0);
+            double dblStandardTotal = 0.00;
+            double dblStandardTest = 0.00;
+            double dblStandardReplicated = 0.00;
+            string strStandardLevel = "";
+            if (chkNew.Checked == true && intStandard == 1)
+            {
+                dblStandardTotal = double.Parse(txtStandardRequire.Text);
+                if (panStandardProduction.Visible == true)
+                {
+                    dblStandardTest = double.Parse(txtStandardRequireTest.Text);
+                    if (ddlStandardReplicated.SelectedIndex == (ddlStandardReplicated.Items.Count - 1))
+                        dblStandardReplicated = double.Parse(txtStandardReplicated.Text);
+                    strStandardLevel = ddlStandardLevel.SelectedItem.Value;
+                }
+            }
+            int intLow = (chkLow.Checked ? 1 : 0);
+            double dblLowTotal = 0.00;
+            double dblLowTest = 0.00;
+            double dblLowReplicated = 0.00;
+            string strLowLevel = "";
+            if (chkNew.Checked == true && intLow == 1)
+            {
+                dblLowTotal = double.Parse(txtLowRequire.Text);
+                if (panLowProduction.Visible == true)
+                {
+                    dblLowTest = double.Parse(txtLowRequireTest.Text);
+                    if (ddlLowReplicated.SelectedIndex == (ddlLowReplicated.Items.Count - 1))
+                        dblLowReplicated = double.Parse(txtLowReplicated.Text);
+                    strLowLevel = ddlLowLevel.SelectedItem.Value;
+                }
+            }
+            oCustomized.AddStorage(intRequest, intItem, intNumber, intServer, intLun, intMount, dblAmount, intHigh, dblHighTotal, dblHighTest, dblHighReplicated, strHighLevel, intStandard, dblStandardTotal, dblStandardTest, dblStandardReplicated, strStandardLevel, intLow, dblLowTotal, dblLowTest, dblLowReplicated, strLowLevel, DateTime.Parse(txtStart.Text), DateTime.Parse(txtEnd.Text));
+        }
+        else
+        {
+            int intHigh = (chkOldHigh.Checked ? 1 : 0);
+            double dblHighTotal = 0.00;
+            double dblHighTest = 0.00;
+            if (chkNew.Checked == true && intHigh == 1)
+            {
+                dblHighTotal = double.Parse(txtOldHighRequire.Text);
+                if (panOldHighProduction.Visible == true)
+                    dblHighTest = double.Parse(txtOldHighRequireTest.Text);
+            }
+            int intStandard = (chkOldStandard.Checked ? 1 : 0);
+            double dblStandardTotal = 0.00;
+            double dblStandardTest = 0.00;
+            double dblStandardReplicated = 0.00;
+            if (chkNew.Checked == true && intStandard == 1)
+            {
+                dblStandardTotal = double.Parse(txtOldStandardRequire.Text);
+                if (panOldStandardProduction.Visible == true)
+                {
+                    dblStandardTest = double.Parse(txtOldStandardRequireTest.Text);
+                    if (ddlOldStandardReplicated.SelectedIndex == (ddlOldStandardReplicated.Items.Count - 1))
+                        dblStandardReplicated = double.Parse(txtOldStandardReplicated.Text);
+                }
+            }
+            int intLow = (chkOldLow.Checked ? 1 : 0);
+            double dblLowTotal = 0.00;
+            double dblLowTest = 0.00;
+            if (chkNew.Checked == true && intLow == 1)
+            {
+                dblLowTotal = double.Parse(txtOldLowRequire.Text);
+                if (panOldLowProduction.Visible == true)
+                    dblLowTest = double.Parse(txtOldLowRequireTest.Text);
+            }
+            oCustomized.AddStorage(intRequest, intItem, intNumber, intServer, intLun, intMount, dblAmount, intHigh, dblHighTotal, dblHighTest, 0.00, "", intStandard, dblStandardTotal, dblStandardTest, dblStandardReplicated, "", intLow, dblLowTotal, dblLowTest, 0.00, "", DateTime.Parse(txtStart.Text), DateTime.Parse(txtEnd.Text));
+        }
+        oRequestItem.UpdateForm(intRequest, true);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?rid=" + intRequest.ToString());
+    }
+    private void btnCancel_Click(Object Sender, EventArgs e)
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        ServiceRequests oServiceRequest = new ServiceRequests(intProfile, dsn);
+        Requests oRequest = new Requests(intProfile, dsn);
+        Projects oProject = new Projects(intProfile, dsn);
+        int intProject = oRequest.GetProjectNumber(intRequest);
+        DataSet ds = oRequest.Gets(intProject);
+        if (ds.Tables[0].Rows.Count == 0)
+            oProject.Delete(intProject);
+        Response.Redirect(oPage.GetFullLink(intPage));
+    }
+</script>
+<script type="text/javascript">
+    function UpdateRadio(oHidden, oZero, oValue) {
+        oHidden = document.getElementById(oHidden);
+        oZero = document.getElementById(oZero);
+        oHidden.value = oValue;
+        oZero.value = "";
+    }
+    function ConfirmStorageAdd(oNew, oExisting, oAmount, oEnd, oStart, oHigh, oStandard, oLow, oLun, oMount) {
+        oNew = document.getElementById(oNew);
+        oExisting = document.getElementById(oExisting);
+        if (oNew.checked == false && oExisting.checked == false) {
+            alert('Please select how you want to add the storage');
+            oNew.focus();
+            return false;
+        }
+        if (oNew.checked == true) {
+            oHigh = document.getElementById(oHigh);
+            oStandard = document.getElementById(oStandard);
+            oLow = document.getElementById(oLow);
+            if (oHigh.checked == false && oStandard.checked == false && oLow.checked == false) {
+                alert('Please select a type of storage');
+                oHigh.focus();
+                return false;
+            }
+        }
+        if (oExisting.checked == true) {
+            oLun = document.getElementById(oLun);
+            oMount = document.getElementById(oMount);
+            if (oLun.value == "" && oMount.value == "") {
+                alert('Please select the LUN to which you want to add storage');
+                return false;
+            }
+            if (ValidateNumber0(oAmount,'Please enter a valid amount of storage') == false)
+                return false;
+        }
+        if (ValidateDate(oStart, 'Please enter a valid estimated start date') == false || ValidateDate(oEnd, 'Please enter a valid estimated end date') == false || ValidateDates(oStart, oEnd, 'The estimated start date must occur before the estimated end date') == false)
+            return false;
+        return true;
+    }
+    function EnsureStorage2(oNew, oCheck, oTextReq, oTest, oProd, oDDLRep, oTextRep, oDDL) {
+        oNew = document.getElementById(oNew);
+        oCheck = document.getElementById(oCheck);
+        if (oNew.checked == true && oCheck.checked == true) {
+            if (ValidateNumber0(oTextReq, 'Please enter a valid number for the total amount of storage') == false)
+                return false;
+            if (oProd == true && ValidateNumber(oTest, 'Please enter a valid number for the total amount of storage in TEST') == false)
+                return false;
+            oDDLRep = document.getElementById(oDDLRep);
+            if (oDDLRep.selectedIndex == (oDDLRep.length - 1)) {
+                if (ValidateNumber0(oTextRep, 'Please enter a valid number for the amount of storage to be replicated') == false)
+                    return false;
+            }
+            if (ValidateDropDown(oDDL, 'Please select the level of storage availability') == false)
+                return false;
+        }
+        return true;
+    }
+    function EnsureStorage3(oNew, oCheck, oTextReq, oTest, oProd, oDDLRep, oTextRep) {
+        oNew = document.getElementById(oNew);
+        oCheck = document.getElementById(oCheck);
+        if (oNew.checked == true && oCheck.checked == true) {
+            if (ValidateNumber0(oTextReq, 'Please enter a valid number for the total amount of storage') == false)
+                return false;
+            if (oProd == true && ValidateNumber(oTest, 'Please enter a valid number for the total amount of storage in TEST') == false)
+                return false;
+            if (oProd == true && oDDLRep != null) {
+                oDDLRep = document.getElementById(oDDLRep);
+                if (oDDLRep.selectedIndex == (oDDLRep.length - 1)) {
+                    if (ValidateNumber0(oTextRep, 'Please enter a valid number for the amount of storage to be replicated') == false)
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+</script>
+<asp:Panel ID="panDevice" runat="server" Visible="false">
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td nowrap>Server:<font class="required">&nbsp;*</font></td>
+        <td width="100%">
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td><asp:TextBox ID="txtDevice" runat="server" Width="200" CssClass="default" /></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divDevice" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                            <asp:ListBox ID="lstDevice" runat="server" CssClass="default" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td nowrap></td>
+        <td width="100%"><asp:Button ID="btnSearch" runat="server" CssClass="default" Text="Search" Width="125" OnClick="btnSearch_Click" /></td>
+    </tr>
+</table>
+</asp:Panel>
+<asp:Panel ID="panFound" runat="server" Visible="false">
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td nowrap>Server Name:</td>
+        <td width="100%"><asp:Label ID="lblServer" runat="server" CssClass="reddefault" /></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td colspan="2">
+            <table width="100%" cellpadding="3" cellspacing="0" border="0" style="border:solid 1px #CCCCCC">
+                <tr bgcolor="#EEEEEE">
+                    <td></td>
+                    <td><b><u>LUN:</u></b></td>
+                    <td><b><u>Path:</u></b></td>
+                    <td><b><u>Performance:</u></b></td>
+                    <td><b><u>Amount:</u></b></td>
+                    <td><b><u>Amount in Test:</u></b></td>
+                    <td><b><u>Replicated:</u></b></td>
+                    <td><b><u>High Availability:</u></b></td>
+                </tr>
+                <%=strStorage %>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2">Please select how you want to add the storage:<font class="required">&nbsp;*</font></td>
+    </tr>
+    <tr>
+        <td nowrap>&nbsp;</td>
+        <td width="100%"><asp:RadioButton ID="chkNew" runat="server" Text="Add storage to a new LUN" CssClass="default" GroupName="add" /></td>
+    </tr>
+    <tr>
+        <td nowrap>&nbsp;</td>
+        <td width="100%"><asp:RadioButton ID="chkExisting" runat="server" Text="Add storage to an existing LUN" CssClass="default" GroupName="add" /></td>
+    </tr>
+</table>
+<div id="divExisting" runat="server" style="display:none">
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td nowrap>Amount to Add:<font class="required">&nbsp;*</font></td>
+        <td width="100%"><asp:TextBox ID="txtAmount" runat="server" CssClass="default" Width="100" MaxLength="10" /> GB</td>
+    </tr>
+</table>
+</div>
+<div id="divNew" runat="server" style="display:none">
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td colspan="2">Check if you require any of the following storage:<font class="required">&nbsp;*</font></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <asp:Panel id="panOldModel" runat="server" Visible="false">
+                <table cellpadding="1" cellspacing="1" border="0" class="default">
+                    <tr>
+                        <td><asp:CheckBox ID="chkOldHigh" runat="server" CssClass="default" Text="High Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divOldHigh" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>High Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldHighRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panOldHighProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>High Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldHighRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><asp:CheckBox ID="chkOldStandard" runat="server" CssClass="default" Text="Standard Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divOldStandard" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Standard Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldStandardRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panOldStandardProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Standard Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldStandardRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td colspan="2"><b>Standard Performance Storage</b> - Will this storage be replicated?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlOldStandardReplicated" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="No" />
+                                            <asp:ListItem Value="Yes" />
+                                        </asp:DropDownList>
+                                    </td>
+                                    <td><div id="divOldStandardReplicated" runat="server" style="display:none"><img src="/images/green_right.gif" border="0" align="absmiddle" /><img src="/images/spacer.gif" border="0" width="10" height="1" />Please enter the amount of storage to be replicated:<img src="/images/spacer.gif" border="0" width="5" height="1" /><asp:TextBox ID="txtOldStandardReplicated" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</div></td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><asp:CheckBox ID="chkOldLow" runat="server" CssClass="default" Text="Low Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divOldLow" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Low Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldLowRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panOldLowProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Low Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtOldLowRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                </asp:Panel>
+                <asp:Panel id="panNewModel" runat="server" Visible="false">
+                <table cellpadding="1" cellspacing="1" border="0" class="default">
+                    <tr>
+                        <td><asp:CheckBox ID="chkHigh" runat="server" CssClass="default" Text="High Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divHigh" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>High Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtHighRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panHighProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>High Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtHighRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td colspan="2"><b>High Performance Storage</b> - Will this storage be replicated?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlHighReplicated" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="No" />
+                                            <asp:ListItem Value="Yes" />
+                                        </asp:DropDownList>
+                                    </td>
+                                    <td><div id="divHighReplicated" runat="server" style="display:none"><img src="/images/green_right.gif" border="0" align="absmiddle" /><img src="/images/spacer.gif" border="0" width="10" height="1" />Please enter the amount of storage to be replicated:<img src="/images/spacer.gif" border="0" width="5" height="1" /><asp:TextBox ID="txtHighReplicated" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</div></td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>High Performance Storage</b> - What level of storage availability to you require?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlHighLevel" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="Standard" />
+                                            <asp:ListItem Value="High" />
+                                        </asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><asp:CheckBox ID="chkStandard" runat="server" CssClass="default" Text="Standard Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divStandard" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Standard Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtStandardRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panStandardProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Standard Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtStandardRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td colspan="2"><b>Standard Performance Storage</b> - Will this storage be replicated?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlStandardReplicated" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="No" />
+                                            <asp:ListItem Value="Yes" />
+                                        </asp:DropDownList>
+                                    </td>
+                                    <td><div id="divStandardReplicated" runat="server" style="display:none"><img src="/images/green_right.gif" border="0" align="absmiddle" /><img src="/images/spacer.gif" border="0" width="10" height="1" />Please enter the amount of storage to be replicated:<img src="/images/spacer.gif" border="0" width="5" height="1" /><asp:TextBox ID="txtStandardReplicated" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</div></td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Standard Performance Storage</b> - What level of storage availability to you require?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlStandardLevel" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="Standard" />
+                                            <asp:ListItem Value="High" />
+                                        </asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><asp:CheckBox ID="chkLow" runat="server" CssClass="default" Text="Low Performance" GroupName="performance" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="divLow" runat="server" style="display:none">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Low Performance Storage</b> - Please enter the total amount of storage you require:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtLowRequire" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <asp:Panel ID="panLowProduction" runat="server" Visible="false">
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Low Performance Storage</b> - Please enter the total amount of storage you require in TEST:<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td><asp:TextBox ID="txtLowRequireTest" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td colspan="2"><b>Low Performance Storage</b> - Will this storage be replicated?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlLowReplicated" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="No" />
+                                            <asp:ListItem Value="Yes" />
+                                        </asp:DropDownList>
+                                    </td>
+                                    <td><div id="divLowReplicated" runat="server" style="display:none"><img src="/images/green_right.gif" border="0" align="absmiddle" /><img src="/images/spacer.gif" border="0" width="10" height="1" />Please enter the amount of storage to be replicated:<img src="/images/spacer.gif" border="0" width="5" height="1" /><asp:TextBox ID="txtLowReplicated" runat="server" CssClass="default" Width="75" MaxLength="5" /> GB</div></td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table cellpadding="2" cellspacing="3" border="0">
+                                <tr>
+                                    <td align="right"><img src="/images/arrow_down_right.gif" border="0" align="absmiddle" /></td>
+                                    <td><b>Low Performance Storage</b> - What level of storage availability to you require?<font class="required">&nbsp;*</font></td>
+                                </tr>
+                                <tr>
+                                    <td><img src="/images/spacer.gif" border="0" width="20" height="1" /></td>
+                                    <td>
+                                        <asp:DropDownList ID="ddlLowLevel" runat="server" CssClass="default" Width="100">
+                                            <asp:ListItem Value="Standard" />
+                                            <asp:ListItem Value="High" />
+                                        </asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br />
+                            </asp:Panel>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                </asp:Panel>
+        </td>
+    </tr>
+</table>
+</div>
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td colspan="2"><img src="/images/spacer.gif" border="0" height="1" width="1" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Estimated Start Date:<font class="required">&nbsp;*</font></td>
+        <td width="100%"><asp:TextBox ID="txtStart" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgStart" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Estimated End Date:<font class="required">&nbsp;*</font></td>
+        <td width="100%"><asp:TextBox ID="txtEnd" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgEnd" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+    </tr>
+</table>
+</asp:Panel>
+<table width="100%" border="0" cellSpacing="2" cellPadding="4" class="default">
+    <tr>
+        <td colspan="2"><hr size="1" noshade /></td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td>
+                        <table cellpadding="4" cellspacing="4" border="0">
+                            <tr>
+                                <td><asp:Button ID="btnBack" runat="server" OnClick="btnBack_Click" CssClass="default" Text="<<  Back" Width="100" /></td>
+                                <td>
+                                    <asp:Panel ID="panDeliverable" runat="server" Visible="false">
+                                        <asp:Button ID="btnDeliverable" runat="server" CssClass="default" Text="Service Deliverables" Width="150" />
+                                    </asp:Panel>
+                                </td>
+                                <td><asp:Button ID="btnNext" runat="server" OnClick="btnNext_Click" CssClass="default" Text="Next  >>" Width="100" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td align="right">
+                        <table cellpadding="4" cellspacing="4" border="0">
+                            <tr>
+                                <td><asp:Button ID="btnCancel1" runat="server" OnClick="btnCancel_Click" CssClass="default" Text="Cancel Request" Width="125" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<asp:Label ID="lblItem" runat="server" Visible="false" />
+<asp:Label ID="lblNumber" runat="server" Visible="false" />
+<asp:Label ID="lblService" runat="server" Visible="false" />
+<asp:HiddenField ID="hdnDevice" runat="server" />
+<asp:HiddenField ID="hdnLun" runat="server" />
+<asp:HiddenField ID="hdnMount" runat="server" />

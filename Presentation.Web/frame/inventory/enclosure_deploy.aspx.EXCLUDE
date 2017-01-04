@@ -1,0 +1,184 @@
+<%@ Page Language="C#" Debug="false" EnableEventValidation="false" ValidateRequest="false" MasterPageFile="~/frame.Master" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private string dsnIP = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["IpDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private Asset oAsset;
+    private ModelsProperties oModelsProperties;
+    private int intProfile;
+    private int intID = 0;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oAsset = new Asset(0, dsnAsset);
+        oModelsProperties = new ModelsProperties(0, dsn);
+        if (Request.QueryString["id"] != null && Request.QueryString["id"] != "")
+            intID = Int32.Parse(Request.QueryString["id"]);
+        if (Request.QueryString["save"] != null)
+            Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "saved", "<script type=\"text/javascript\">window.parent.navigate(window.parent.location);<" + "/" + "script>");
+        if (!IsPostBack)
+        {
+            DataSet ds = oAsset.Get(intID);
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                lblTracking.Text = ds.Tables[0].Rows[0]["tracking"].ToString();
+                lblSerial.Text = ds.Tables[0].Rows[0]["serial"].ToString();
+                lblModel.Text = ds.Tables[0].Rows[0]["modelname"].ToString();
+                lblAsset.Text = ds.Tables[0].Rows[0]["asset"].ToString();
+                lblVC.Text = "&nbsp;(Currently = " + oAsset.GetEnclosureVCs(intID, 1).Tables[0].Rows.Count.ToString() + " HBAs)";
+            }
+            LoadLists();
+        }
+        ddlClass.Attributes.Add("onchange", "PopulateEnvironments('" + ddlClass.ClientID + "','" + ddlEnvironment.ClientID + "',0);");
+        ddlEnvironment.Attributes.Add("onchange", "UpdateDropDownHidden('" + ddlEnvironment.ClientID + "','" + hdnEnvironment.ClientID + "');");
+        ddlLocation.Attributes.Add("onchange", "WaitDDL('" + divLocation.ClientID + "');");
+        btnSubmit.Attributes.Add("onclick", "return ValidateDropDown('" + ddlStatus.ClientID + "','Please select a status')" +
+            " && ValidateDropDown('" + ddlLocation.ClientID + "','Please select a location')" +
+            " && ValidateDropDown('" + ddlClass.ClientID + "','Please select a class')" +
+            " && ValidateDropDown('" + ddlEnvironment.ClientID + "','Please select an environment')" +
+            " && ValidateDropDown('" + ddlRoom.ClientID + "','Please select a room')" +
+            " && ValidateDropDown('" + ddlRack.ClientID + "','Please select a rack')" +
+            " && ValidateText('" + txtRackPosition.ClientID + "','Please enter a rack position')" +
+            " && ValidateText('" + txtName.ClientID + "','Please enter a device name')" +
+            " && ValidateText('" + txtOA.ClientID + "','Please enter an Onboard Administrator IP address')" +
+            ";");
+        btnVCs.Attributes.Add("onclick", "return OpenWindow('ASSET_DEPLOY_VCs','" + Request.QueryString["id"] + "');");
+        btnClose.Attributes.Add("onclick", "return parent.HidePanel();");
+    }
+    public void LoadLists()
+    {
+        Classes oClasses = new Classes(intProfile, dsn);
+        ddlClass.DataValueField = "id";
+        ddlClass.DataTextField = "name";
+        ddlClass.DataSource = oClasses.Gets(1);
+        ddlClass.DataBind();
+        ddlClass.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+        int intAddress = 0;
+        if (Request.QueryString["aid"] != null && Request.QueryString["aid"] != "")
+            intAddress = Int32.Parse(Request.QueryString["aid"]);
+        Locations oLocation = new Locations(intProfile, dsn);
+        ddlLocation.DataValueField = "id";
+        ddlLocation.DataTextField = "fullname";
+        if (intAddress == 0)
+            ddlLocation.DataSource = oLocation.GetAddressCommon();
+        else 
+            ddlLocation.DataSource = oLocation.GetAddresss(1);
+        ddlLocation.DataBind();
+        ddlLocation.SelectedValue = intAddress.ToString();
+        if (intAddress == 0)
+            ddlLocation.Items.Add(new ListItem("-- NOT LISTED --", "-1"));
+        ddlLocation.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+        Rooms oRooms = new Rooms(intProfile, dsn);
+        ddlRoom.DataValueField = "id";
+        ddlRoom.DataTextField = "name";
+        ddlRoom.DataSource = oRooms.Gets(1);
+        ddlRoom.DataBind();
+        ddlRoom.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+        Racks oRacks = new Racks(intProfile, dsn);
+        ddlRack.DataValueField = "id";
+        ddlRack.DataTextField = "name";
+        ddlRack.DataSource = oRacks.Gets(1);
+        ddlRack.DataBind();
+        ddlRack.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+    }
+    private void ddlLocation_Change(Object Sender, EventArgs e)
+    {
+        Response.Redirect(Request.Path + "?id=" + intID.ToString() + "&aid=" + ddlLocation.SelectedItem.Value);
+    }
+    public void btnSubmit_Click(Object Sender, EventArgs e)
+    {
+        oAsset.AddEnclosure(intID, txtName.Text, Int32.Parse(ddlStatus.SelectedItem.Value), intProfile, DateTime.Now, Int32.Parse(ddlClass.SelectedItem.Value), Int32.Parse(Request.Form[hdnEnvironment.UniqueID]), Int32.Parse(ddlLocation.SelectedItem.Value), Int32.Parse(ddlRoom.SelectedItem.Value), Int32.Parse(ddlRack.SelectedItem.Value), txtRackPosition.Text, 0, txtOA.Text);
+        Response.Redirect(Request.Path + "?save=true");
+    }
+</script>
+<asp:Content ID="Content1" ContentPlaceHolderID="AllContent" Runat="Server">
+<table width="100%" cellpadding="4" cellspacing="3" border="0">
+    <tr>
+        <td nowrap>Tracking Number:</td>
+        <td width="100%"><asp:Label ID="lblTracking" runat="server" CssClass="default" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Serial Number:</td>
+        <td width="100%"><asp:Label ID="lblSerial" runat="server" CssClass="default" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Asset Tag:</td>
+        <td width="100%"><asp:Label ID="lblAsset" runat="server" CssClass="default" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Model:</td>
+        <td width="100%"><asp:Label ID="lblModel" runat="server" CssClass="default" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Status:</td>
+        <td width="100%">
+            <asp:DropDownList ID="ddlStatus" runat="server" CssClass="default" Width="200">
+                <asp:ListItem Value="0" Text="Arrived" />
+                <asp:ListItem Value="1" Text="In Stock" />
+                <asp:ListItem Value="10" Text="In Use (Default)" />
+                <asp:ListItem Value="100" Text="Reserved" />
+            </asp:DropDownList>
+        </td>
+    </tr>
+    <tr>
+        <td nowrap>Location:</td>
+        <td colspan="2">
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td><asp:DropDownList ID="ddlLocation" runat="server" CssClass="default" Width="300" AutoPostBack="true" OnSelectedIndexChanged="ddlLocation_Change" /></td>
+                    <td class="bold">
+                        <div id="divLocation" runat="server" style="display:none">
+                            <img src="/images/spacer.gif" border="0" width="20" height="1" /><img src="/images/please_wait.gif" border="0" align="absmiddle" /> Please Wait...
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td nowrap>Class:</td>
+        <td width="100%"><asp:DropDownList ID="ddlClass" CssClass="default" runat="server" Width="300" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Environment:</td>
+        <td width="100%">
+            <asp:DropDownList ID="ddlEnvironment" CssClass="default" runat="server" Width="300" Enabled="false" >
+                <asp:ListItem Value="-- Please select a Class --" />
+            </asp:DropDownList>
+        </td>
+    </tr>
+    <tr>
+        <td nowrap>Room:</td>
+        <td width="100%"><asp:DropDownList ID="ddlRoom" runat="server" CssClass="default" Width="300" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Rack:</td>
+        <td width="100%"><asp:DropDownList ID="ddlRack" runat="server" CssClass="default" Width="300" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Rack Position (U#):</td>
+        <td width="100%"><asp:TextBox ID="txtRackPosition" runat="server" CssClass="default" Width="100" MaxLength="10" /> <span class="footer">[Format: 2-4]</span></td>
+    </tr>
+    <tr>
+        <td nowrap>Name:</td>
+        <td width="100%"><asp:TextBox ID="txtName" runat="server" CssClass="default" Width="200" MaxLength="30" /></td>
+    </tr>
+    <tr>
+        <td nowrap>Onboard Administrator IP:</td>
+        <td width="100%"><asp:TextBox ID="txtOA" runat="server" CssClass="default" Width="150" MaxLength="15" /></td>
+    </tr>
+    <tr>
+        <td nowrap></td>
+        <td width="100%"><asp:Button ID="btnVCs" runat="server" CssClass="default" Width="150" Text="Virtual Connects" /> <asp:Label ID="lblVC" runat="server" CssClass="reddefault" /></td>
+    </tr>
+    <tr>
+        <td nowrap></td>
+        <td width="100%">
+            <asp:Button ID="btnSubmit" runat="server" CssClass="default" Width="100" Text="Save" OnClick="btnSubmit_Click" /> 
+            <asp:Button ID="btnClose" runat="server" CssClass="default" Width="100" Text="Close" /> 
+        </td>
+    </tr>
+</table>
+<input type="hidden" id="hdnEnvironment" runat="server" />
+</asp:Content>

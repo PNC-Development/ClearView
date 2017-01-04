@@ -1,0 +1,127 @@
+<%@ Page Language="C#" Debug="false" %>
+<script runat="server">
+    private Users oUser;
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private void Page_Load()
+    {
+        oUser = new Users(0, dsn);
+        int intUser = 0;
+        if (Request.QueryString["userid"] != null && Request.QueryString["userid"] != "")
+            intUser = Int32.Parse(Request.QueryString["userid"]);
+        else if (Request.QueryString["pid"] != null && Request.QueryString["pid"] != "")
+        {
+            Platforms oPlatform = new Platforms(0, dsn);
+            int intPlatform = Int32.Parse(Request.QueryString["pid"]);
+            intUser = oPlatform.GetManager(intPlatform);
+        }
+        if (intUser > 0)
+        {
+            DataSet ds = oUser.Get(intUser);
+            if (ds.Tables[0].Rows.Count > 0) 
+            {
+                lblName.Text = ds.Tables[0].Rows[0]["fname"].ToString() + " " + ds.Tables[0].Rows[0]["lname"].ToString();
+                lblPhone.Text = ds.Tables[0].Rows[0]["phone"].ToString();
+                lblPager.Text = ds.Tables[0].Rows[0]["pager"].ToString();
+                string strEmail = oUser.GetEmail(ds.Tables[0].Rows[0]["xid"].ToString(), intEnvironment).ToLower();
+                lblEmail.Text = "<a href=\"mailto:" + strEmail + "\">" + strEmail + "</a>";
+                int intManager = Int32.Parse(ds.Tables[0].Rows[0]["manager"].ToString());
+                lblManager.Text = "<a href=\"" + Request.Path + "?userid=" + intManager.ToString() + "\">" + oUser.GetFullName(intManager) + "</a>";
+                lblSkills.Text = ds.Tables[0].Rows[0]["other"].ToString();
+                imgPicture.ImageUrl = "/frame/picture.aspx?xid=" + ds.Tables[0].Rows[0]["xid"].ToString();
+                imgPicture.Style["border"] = "solid 1px #999999";
+            }
+        }
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title>Profile Information</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script type="text/javascript" src="/javascript/default.js"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+<table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr height="9"> 
+        <td><img src="/images/frame_top_left.gif" width="9" height="9"></td>
+        <td background="/images/frame_top.gif" width="100%"><img src="/images/frame_top.gif" width="9" height="9"></td>
+        <td><img src="/images/frame_top_right.gif" width="9" height="9"></td>
+    </tr>
+    <tr> 
+        <td background="/images/frame_left.gif"><img src="/images/frame_left.gif" width="9" height="9"></td>
+        <td valign="top" width="100%" height="100%" bgcolor="#FFFFFF">
+            <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                <tr height="1">
+                    <td align="right" width="50%"><a href="javascript:void(0);" onclick="window.print();"><img src='/images/print-icon.gif' border='0' align='absmiddle' />Print Page</a></td>
+                    <td align="center"><img src='/images/spacer.gif' border='0' width='10' height='1' /></td>
+                    <td align="left" width="50%"><a href="javascript:void(0);" onclick="parent.HidePanel();"><img src='/images/close-icon.gif' border='0' align='absmiddle' /><img src='/images/spacer.gif' border='0' width='5' height='1' />Close Window</a></td>
+                </tr>
+                <tr>
+                    <td colspan="3" height="100%" valign="top">
+                        <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                            <tr>
+                                <td valign="top">
+                                    <div style="width:100%; height:100%; overflow-x:none; overflow-y:auto">
+	                                    <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+		                                    <tr height="1">
+			                                    <td valign="top">
+				                                    <table width="100%" cellpadding="2" cellspacing="2" border="0">
+					                                    <tr>
+						                                    <td nowrap><b>Name:</b></td>
+						                                    <td width="100%"><asp:Label ID="lblName" runat="server" CssClass="default" /></td>
+					                                    </tr>
+					                                    <tr>
+						                                    <td nowrap><b>Phone:</b></td>
+						                                    <td width="100%"><asp:Label ID="lblPhone" runat="server" CssClass="default" /></td>
+					                                    </tr>
+					                                    <tr>
+						                                    <td nowrap><b>Pager:</b></td>
+						                                    <td width="100%"><asp:Label ID="lblPager" runat="server" CssClass="default" /></td>
+					                                    </tr>
+					                                    <tr>
+						                                    <td nowrap><b>Email:</b></td>
+						                                    <td width="100%"><asp:Label ID="lblEmail" runat="server" CssClass="default" /></td>
+					                                    </tr>
+					                                    <tr>
+						                                    <td nowrap><b>Manager:</b></td>
+						                                    <td width="100%"><asp:Label ID="lblManager" runat="server" CssClass="default" /></td>
+					                                    </tr>
+				                                    </table>
+			                                    </td>
+			                                    <td valign="top"><asp:Image ID="imgPicture" runat="server" Width="90" Height="90" /></td>
+		                                    </tr>
+		                                    <tr>
+			                                    <td colspan="2" valign="top">
+				                                    <table width="100%" cellpadding="2" cellspacing="2" border="0">
+					                                    <tr>
+						                                    <td><b>Special Skills:</b></td>
+					                                    </tr>
+					                                    <tr>
+						                                    <td><asp:Label ID="lblSkills" runat="server" CssClass="default" /></td>
+					                                    </tr>
+				                                    </table>
+			                                    </td>
+		                                    </tr>		
+	                                    </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td background="/images/frame_right.gif"><img src="/images/frame_right.gif" width="9" height="9"></td>
+    </tr>
+    <tr height="9"> 
+        <td><img src="/images/frame_bottom_left.gif" width="9" height="9"></td>
+        <td background="/images/frame_bottom.gif" width="100%"><img src="/images/frame_bottom.gif" width="9" height="9"></td>
+        <td><img src="/images/frame_bottom_right.gif" width="9" height="9"></td>
+    </tr>
+</table>
+</form>
+</body>
+</html>

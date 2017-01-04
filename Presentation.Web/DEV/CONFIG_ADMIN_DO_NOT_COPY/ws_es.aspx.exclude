@@ -1,0 +1,113 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_projects WHERE lead = 0 AND deleted = 0 AND status = 2");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intProject = Int32.Parse(dr["projectid"].ToString());
+            DataSet dsRequests = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_requests WHERE projectid = " + intProject.ToString());
+            foreach (DataRow drRequest in dsRequests.Tables[0].Rows)
+            {
+                DataSet ds2 = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_request_field_values WHERE requestid = " + drRequest["requestid"].ToString());
+                if (ds2.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow dr2 in ds2.Tables[0].Rows)
+                    {
+                        if (dr2["nameid"].ToString() == "10011")
+                            oProject.Update(intProject, Int32.Parse(dr["value"].ToString()), 0, 0, 0, 0);
+                    }
+                }
+            }
+        }
+        ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_projects WHERE executive = 0 AND deleted = 0 AND status = 2");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intProject = Int32.Parse(dr["projectid"].ToString());
+            DataSet dsRequests = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_requests WHERE projectid = " + intProject.ToString());
+            foreach (DataRow drRequest in dsRequests.Tables[0].Rows)
+            {
+                DataSet ds2 = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_request_field_values WHERE requestid = " + drRequest["requestid"].ToString());
+                if (ds2.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow dr2 in ds2.Tables[0].Rows)
+                    {
+                        if (dr2["nameid"].ToString() == "10038")
+                            oProject.Update(intProject, 0, Int32.Parse(dr["value"].ToString()), 0, 0, 0);
+                    }
+                }
+            }
+        }
+        ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_projects WHERE working = 0 AND deleted = 0 AND status = 2");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intProject = Int32.Parse(dr["projectid"].ToString());
+            DataSet dsRequests = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_requests WHERE projectid = " + intProject.ToString());
+            foreach (DataRow drRequest in dsRequests.Tables[0].Rows)
+            {
+                DataSet ds2 = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_request_field_values WHERE requestid = " + drRequest["requestid"].ToString());
+                if (ds2.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow dr2 in ds2.Tables[0].Rows)
+                    {
+                        if (dr2["nameid"].ToString() == "10000")
+                            oProject.Update(intProject, 0, 0, Int32.Parse(dr["value"].ToString()), 0, 0);
+                    }
+                }
+            }
+        }
+        ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_projects WHERE technical = 0 AND deleted = 0 AND status = 2");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intProject = Int32.Parse(dr["projectid"].ToString());
+            DataSet dsRequests = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_requests WHERE projectid = " + intProject.ToString());
+            foreach (DataRow drRequest in dsRequests.Tables[0].Rows)
+            {
+                DataSet ds2 = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * from cv_request_field_values WHERE requestid = " + drRequest["requestid"].ToString());
+                if (ds2.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow dr2 in ds2.Tables[0].Rows)
+                    {
+                        if (dr2["nameid"].ToString() == "10012")
+                            oProject.Update(intProject, 0, 0, 0, Int32.Parse(dr["value"].ToString()), 0);
+                    }
+                }
+            }
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+</script>
+<html>
+<head>
+<title>fix</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">fix</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

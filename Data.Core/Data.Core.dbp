@@ -1,0 +1,43 @@
+# Microsoft Developer Studio Project File - Database Project
+Begin DataProject = "Data.Core"
+   MSDTVersion = "80"
+   DefDBRef = "ohcleiis4333.ClearView.dbo"
+   SccProjectName = "SAK"
+   SccLocalPath = "SAK"
+   SccAuxPath = "SAK"
+   SccProvider = "SAK"
+   Begin Folder = "_Templates"
+      Script = "vXX.XX_CVDB_01.sql"
+      Script = "vXX.XX_CVDB_02.sql"
+      Script = "vXX.XX_CVDB_03.sql"
+      Script = "vXX.XX_CVDB_04.sql"
+      Script = "vXX.XX_CVDB_05.sql"
+   End
+   Begin Folder = "Change Scripts"
+      Script = "1_Backups.sql"
+      Script = "2_Tables.sql"
+      Script = "3_Views.sql"
+      Script = "4_SPs_Funcs.sql"
+      Script = "5_DML.sql"
+      Script = "6_Cleanup.sql"
+      Script = "enhanccements.sql"
+   End
+   Begin Folder = "Create Scripts"
+      Script = "Database.sql"
+      Script = "Functions.Scalar.sql"
+      Script = "Functions.Table.sql"
+      Script = "Security.Roles.Database.sql"
+      Script = "Security.Schemas.sql"
+      Script = "Security.Users.sql"
+      Script = "StoredProcedures.sql"
+      Script = "Tables.sql"
+      Script = "Views.sql"
+   End
+   Begin DBRefFolder = "Database References"
+      Begin DBRefNode = "ohcleiis4333.ClearView.dbo"
+         ConnectStr = "Data Source=OHCLEIIS4333;Initial Catalog=ClearView;Integrated Security=True"
+         Provider = "{91510608-8809-4020-8897-FBA057E22D54}"
+         Colorizer = 0
+      End
+   End
+End

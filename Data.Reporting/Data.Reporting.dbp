@@ -1,0 +1,24 @@
+# Microsoft Developer Studio Project File - Database Project
+Begin DataProject = "Data.Reporting"
+   MSDTVersion = "80"
+   SccProjectName = "SAK"
+   SccLocalPath = "SAK"
+   SccAuxPath = "SAK"
+   SccProvider = "SAK"
+   Begin Folder = "Change Scripts"
+   End
+   Begin Folder = "Create Scripts"
+      Script = "Database.sql"
+      Script = "Functions.Scalar.sql"
+      Script = "Functions.Table.sql"
+      Script = "Security.Roles.Database.sql"
+      Script = "Security.Schemas.sql"
+      Script = "Security.Users.sql"
+      Script = "StoredProcedures.sql"
+      Script = "Tables.sql"
+      Script = "Triggers.sql"
+      Script = "Views.sql"
+   End
+   Begin DBRefFolder = "Database References"
+   End
+End

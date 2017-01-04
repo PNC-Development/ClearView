@@ -1,0 +1,47 @@
+<%@ Page Language="C#" MasterPageFile="~/frame.Master" AutoEventWireup="true" CodeBehind="dp_applications.aspx.cs" Inherits="NCC.ClearView.Presentation.Web.dp_applications" Title="Untitled Page" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="AllContent" Runat="Server">
+<script type="text/javascript">
+</script>
+            <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                <tr height="1">
+                    <td class="frame">&nbsp;DataPoint Applications</td>
+                    <td class="frame" align="right"><a href="javascript:void(0);" onclick="parent.HidePanel();"><img src="/images/close.gif" border="0" title="Close"></a></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+	                        <tr height="1">
+	                            <td nowrap><b>KEY:</b></td>
+	                            <td width="100%"><%=Request.QueryString["key"] %></td>
+	                        </tr>
+	                        <tr height="1">
+	                            <td nowrap><b>Applications:</b></td>
+	                            <td width="100%"><asp:DropDownList ID="ddlApplications" runat="server" CssClass="default" Width="475" /></td>
+	                        </tr>
+	                        <tr height="1">
+	                            <td class="default"><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+	                            <td class="default" width="100%"></td>
+	                        </tr>
+	                        <tr height="1">
+	                            <td nowrap></td>
+	                            <td width="100%"><asp:Button ID="btnAdd" runat="server" CssClass="default" Width="75" Text="Add" OnClick="btnAdd_Click" /></td>
+	                        </tr>
+	                        <tr height="1">
+	                            <td colspan="2" class="default">&nbsp;</td>
+	                        </tr>
+	                        <tr height="1">
+	                            <td colspan="2" class="default"><b>Applications with View Permission:</b></td>
+	                        </tr>
+                            <tr>
+                                <td colspan="2" valign="top" class="default">
+                                    <asp:ListBox ID="lstCurrent" runat="server" Width="475" Rows="35" CssClass="default" />
+                                </td>
+                            </tr>
+	                        <tr height="1">
+	                            <td colspan="2" class="default"><asp:Button ID="btnRemove" runat="server" CssClass="default" Width="75" Text="Delete" OnClick="btnRemove_Click" /></td>
+	                        </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+</asp:Content>

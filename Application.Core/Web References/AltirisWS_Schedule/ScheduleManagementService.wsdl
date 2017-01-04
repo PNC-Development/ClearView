@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://Altiris.ASDK.DS.com" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://Altiris.ASDK.DS.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://Altiris.ASDK.DS.com">
+      <s:element name="DeleteJobSchedule">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="scheduleID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteJobScheduleResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteJobScheduleResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DSCredentialsHeader" type="tns:DSCredentialsHeader" />
+      <s:complexType name="DSCredentialsHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CreateJobScheduleByName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="scheduleNow" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="applicationName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="scheduleAttributes" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobScheduleByNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateJobScheduleByNameResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobSchedule">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="jobID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="scheduleNow" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="applicationName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="scheduleAttributes" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobScheduleResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateJobScheduleResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobSchedules">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerIDs" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="jobIDs" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="scheduleNow" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="applicationName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="scheduleAttributes" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateJobSchedulesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateJobSchedulesResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="RegisterExternalApp">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="alias" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="description" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="app_path" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="overwrite" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RegisterExternalAppResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RegisterExternalAppResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="int" type="s:int" />
+      <s:element name="ArrayOfInt" nillable="true" type="tns:ArrayOfInt" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="DeleteJobScheduleSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteJobSchedule" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteJobScheduleResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateJobScheduleByName" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateJobScheduleByNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateJobSchedule" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateJobScheduleResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateJobSchedules" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateJobSchedulesResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppSoapIn">
+    <wsdl:part name="parameters" element="tns:RegisterExternalApp" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterExternalAppResponse" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleHttpGetIn">
+    <wsdl:part name="scheduleID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameHttpGetIn">
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesHttpGetIn">
+    <wsdl:part name="computerIDs" type="s:string" />
+    <wsdl:part name="jobIDs" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppHttpGetIn">
+    <wsdl:part name="alias" type="s:string" />
+    <wsdl:part name="description" type="s:string" />
+    <wsdl:part name="app_path" type="s:string" />
+    <wsdl:part name="overwrite" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleHttpPostIn">
+    <wsdl:part name="scheduleID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteJobScheduleHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameHttpPostIn">
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleByNameHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="jobID" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobScheduleHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesHttpPostIn">
+    <wsdl:part name="computerIDs" type="s:string" />
+    <wsdl:part name="jobIDs" type="s:string" />
+    <wsdl:part name="scheduleNow" type="s:string" />
+    <wsdl:part name="applicationName" type="s:string" />
+    <wsdl:part name="scheduleAttributes" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateJobSchedulesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppHttpPostIn">
+    <wsdl:part name="alias" type="s:string" />
+    <wsdl:part name="description" type="s:string" />
+    <wsdl:part name="app_path" type="s:string" />
+    <wsdl:part name="overwrite" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RegisterExternalAppHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:portType name="ScheduleManagementServiceSoap">
+    <wsdl:operation name="DeleteJobSchedule">
+      <wsdl:input message="tns:DeleteJobScheduleSoapIn" />
+      <wsdl:output message="tns:DeleteJobScheduleSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <wsdl:input message="tns:CreateJobScheduleByNameSoapIn" />
+      <wsdl:output message="tns:CreateJobScheduleByNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <wsdl:input message="tns:CreateJobScheduleSoapIn" />
+      <wsdl:output message="tns:CreateJobScheduleSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <wsdl:input message="tns:CreateJobSchedulesSoapIn" />
+      <wsdl:output message="tns:CreateJobSchedulesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <wsdl:input message="tns:RegisterExternalAppSoapIn" />
+      <wsdl:output message="tns:RegisterExternalAppSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ScheduleManagementServiceHttpGet">
+    <wsdl:operation name="DeleteJobSchedule">
+      <wsdl:input message="tns:DeleteJobScheduleHttpGetIn" />
+      <wsdl:output message="tns:DeleteJobScheduleHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <wsdl:input message="tns:CreateJobScheduleByNameHttpGetIn" />
+      <wsdl:output message="tns:CreateJobScheduleByNameHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <wsdl:input message="tns:CreateJobScheduleHttpGetIn" />
+      <wsdl:output message="tns:CreateJobScheduleHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <wsdl:input message="tns:CreateJobSchedulesHttpGetIn" />
+      <wsdl:output message="tns:CreateJobSchedulesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <wsdl:input message="tns:RegisterExternalAppHttpGetIn" />
+      <wsdl:output message="tns:RegisterExternalAppHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ScheduleManagementServiceHttpPost">
+    <wsdl:operation name="DeleteJobSchedule">
+      <wsdl:input message="tns:DeleteJobScheduleHttpPostIn" />
+      <wsdl:output message="tns:DeleteJobScheduleHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <wsdl:input message="tns:CreateJobScheduleByNameHttpPostIn" />
+      <wsdl:output message="tns:CreateJobScheduleByNameHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <wsdl:input message="tns:CreateJobScheduleHttpPostIn" />
+      <wsdl:output message="tns:CreateJobScheduleHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <wsdl:input message="tns:CreateJobSchedulesHttpPostIn" />
+      <wsdl:output message="tns:CreateJobSchedulesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <wsdl:input message="tns:RegisterExternalAppHttpPostIn" />
+      <wsdl:output message="tns:RegisterExternalAppHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ScheduleManagementServiceSoap" type="tns:ScheduleManagementServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="DeleteJobSchedule">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteJobSchedule" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteJobScheduleDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/CreateJobScheduleByName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateJobScheduleByNameDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/CreateJobSchedule" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateJobScheduleDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/CreateJobSchedules" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateJobSchedulesDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/RegisterExternalApp" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:RegisterExternalAppDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ScheduleManagementServiceHttpGet" type="tns:ScheduleManagementServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="DeleteJobSchedule">
+      <http:operation location="/DeleteJobSchedule" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <http:operation location="/CreateJobScheduleByName" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <http:operation location="/CreateJobSchedule" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <http:operation location="/CreateJobSchedules" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <http:operation location="/RegisterExternalApp" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ScheduleManagementServiceHttpPost" type="tns:ScheduleManagementServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="DeleteJobSchedule">
+      <http:operation location="/DeleteJobSchedule" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobScheduleByName">
+      <http:operation location="/CreateJobScheduleByName" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedule">
+      <http:operation location="/CreateJobSchedule" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateJobSchedules">
+      <http:operation location="/CreateJobSchedules" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterExternalApp">
+      <http:operation location="/RegisterExternalApp" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ScheduleManagementService">
+    <wsdl:port name="ScheduleManagementServiceSoap" binding="tns:ScheduleManagementServiceSoap">
+      <soap:address location="http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ScheduleManagementServiceHttpGet" binding="tns:ScheduleManagementServiceHttpGet">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ScheduleManagementServiceHttpPost" binding="tns:ScheduleManagementServiceHttpPost">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

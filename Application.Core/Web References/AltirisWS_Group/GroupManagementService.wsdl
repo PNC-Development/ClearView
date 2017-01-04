@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://Altiris.ASDK.DS.com" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://Altiris.ASDK.DS.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://Altiris.ASDK.DS.com">
+      <s:element name="GetGroupID">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="groupSearchPhrase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetGroupIDResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetGroupIDResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DSCredentialsHeader" type="tns:DSCredentialsHeader" />
+      <s:complexType name="DSCredentialsHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CreateGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="name" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="parentID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="CreateGroupResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="parentID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveGroupResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteGroupResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroupByName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroupByNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteGroupByNameResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroups">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="groupIDs" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteGroupsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteGroupsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="name" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RenameGroupResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="int" type="s:int" />
+      <s:element name="boolean" type="s:boolean" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetGroupIDSoapIn">
+    <wsdl:part name="parameters" element="tns:GetGroupID" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDSoapOut">
+    <wsdl:part name="parameters" element="tns:GetGroupIDResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateGroup" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveGroup" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteGroup" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteGroupByName" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteGroupByNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteGroups" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteGroupsResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:RenameGroup" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:RenameGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDHttpGetIn">
+    <wsdl:part name="groupSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupHttpGetIn">
+    <wsdl:part name="name" type="s:string" />
+    <wsdl:part name="parentID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupHttpGetIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="parentID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupHttpGetIn">
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameHttpGetIn">
+    <wsdl:part name="name" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsHttpGetIn">
+    <wsdl:part name="groupIDs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupHttpGetIn">
+    <wsdl:part name="name" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDHttpPostIn">
+    <wsdl:part name="groupSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetGroupIDHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupHttpPostIn">
+    <wsdl:part name="name" type="s:string" />
+    <wsdl:part name="parentID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CreateGroupHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupHttpPostIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="parentID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveGroupHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupHttpPostIn">
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameHttpPostIn">
+    <wsdl:part name="name" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupByNameHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsHttpPostIn">
+    <wsdl:part name="groupIDs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteGroupsHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupHttpPostIn">
+    <wsdl:part name="name" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameGroupHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:portType name="GroupManagementServiceSoap">
+    <wsdl:operation name="GetGroupID">
+      <wsdl:input message="tns:GetGroupIDSoapIn" />
+      <wsdl:output message="tns:GetGroupIDSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <wsdl:input message="tns:CreateGroupSoapIn" />
+      <wsdl:output message="tns:CreateGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <wsdl:input message="tns:MoveGroupSoapIn" />
+      <wsdl:output message="tns:MoveGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <wsdl:input message="tns:DeleteGroupSoapIn" />
+      <wsdl:output message="tns:DeleteGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <wsdl:input message="tns:DeleteGroupByNameSoapIn" />
+      <wsdl:output message="tns:DeleteGroupByNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <wsdl:input message="tns:DeleteGroupsSoapIn" />
+      <wsdl:output message="tns:DeleteGroupsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <wsdl:input message="tns:RenameGroupSoapIn" />
+      <wsdl:output message="tns:RenameGroupSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="GroupManagementServiceHttpGet">
+    <wsdl:operation name="GetGroupID">
+      <wsdl:input message="tns:GetGroupIDHttpGetIn" />
+      <wsdl:output message="tns:GetGroupIDHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <wsdl:input message="tns:CreateGroupHttpGetIn" />
+      <wsdl:output message="tns:CreateGroupHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <wsdl:input message="tns:MoveGroupHttpGetIn" />
+      <wsdl:output message="tns:MoveGroupHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <wsdl:input message="tns:DeleteGroupHttpGetIn" />
+      <wsdl:output message="tns:DeleteGroupHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <wsdl:input message="tns:DeleteGroupByNameHttpGetIn" />
+      <wsdl:output message="tns:DeleteGroupByNameHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <wsdl:input message="tns:DeleteGroupsHttpGetIn" />
+      <wsdl:output message="tns:DeleteGroupsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <wsdl:input message="tns:RenameGroupHttpGetIn" />
+      <wsdl:output message="tns:RenameGroupHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="GroupManagementServiceHttpPost">
+    <wsdl:operation name="GetGroupID">
+      <wsdl:input message="tns:GetGroupIDHttpPostIn" />
+      <wsdl:output message="tns:GetGroupIDHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <wsdl:input message="tns:CreateGroupHttpPostIn" />
+      <wsdl:output message="tns:CreateGroupHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <wsdl:input message="tns:MoveGroupHttpPostIn" />
+      <wsdl:output message="tns:MoveGroupHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <wsdl:input message="tns:DeleteGroupHttpPostIn" />
+      <wsdl:output message="tns:DeleteGroupHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <wsdl:input message="tns:DeleteGroupByNameHttpPostIn" />
+      <wsdl:output message="tns:DeleteGroupByNameHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <wsdl:input message="tns:DeleteGroupsHttpPostIn" />
+      <wsdl:output message="tns:DeleteGroupsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <wsdl:input message="tns:RenameGroupHttpPostIn" />
+      <wsdl:output message="tns:RenameGroupHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="GroupManagementServiceSoap" type="tns:GroupManagementServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetGroupID">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetGroupID" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetGroupIDDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/CreateGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:CreateGroupDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveGroupDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteGroupDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteGroupByName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteGroupByNameDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteGroups" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteGroupsDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/RenameGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:RenameGroupDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="GroupManagementServiceHttpGet" type="tns:GroupManagementServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetGroupID">
+      <http:operation location="/GetGroupID" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <http:operation location="/CreateGroup" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <http:operation location="/MoveGroup" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <http:operation location="/DeleteGroup" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <http:operation location="/DeleteGroupByName" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <http:operation location="/DeleteGroups" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <http:operation location="/RenameGroup" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="GroupManagementServiceHttpPost" type="tns:GroupManagementServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetGroupID">
+      <http:operation location="/GetGroupID" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateGroup">
+      <http:operation location="/CreateGroup" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveGroup">
+      <http:operation location="/MoveGroup" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroup">
+      <http:operation location="/DeleteGroup" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroupByName">
+      <http:operation location="/DeleteGroupByName" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteGroups">
+      <http:operation location="/DeleteGroups" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameGroup">
+      <http:operation location="/RenameGroup" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="GroupManagementService">
+    <wsdl:port name="GroupManagementServiceSoap" binding="tns:GroupManagementServiceSoap">
+      <soap:address location="http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="GroupManagementServiceHttpGet" binding="tns:GroupManagementServiceHttpGet">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="GroupManagementServiceHttpPost" binding="tns:GroupManagementServiceHttpPost">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

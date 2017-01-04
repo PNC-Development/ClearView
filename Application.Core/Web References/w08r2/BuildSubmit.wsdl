@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="automatedBuild">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="OStoInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainToJoin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TaskSequence" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BackupSoftware" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildDatabase" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IISInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ESMInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="clearviewInstall" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="automatedBuildResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="automatedBuildResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="addBuild">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainToJoin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TaskSequence" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BackupSoftware" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildDatabase" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IISInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ESMInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="clearviewInstall" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="addBuildResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="addBuildResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ForceCleanup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="buildDatabase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ForceCleanupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ForceCleanupResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Cleanup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="buildDatabase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CleanupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CleanupResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CheckADForComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DomainToQuery" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ComputertoCheck" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="extendedFunctions" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CheckADForComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckADForComputerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="automatedBuild2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="OStoInstall" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildType" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainToJoin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TaskSequence" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildDatabase" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="extendedValues" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="automatedBuild2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="automatedBuild2Result" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="addBuild2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ComputerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainToJoin" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="TaskSequence" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildDatabase" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="extendedValues" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="addBuild2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="addBuild2Result" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="automatedBuildSoapIn">
+    <wsdl:part name="parameters" element="tns:automatedBuild" />
+  </wsdl:message>
+  <wsdl:message name="automatedBuildSoapOut">
+    <wsdl:part name="parameters" element="tns:automatedBuildResponse" />
+  </wsdl:message>
+  <wsdl:message name="addBuildSoapIn">
+    <wsdl:part name="parameters" element="tns:addBuild" />
+  </wsdl:message>
+  <wsdl:message name="addBuildSoapOut">
+    <wsdl:part name="parameters" element="tns:addBuildResponse" />
+  </wsdl:message>
+  <wsdl:message name="ForceCleanupSoapIn">
+    <wsdl:part name="parameters" element="tns:ForceCleanup" />
+  </wsdl:message>
+  <wsdl:message name="ForceCleanupSoapOut">
+    <wsdl:part name="parameters" element="tns:ForceCleanupResponse" />
+  </wsdl:message>
+  <wsdl:message name="CleanupSoapIn">
+    <wsdl:part name="parameters" element="tns:Cleanup" />
+  </wsdl:message>
+  <wsdl:message name="CleanupSoapOut">
+    <wsdl:part name="parameters" element="tns:CleanupResponse" />
+  </wsdl:message>
+  <wsdl:message name="CheckADForComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:CheckADForComputer" />
+  </wsdl:message>
+  <wsdl:message name="CheckADForComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:CheckADForComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="automatedBuild2SoapIn">
+    <wsdl:part name="parameters" element="tns:automatedBuild2" />
+  </wsdl:message>
+  <wsdl:message name="automatedBuild2SoapOut">
+    <wsdl:part name="parameters" element="tns:automatedBuild2Response" />
+  </wsdl:message>
+  <wsdl:message name="addBuild2SoapIn">
+    <wsdl:part name="parameters" element="tns:addBuild2" />
+  </wsdl:message>
+  <wsdl:message name="addBuild2SoapOut">
+    <wsdl:part name="parameters" element="tns:addBuild2Response" />
+  </wsdl:message>
+  <wsdl:portType name="BuildSubmitSoap">
+    <wsdl:operation name="automatedBuild">
+      <wsdl:input message="tns:automatedBuildSoapIn" />
+      <wsdl:output message="tns:automatedBuildSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="addBuild">
+      <wsdl:input message="tns:addBuildSoapIn" />
+      <wsdl:output message="tns:addBuildSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ForceCleanup">
+      <wsdl:input message="tns:ForceCleanupSoapIn" />
+      <wsdl:output message="tns:ForceCleanupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Cleanup">
+      <wsdl:input message="tns:CleanupSoapIn" />
+      <wsdl:output message="tns:CleanupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CheckADForComputer">
+      <wsdl:input message="tns:CheckADForComputerSoapIn" />
+      <wsdl:output message="tns:CheckADForComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="automatedBuild2">
+      <wsdl:input message="tns:automatedBuild2SoapIn" />
+      <wsdl:output message="tns:automatedBuild2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="addBuild2">
+      <wsdl:input message="tns:addBuild2SoapIn" />
+      <wsdl:output message="tns:addBuild2SoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BuildSubmitSoap" type="tns:BuildSubmitSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="automatedBuild">
+      <soap:operation soapAction="http://tempuri.org/automatedBuild" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addBuild">
+      <soap:operation soapAction="http://tempuri.org/addBuild" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ForceCleanup">
+      <soap:operation soapAction="http://tempuri.org/ForceCleanup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Cleanup">
+      <soap:operation soapAction="http://tempuri.org/Cleanup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckADForComputer">
+      <soap:operation soapAction="http://tempuri.org/CheckADForComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="automatedBuild2">
+      <soap:operation soapAction="http://tempuri.org/automatedBuild2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addBuild2">
+      <soap:operation soapAction="http://tempuri.org/addBuild2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="BuildSubmitSoap12" type="tns:BuildSubmitSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="automatedBuild">
+      <soap12:operation soapAction="http://tempuri.org/automatedBuild" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addBuild">
+      <soap12:operation soapAction="http://tempuri.org/addBuild" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ForceCleanup">
+      <soap12:operation soapAction="http://tempuri.org/ForceCleanup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Cleanup">
+      <soap12:operation soapAction="http://tempuri.org/Cleanup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CheckADForComputer">
+      <soap12:operation soapAction="http://tempuri.org/CheckADForComputer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="automatedBuild2">
+      <soap12:operation soapAction="http://tempuri.org/automatedBuild2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addBuild2">
+      <soap12:operation soapAction="http://tempuri.org/addBuild2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BuildSubmit">
+    <wsdl:port name="BuildSubmitSoap" binding="tns:BuildSubmitSoap">
+      <soap:address location="http://wcrdp100a.pnceng.pvt/wabebuild/BuildSubmit.asmx" />
+    </wsdl:port>
+    <wsdl:port name="BuildSubmitSoap12" binding="tns:BuildSubmitSoap12">
+      <soap12:address location="http://wcrdp100a.pnceng.pvt/wabebuild/BuildSubmit.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

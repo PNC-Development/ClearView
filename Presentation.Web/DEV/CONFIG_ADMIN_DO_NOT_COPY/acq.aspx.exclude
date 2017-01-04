@@ -1,0 +1,54 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnLoad1_Click(Object Sender, EventArgs e)
+    {
+        Forecast oForecast = new Forecast(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_forecast_acquisitions");
+        DataSet ds1 = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_models WHERE typeid = 15 OR typeid = 16");
+        foreach (DataRow dr1 in ds1.Tables[0].Rows)
+        {
+            int intModel = Int32.Parse(dr1["id"].ToString());
+            if (intModel != 121)
+            {
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                    oForecast.AddAcquisition(intModel, Int32.Parse(dr["lineitemid"].ToString()), double.Parse(dr["cost"].ToString()), Int32.Parse(dr["prod"].ToString()), 1);
+                intCount++;
+            }
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title>LOAD</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+        <table>
+            <tr>
+                <td colspan="2" class="header">2.10</td>
+            </tr>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:Button ID="btnLoad1" runat="server" CssClass="default" Width="150" Text="Load Reports" OnClick="btnLoad1_Click" /></td>
+            </tr>
+        </table>
+</form>
+</body>
+</html>

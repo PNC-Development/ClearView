@@ -1,0 +1,52 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_WM_project_coordinator");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intRequest = Int32.Parse(dr["requestid"].ToString());
+            DataSet dsRR = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_resource_requests WHERE id = " + intRequest.ToString());
+            if (dsRR.Tables[0].Rows.Count > 0)
+            {
+                SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_WM_project_coordinator SET requestid = " + dsRR.Tables[0].Rows[0]["requestid"].ToString() + ", itemid = " + dsRR.Tables[0].Rows[0]["itemid"].ToString() + ", number = " + dsRR.Tables[0].Rows[0]["number"].ToString() + " WHERE requestid = " + intRequest.ToString());
+                intCount++;
+            }
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+</script>
+<html>
+<head>
+<title>Fix PC</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Fix PC</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

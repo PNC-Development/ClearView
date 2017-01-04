@@ -1,0 +1,266 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private DataSet ds;
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intViewRequest = Int32.Parse(ConfigurationManager.AppSettings["ViewRequest"]);
+    private int intWorkloadManager = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private int intCSRCPage = Int32.Parse(ConfigurationManager.AppSettings["CSRC_WORKFLOW"]);
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private int intProfile;
+    private TPM oTPM;
+    private Projects oProject;
+    private Users oUser;
+    private Pages oPage;
+    private ResourceRequest oResourceRequest;
+    private Variables oVariable;
+    private int intApplication = 0;
+    private int intPage = 0;
+    private int intId = 0;
+    private string strDetails = "";
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oTPM = new TPM(intProfile, dsn, intEnvironment);
+        oProject = new Projects(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oPage = new Pages(intProfile, dsn);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        if (Request.QueryString["id"] != null && Request.QueryString["id"] != "")
+        {
+            intId = Int32.Parse(Request.QueryString["id"]);
+            lblId.Text = Request.QueryString["id"];
+        }
+        if (Request.QueryString["action"] != null && Request.QueryString["action"] != "")
+            panFinish.Visible = true;
+        else
+        {
+            if (Request.QueryString["applicationid"] != null && Request.QueryString["applicationid"] != "")
+                intApplication = Int32.Parse(Request.QueryString["applicationid"]);
+            if (Request.QueryString["pageid"] != null && Request.QueryString["pageid"] != "")
+                intPage = Int32.Parse(Request.QueryString["pageid"]);
+            if (Request.Cookies["application"] != null && Request.Cookies["application"].Value != "")
+                intApplication = Int32.Parse(Request.Cookies["application"].Value);
+            if (!IsPostBack)
+            {
+                bool boolDeny = true;
+                if (intId > 0)
+                {
+                    ds = oTPM.GetCSRC(intId, intProfile);
+                    if (ds.Tables[0].Rows.Count > 0)
+                    {
+                        boolDeny = false;
+                        bool boolButtons = false;
+                        foreach (DataRow dr in ds.Tables[0].Rows)
+                        {
+                            if (dr["status"].ToString() == "0")
+                            {
+                                boolButtons = true;
+                                lblStep.Text = dr["step"].ToString();
+                            }
+                        }
+                        btnApprove.Enabled = boolButtons;
+                        btnDeny.Enabled = boolButtons;
+                    }
+                }
+                if (boolDeny == false)
+                {
+                    panWorkflow.Visible = true;
+                    int intRequest = Int32.Parse(ds.Tables[0].Rows[0]["requestid"].ToString());
+                    int intItem = Int32.Parse(ds.Tables[0].Rows[0]["itemid"].ToString());
+                    int intNumber = Int32.Parse(ds.Tables[0].Rows[0]["number"].ToString());
+                    int intUser = Int32.Parse(oResourceRequest.Get(intRequest, intItem, intNumber, "userid"));
+                    strDetails += "<tr><td nowrap><b>Submitter:</b></td><td width=\"100%\">" + oUser.GetFullName(intUser) + "</td></tr>";
+                    strDetails += "<tr><td nowrap><b>Submitted On:</b></td><td width=\"100%\">" + ds.Tables[0].Rows[0]["modified"].ToString() + "</td></tr>";
+                    strDetails += "<tr><td nowrap><b>CSRC Document:</b></td><td width=\"100%\"><a href=\"" + oVariable.URL() + "/" + ds.Tables[0].Rows[0]["path"].ToString().Replace("\\", "/") + "\" target=\"_blank\">Click Here to View</a></td></tr>";
+                    strDetails += "<tr><td nowrap><b>Project Information:</b></td><td width=\"100%\"><a href=\"" + oPage.GetFullLink(intViewRequest) + "?rid=" + intRequest.ToString() + "\" target=\"_blank\">Click Here to View</a></td></tr>";
+                    lblDetailId.Text = ds.Tables[0].Rows[0]["detailid"].ToString();
+                    if (ds.Tables[0].Rows[0]["ds"].ToString() != "")
+                    {
+                        strDetails += "<tr><td colspan=\"2\"><hr size=\"1\" noshade/></td></tr>";
+                        strDetails += "<tr><td nowrap><b>Discovery Phase Start Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["ds"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Discovery Phase End Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["de"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Discovery Internal Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["di"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Discovery External Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["dex"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Discovery HW/SW/One Time Cost:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["dh"].ToString()).ToString("F") + "</td></tr>";
+                    }
+                    if (ds.Tables[0].Rows[0]["ps"].ToString() != "")
+                    {
+                        strDetails += "<tr><td colspan=\"2\"><hr size=\"1\" noshade/></td></tr>";
+                        strDetails += "<tr><td nowrap><b>Planning Phase Start Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["ps"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Planning Phase End Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["pe"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Planning Internal Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["pi"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Planning External Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["pex"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Planning HW/SW/One Time Cost:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["ph"].ToString()).ToString("F") + "</td></tr>";
+                    }
+                    if (ds.Tables[0].Rows[0]["es"].ToString() != "")
+                    {
+                        strDetails += "<tr><td colspan=\"2\"><hr size=\"1\" noshade/></td></tr>";
+                        strDetails += "<tr><td nowrap><b>Execution Phase Start Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["es"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Execution Phase End Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["ee"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Execution Internal Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["ei"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Execution External Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["eex"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Execution HW/SW/One Time Cost:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["eh"].ToString()).ToString("F") + "</td></tr>";
+                    }
+                    if (ds.Tables[0].Rows[0]["cs"].ToString() != "")
+                    {
+                        strDetails += "<tr><td colspan=\"2\"><hr size=\"1\" noshade/></td></tr>";
+                        strDetails += "<tr><td nowrap><b>Closing Phase Start Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["cs"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Closing Phase End Date:</b></td><td width=\"100%\">" + DateTime.Parse(ds.Tables[0].Rows[0]["ce"].ToString()).ToLongDateString() + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Closing Internal Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["ci"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Closing External Labor:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["cex"].ToString()).ToString("F") + "</td></tr>";
+                        strDetails += "<tr><td nowrap><b>Closing HW/SW/One Time Cost:</b></td><td width=\"100%\">$" + double.Parse(ds.Tables[0].Rows[0]["ch"].ToString()).ToString("F") + "</td></tr>";
+                    }
+                    strDetails = "<table width=\"100%\" cellpadding=\"4\" cellspacing=\"3\" border=\"0\">" + strDetails + "</table>";
+                }
+                else
+                    panDenied.Visible = true;
+            }
+        }
+        btnClose.Attributes.Add("onclick", "return CloseWindow();");
+        btnFinish.Attributes.Add("onclick", "return CloseWindow();");
+        btnApprove.Attributes.Add("onclick", "return confirm('Are you sure you want to APPROVE this request?');");
+        btnDeny.Attributes.Add("onclick", "return ValidateText('" + txtComments.ClientID + "','Please enter some comments') && confirm('Are you sure you want to DENY this request?');");
+    }
+    private void btnSubmit_Click(Object Sender, EventArgs e)
+    {
+        Button oButton = (Button)Sender;
+        int intStep = Int32.Parse(lblStep.Text);
+        int intDetailId = Int32.Parse(lblDetailId.Text);
+        oTPM.UpdateCSRCDetail(intDetailId, Int32.Parse(oButton.CommandArgument), txtComments.Text);
+        oTPM.ApproveCSRC(intId, intStep + 1, Int32.Parse(oButton.CommandArgument), intCSRCPage, intWorkloadManager, strBCC);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?id=" + lblId.Text + "&action=done");
+    }
+</script>
+<script type="text/javascript">
+    function ShowDetail(oDiv) {
+        oDiv = document.getElementById(oDiv);
+        if (oDiv.style.display == "inline")
+            oDiv.style.display = "none";
+        else
+            oDiv.style.display = "inline";
+    }
+</script>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="default">
+    <tr>
+        <td><img src="/images/table_topleft.gif" border="0" width="5" height="26"></td>
+        <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%">CSRC Workflow</td>
+        <td><img src="/images/table_topright.gif" border="0" width="5" height="26"></td>
+    </tr>
+    <tr>
+        <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+        <td width="100%" bgcolor="#FFFFFF">
+            <br />
+            <asp:Panel ID="panWorkflow" runat="server" Visible="false">
+            <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                <tr>
+                    <td rowspan="2"><img src="/images/workflow.gif" border="0" align="absmiddle" /></td>
+                    <td class="hugeheader" width="100%" valign="bottom">CSRC Approval Workflow</td>
+                </tr>
+                <tr>
+                    <td width="100%" valign="top">CSRC Forms are submitted and routed for approval.  You are required to make a decision on the following CSRC form by using the buttons below.</td>
+                </tr>
+            </table>
+                <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                    <tr>
+                        <td><%=strDetails %></td>
+                    </tr>
+                    <tr>
+                        <td><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td valign="top">
+                                        <table cellpadding="2" cellspacing="1" border="0">
+                                            <tr>
+                                                <td><b>Comments:</b></td>
+                                            </tr>
+                                            <tr>
+                                                <td><asp:TextBox ID="txtComments" runat="server" Width="400" Rows="5" TextMode="MultiLine" CssClass="default" /></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td valign="top" align="right">
+                                        <table cellpadding="2" cellspacing="1" border="0">
+                                            <tr>
+                                                <td><asp:Button ID="btnApprove" runat="server" CssClass="default" Width="75" Text="Approve" CommandArgument="1" OnClick="btnSubmit_Click" /></td>
+                                                <td><asp:Button ID="btnDeny" runat="server" CssClass="default" Width="75" Text="Deny" CommandArgument="-1" OnClick="btnSubmit_Click" /></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+		        </table>
+            </asp:Panel>
+            <asp:Panel ID="panDenied" runat="server" Visible="false">
+                <table width="100%" cellpadding="2" cellspacing="2" border="0">
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td class="header"><img src="/images/bigX.gif" border="0" align="absmiddle" /> Access Denied</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td>You do not have rights to view this item.</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="2"><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td class="footer"></td>
+                                    <td align="right"><asp:Button ID="btnClose" runat="server" CssClass="default" Width="75" Text="Close" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <asp:Panel ID="panFinish" runat="server" Visible="false">
+                <table width="100%" cellpadding="2" cellspacing="2" border="0">
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td class="header"><img src="/images/bigCheck.gif" border="0" align="absmiddle" /> Record Updated</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td>Your information has been saved successfully.</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="2"><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td class="footer"></td>
+                                    <td align="right"><asp:Button ID="btnFinish" runat="server" CssClass="default" Width="75" Text="Finish" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <p>&nbsp;</p>
+        </td>
+        <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+    </tr>
+    <tr>
+        <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+        <td width="100%" background="/images/table_bottom.gif"></td>
+        <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+    </tr>
+</table>
+<asp:Label ID="lblStep" runat="server" Visible="false" />
+<asp:Label ID="lblId" runat="server" Visible="false" />
+<asp:Label ID="lblDetailId" runat="server" Visible="false" />

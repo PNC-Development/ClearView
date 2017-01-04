@@ -1,0 +1,270 @@
+IMG 
+{
+	vertical-align: middle;
+	border: 0px;
+}
+#Wrapper 
+{
+	position: relative;
+	height:auto !important; /* real browsers */
+	height:100%; /* IE6: treated as min-height*/
+	min-height:100%; /* real browsers */
+	/*width:auto;*/
+	margin:0 auto;
+	text-align:left;
+	padding:0px;
+	background-image: url(/images/PNC.png);
+	background-repeat: no-repeat;
+	background-position: center 100px;
+	background-attachment: fixed;
+}
+#contentWrapper {
+	width:1000px;
+	margin: 0 auto;
+	padding-bottom: 50px;/* allow for footer */
+	background-color: #FFF;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=92)";
+	filter: alpha(opacity=92);/* This works in IE 5, 6, 7 */
+	-moz-opacity:0.92;/* Older than Firefox 0.9 */
+	-khtml-opacity: 0.92;/* Safari 1.x (pre WebKit!) */
+	opacity: 0.92;/* Firefox 0.9+, Safari 2, Chrome, Opera 9+, IE 9+ */
+
+	/*border: solid 1px #F00;*/
+}
+#ss_blackOut {
+	position:fixed;
+	top:0px;
+	left:0px;
+	background-color:#000000;
+	height:auto !important; /* real browsers */
+	height:100%; /* IE6: treated as min-height*/
+	min-height:100%; /* real browsers */
+	width:100%;
+	z-index:1999;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+	filter: alpha(opacity=50);/* This works in IE 5, 6, 7 */
+	-moz-opacity:0.50;/* Older than Firefox 0.9 */
+	-khtml-opacity: 0.50;/* Safari 1.x (pre WebKit!) */
+	opacity: 0.50;/* Firefox 0.9+, Safari 2, Chrome, Opera 9+, IE 9+ */
+	display:inline;
+	text-align:center;
+}
+#ss_blackOutBox {
+	position:fixed;
+	background: #000000 url(/images/loadingBlack.gif) no-repeat center;
+	top: 50%;
+	left: 50%;
+	margin-top: -20px;
+	margin-left: -20px;
+	height: 40px;
+	width: 40px;
+    border-radius: 5px; 
+    -moz-border-radius: 5px; 
+    -webkit-border-radius: 5px; 
+    -webkit-box-shadow: 3px 3px 10px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    3px 3px 10px rgba(50, 50, 50, 0.75);
+    box-shadow:         3px 3px 10px rgba(50, 50, 50, 0.75);  
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+	filter: alpha(opacity=70);/* This works in IE 5, 6, 7 */
+	-moz-opacity:0.70;/* Older than Firefox 0.9 */
+	-khtml-opacity: 0.70;/* Safari 1.x (pre WebKit!) */
+	opacity: 0.70;/* Firefox 0.9+, Safari 2, Chrome, Opera 9+, IE 9+ */
+	display:inline;
+	z-index:1999;
+}
+h1 
+{
+	text-align: center;
+	padding: 0;
+	margin: 5px 0;
+}
+h1 p
+{
+	font-size: 22px;
+	margin: 8px;
+}
+p, input, select, span, table
+{
+	font-size: 11px;
+}
+h4
+{
+	margin-left: 10px;
+	font-weight: bold;
+	font-size: 11px;
+}
+h4 span
+{
+	margin-left: 10px;
+	font-weight: normal;
+	color: #960;
+	font-style: italic;
+}
+h5
+{
+	margin-left: 60px;
+	font-size: 11px;
+	font-weight: normal;
+}
+h5 > span, table.info tr:first-child 
+{
+	margin-left: 10px;
+	color: #0047A3;
+}
+h5 table td
+{
+	padding: 4px;
+}
+label 
+{
+	margin-left: 5px;
+}
+input[type="radio"] 
+{
+	margin-top: 1px;
+	margin-left: 5px;
+}
+input[type="text"], select
+{
+	padding: 6px;
+	border: 1px solid #779ccc;
+	background-color: #f0f7ff;
+}
+input[type="text"].invalid, input[type="radio"].invalid, span.invalid, select.invalid
+{
+	border: solid 1px #f08484;
+	background-color: #fdf2f0;
+}
+span.invalid, span.invalidH
+{
+	padding: 6px;
+}
+input[type="text"].invalidH, input[type="radio"].invalidH, span.invalidH, select.invalidH
+{
+	color: #FFF;
+	background-color: #C00;
+}
+.staticWrapper 
+{
+	position: fixed;
+	top: 0px;
+	left: 50%;
+	width: 500px;
+	border: dashed 1px #CCC;
+	border-top: solid 1px #fff;
+	padding: 10px 40px;
+}
+#staticWrapper span 
+{
+	font-weight: bold;
+	font-size: 13px;
+	margin-right: 10px;
+}
+.Buttons a 
+{
+    text-decoration:none;
+    font-weight:bold;
+    font-size:11px;
+    border-radius: 5px 5px 5px 5px; 
+    -moz-border-radius: 5px 5px 5px 5px; 
+    -webkit-border-radius: 5px 5px 5px 5px; 
+    z-index: 1001;
+    padding: 6px 10px;
+    margin-right: 10px;
+
+	background-color: #f0f6fd;
+	border: solid 1px #81a4c6;
+	color: #009;
+}
+.Buttons a:hover
+{
+	background-color: #ffffde;
+	border: solid 1px #ffcf0f;
+	color: #333;
+	text-decoration: none !important;
+}
+.Buttons a:disabled, .Buttons a[disabled=disabled], .Buttons a:hover[disabled=disabled]
+{
+	background-color: #fff !important;
+	border: solid 1px #ccc !important;
+	color: #999 !important;
+}
+p div 
+{
+	margin-left: 20px;
+}
+h6 
+{
+	font-size: 11px;
+	border: solid 1px #ffcf0f;
+	background-color: #ffffde;
+	padding: 10px;
+}
+h6 IMG
+{
+	margin-right: 5px;
+}
+.error, .success
+{
+	margin-top: 20px;
+	text-align: left;
+	font-size: 13px;
+	font-weight: normal;
+}
+.error 
+{
+	background-color: #fdf2f0;
+	border: solid 1px #f08484;
+	color: #C00;
+}
+.success 
+{
+	background-color: #F0FDF0;
+	border: solid 1px #84F091;
+	color: #0C0;
+}
+.error ul
+{
+	list-style-type: none;
+}
+.error ul li
+{
+	background-image: url(/images/cancel.gif);
+	background-repeat: no-repeat;
+	background-position: 0px 1px;
+	padding-left: 20px; 
+	margin-bottom: 7px;
+}
+.error ul a
+{
+	color: #C00;
+}
+.ui-widget-header, .ui-widget-content
+{
+	border: none !important;
+	background: none !important;
+}
+.ui-state-default 
+{
+	border-color: #999 !important;
+}
+table.info 
+{
+	
+}
+table.info td 
+{
+	padding: 6px;
+}
+table.info td:first-child 
+{
+	font-weight: bold;
+}
+table.info tr:nth-child(even)
+{
+	background-color: #f0f7ff;
+}
+table.info a 
+{
+	color: #C00;
+}

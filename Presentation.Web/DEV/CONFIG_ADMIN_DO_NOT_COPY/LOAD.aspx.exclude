@@ -1,0 +1,93 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private AD oAD;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intTimes = 0;
+    private int intProfile = 0;
+    private int intRandom = 0;
+    private double dblValue = 0;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        ProjectRequest oProjectRequest = new ProjectRequest(0, dsn);
+        ResourceRequest oResourceRequest = new ResourceRequest(0, dsn);
+        Requests oRequest = new Requests(0, dsn);
+        string strDate = DateTime.Now.ToShortDateString();
+        DateTime datNow = DateTime.Now;
+        for (int ii = 0; ii < Int32.Parse(txtRecords.Text); ii++)
+        {
+            intTimes++;
+            int intProfile = GetRandom(14378, 15730);
+            int intProject = oProject.Add("Project Name " + ii.ToString(), "Base", "Number" + ii.ToString(), GetRandom(14378, 15730), 0, 2);
+            int intC1 = (intTimes % 3 == 0 ? 1 : 0);
+            int intAudit = (intTimes % 13 == 0 ? 1 : 0);
+            int intRequest = oRequest.Add(intProject, intProfile, "Opportunity", datNow, datNow);
+            oProjectRequest.Add(intProject, GetRandom(14378, 15730), GetRandom(14378, 15730), intAudit, strDate, "Pre (Must be done prior to other effort)", "Another Project", "Capability", 25, "Less than $350,000", "$50,000 - $150,000", "Greater than $150,000", "Greater than $500,000", "Not Budgeted", "Greater than $150,000", "$50,000 - $150,000", "Greater than 12 Months", "Loss of Business", "None", "Leveraging existing assets or introducting reusable assets", "None", "Negative", "Loss of Functionality", "Does not support", "Does not support", "Increase (Loosely coupled solution)", intC1, 0, "");
+            oProjectRequest.AddPlatform(intRequest, 1);
+            oProjectRequest.AddPlatform(intRequest, 3);
+            oProjectRequest.AddPriority(intRequest, GetRandom(), GetRandom(), GetRandom());
+            int intResource = oResourceRequest.Add(intRequest, 3, 0, intProfile, 0, 50, 0, 2, 0, 1, 1, 0, 0, 1, 0);
+            oProject.Update(intProject, "Number" + ii.ToString());
+        }
+        Response.Write("DONE");
+    }
+    private int GetRandom(int _start, int _end)
+    {
+        if (intTimes % 2 == 0)
+            return 14781;
+        else
+        {
+            Random oRandom = new Random();
+            int intValue = oRandom.Next(_start, _end);
+            while (intRandom == intValue)
+                intValue = oRandom.Next(_start, _end);
+            intRandom = intValue;
+            return intValue;
+        }
+    }
+    private double GetRandom()
+    {
+        Random oRandom = new Random();
+        double dblRandom = oRandom.NextDouble();
+        while (dblRandom == dblValue)
+            dblRandom = oRandom.NextDouble();
+        dblValue = dblRandom;
+        return dblRandom;
+    }
+</script>
+<html>
+<head>
+<title>IMPORT DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Data Load</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Number of Records:</td>
+            <td><asp:TextBox ID="txtRecords" runat="server" Width="100" CssClass="default" /></td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

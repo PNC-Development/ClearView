@@ -1,0 +1,1704 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private DataSet ds;
+    private Pages oPage;
+    private Users oUser;
+    private Variables oVariable;
+    private NCC.ClearView.Application.Core.Roles oRole;
+    private Functions oFunction;
+    private Users_At oUserAt;
+    private Vacation oVacation;
+    private Settings oSetting;
+    private Delegates oDelegate;
+    private Applications oApplication;
+    private AD oAD;
+    
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intProfile;
+    private string strMenu;
+    private int intPage = 0;
+    private int intApplication = 0;     
+    private int intCount = 1;
+    private int intModify = 0;
+    private string strWorkflowBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private bool boolShowImage = false;
+    private string strYes = "<img src=\"/images/check.gif\" border=\"0\" align=\"absmiddle\">";
+    private string strNo = "<img src=\"/images/denied.gif\" border=\"0\" align=\"absmiddle\">";
+
+
+    private bool boolMyInfo = true;
+    private bool boolMySchdTimeOff= false;
+    private bool boolOutofOfficeBuddies = false;
+    private bool boolMyDirectReports = false;
+    private bool boolMyDirectReportsSchdTimeOff = false;
+    private bool boolApplicationMgmt = false;
+
+    private string strHTML = "";
+    private int intOwner = 0;
+    
+    
+    private void Page_Load()
+    {    
+        
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oPage = new Pages(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        oFunction = new Functions(intProfile, dsn, intEnvironment);
+        oRole = new NCC.ClearView.Application.Core.Roles(intProfile, dsn);
+        oUserAt = new Users_At(intProfile, dsn);
+        oVacation = new Vacation(intProfile, dsn);
+        oSetting = new Settings(intProfile, dsn);
+        oDelegate = new Delegates(intProfile, dsn);
+        oApplication = new Applications(intProfile, dsn);
+        oAD = new AD(intProfile, dsn, intEnvironment);
+
+         
+         
+        
+        if (Request.QueryString["applicationid"] != null && Request.QueryString["applicationid"] != "")
+        {
+            intApplication = Int32.Parse(Request.QueryString["applicationid"]);
+            drpApps.SelectedValue = intApplication.ToString();
+            LoadTreeView();
+            panAppMgmtView.Visible = true;
+        }
+        if (Request.QueryString["pageid"] != null && Request.QueryString["pageid"] != "")
+            intPage = Int32.Parse(Request.QueryString["pageid"]);
+        if (Request.Cookies["application"] != null && Request.Cookies["application"].Value != "")
+            intApplication = Int32.Parse(Request.Cookies["application"].Value);        
+ 
+        string strTitle = oPage.Get(intPage, "title");
+         
+        lblTitle.Text = strTitle;
+        if (Request.QueryString["id"] != null && Request.QueryString["id"] != "")
+            intModify = Int32.Parse(Request.QueryString["id"]);
+
+        if (Request.QueryString["div"] != null && Request.QueryString["div"] != "")
+        {
+            string strDiv = Request.QueryString["div"].ToLower();
+            if (strDiv == "app")
+            {
+                boolApplicationMgmt = true;               
+                boolMyInfo = false;
+                boolMyDirectReports = false;
+                boolMyDirectReportsSchdTimeOff = false;
+                boolMySchdTimeOff = false;
+                boolOutofOfficeBuddies = false;                                
+            }
+            else if (strDiv == "myinfo")
+            {
+                boolMyInfo = true;
+                boolApplicationMgmt = false;             
+                boolMyDirectReports = false;
+                boolMyDirectReportsSchdTimeOff = false;
+                boolMySchdTimeOff = false;
+                boolOutofOfficeBuddies = false;   
+            }
+            else if (strDiv == "timeoff")
+            {
+                boolMySchdTimeOff = true;
+                boolMyInfo = false;
+                boolApplicationMgmt = false;
+                boolMyDirectReports = false;
+                boolMyDirectReportsSchdTimeOff = false;               
+                boolOutofOfficeBuddies = false;
+            }
+            else if (strDiv == "buddy")
+            {
+                boolOutofOfficeBuddies = true;
+                boolMySchdTimeOff = false;
+                boolMyInfo = false;
+                boolApplicationMgmt = false;
+                boolMyDirectReports = false;
+                boolMyDirectReportsSchdTimeOff = false;
+               
+            }
+            else if (strDiv == "report")
+            {
+                boolOutofOfficeBuddies = false;
+                boolMySchdTimeOff = false;
+                boolMyInfo = false;
+                boolApplicationMgmt = false;
+                boolMyDirectReports = true;
+                boolMyDirectReportsSchdTimeOff = false;
+            }
+            else if (strDiv == "timeoffrep")
+            {
+                boolOutofOfficeBuddies = false;
+                boolMySchdTimeOff = false;
+                boolMyInfo = false;
+                boolApplicationMgmt = false;
+                boolMyDirectReports = false;
+                boolMyDirectReportsSchdTimeOff = true;
+            }
+        }
+        if (!IsPostBack)
+        {
+            drpApps.DataSource = oRole.Gets(intProfile);
+            drpApps.DataTextField = "name";
+            drpApps.DataValueField = "applicationid";             
+            drpApps.DataBind();
+
+            drpApps.Items.Insert(0,new ListItem("-- SELECT --","-1"));             
+           
+            
+            if (Request.QueryString["action"] != null && Request.QueryString["action"] != "")
+            {
+                lblSaved.Visible = true;
+                switch (Request.QueryString["action"])
+                {
+                    case "profile":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Profile Information Saved";
+                        break;
+                    case "report":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Direct Report Added";
+                        break;
+                    case "delete":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Direct Report Removed";
+                        break;
+                    case "error":
+                        lblSaved.Text = "<img src='/images/bigX.gif' border='0' align='absmiddle' /> Account Already Exists";
+                        break;
+                    case "same":
+                        lblSaved.Text = "<img src='/images/bigX.gif' border='0' align='absmiddle' /> You Cannot Modify the Properties of Your Account";
+                        break;
+                    case "vacation":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Event Deleted";
+                        break;
+                    case "addbuddy":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Out of Office Buddy Added";
+                        break;
+                    case "buddy":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Out of Office Buddy Removed";
+                        break;
+                    case "approve":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Vacation Request Approved";
+                        break;
+                    case "deny":
+                        lblSaved.Text = "<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Vacation Request Denied";
+                        break;
+                }
+            }
+            ds = oUser.Get(intProfile);
+            if (ds.Tables[0].Rows.Count > 0 && ds.Tables[0].Rows[0]["enabled"].ToString() == "1")
+            {
+                LoadList();
+                bool boolManager = (ds.Tables[0].Rows[0]["ismanager"].ToString() == "1");
+                bool boolLoadProfile = true;
+                if (intModify > 0)
+                {
+                    ds = oUser.Get(intModify);
+                    if (ds.Tables[0].Rows.Count > 0 && ds.Tables[0].Rows[0]["enabled"].ToString() == "1")
+                    {
+                        txtManagerUser.Text = ds.Tables[0].Rows[0]["xid"].ToString();
+                        if (boolShowImage == true)
+                        {
+                            imgManagerHeader.Width = Unit.Pixel(90);
+                            imgManagerHeader.Height = Unit.Pixel(90);
+                            imgManagerHeader.ImageUrl = oVariable.PictureURL() + ds.Tables[0].Rows[0]["xid"].ToString() + ".jpg";
+                        }
+                        else
+                            imgManagerHeader.ImageUrl = "/images/profile.gif";
+                        txtManagerFirst.Text = ds.Tables[0].Rows[0]["fname"].ToString();
+                        txtManagerLast.Text = ds.Tables[0].Rows[0]["lname"].ToString();
+                        lblHeader.Text = "(" + ds.Tables[0].Rows[0]["fname"].ToString() + " " + ds.Tables[0].Rows[0]["lname"].ToString() + ")";
+                        lblVacationName.Text = "(" + ds.Tables[0].Rows[0]["fname"].ToString() + " " + ds.Tables[0].Rows[0]["lname"].ToString() + ")";
+                        int intManager = Int32.Parse(ds.Tables[0].Rows[0]["manager"].ToString());
+                        if (intManager > 0)
+                            lblManagerReports.Text = oUser.GetFullName(intManager);
+                        else
+                            lblManagerReports.Text = "None";
+                        txtManagerVacation.Text = ds.Tables[0].Rows[0]["vacation"].ToString();
+                        chkManagerIsManager.Checked = (ds.Tables[0].Rows[0]["ismanager"].ToString() == "1");
+                        lblManagerBoard.Text = (ds.Tables[0].Rows[0]["board"].ToString() == "1" ? strYes : strNo);
+                        lblManagerDirector.Text = (ds.Tables[0].Rows[0]["director"].ToString() == "1" ? strYes : strNo);
+                        txtManagerPager.Text = ds.Tables[0].Rows[0]["pager"].ToString();
+                        ddlManagerUserAt.SelectedValue = ds.Tables[0].Rows[0]["atid"].ToString();
+                        txtManagerPhone.Text = ds.Tables[0].Rows[0]["phone"].ToString();
+                        txtManagerSkills.Text = ds.Tables[0].Rows[0]["other"].ToString();
+                        imgManagerPicture.ImageUrl = "/frame/picture.aspx?xid=" + ds.Tables[0].Rows[0]["xid"].ToString();
+                        imgManagerPicture.Style["border"] = "solid 1px #999999";
+                        panManagerProfile.Visible = true;
+                        boolLoadProfile = false;
+                        ds = oVacation.Gets(intModify, DateTime.Today.Year);
+                        foreach (DataRow dr in ds.Tables[0].Rows)
+                        {
+                            if (dr["vacation"].ToString() == "1")
+                                dr["reason"] = "Vacation";
+                            else if (dr["holiday"].ToString() == "1")
+                                dr["reason"] = "Floating Holiday";
+                            else if (dr["personal"].ToString() == "1")
+                                dr["reason"] = "Personal / Sick Day";
+                            if (dr["morning"].ToString() == "1")
+                                dr["duration"] = "Morning";
+                            else if (dr["afternoon"].ToString() == "1")
+                                dr["duration"] = "Afternoon";
+                            else
+                                dr["duration"] = "Full Day";
+                        }
+                        lblNone.Visible = (ds.Tables[0].Rows.Count == 0);
+                        rptVacation.DataSource = ds;
+                        rptVacation.DataBind();
+                        foreach (RepeaterItem ri in rptVacation.Items)
+                            ((LinkButton)ri.FindControl("btnDeleteVacation")).Attributes.Add("onclick", "return confirm('Are you sure you want to delete this event?');");
+                       // panVacation.Visible = true;
+                    }
+                }
+                if (boolLoadProfile == true)
+                {
+                    ds = oUser.Get(intProfile);
+                    txtUser.Text = ds.Tables[0].Rows[0]["xid"].ToString();
+                    if (boolShowImage == true)
+                    {
+                        imgHeader.Width = Unit.Pixel(90);
+                        imgHeader.Height = Unit.Pixel(90);
+                        imgHeader.ImageUrl = oVariable.PictureURL() + ds.Tables[0].Rows[0]["xid"].ToString() + ".jpg";
+                    }
+                    else
+                        imgHeader.ImageUrl = "/images/profile.gif";
+                    txtFirst.Text = ds.Tables[0].Rows[0]["fname"].ToString();
+                    txtLast.Text = ds.Tables[0].Rows[0]["lname"].ToString();
+                    int intManager = Int32.Parse(ds.Tables[0].Rows[0]["manager"].ToString());
+                    if (intManager > 0)
+                        lblManager.Text = oUser.GetFullName(intManager);
+                    else
+                        lblManager.Text = "None";
+                    lblVacation.Text = ds.Tables[0].Rows[0]["vacation"].ToString();
+                    if (lblVacation.Text == "")
+                        lblVacation.Text = "Not Configured";
+                    lblIsManager.Text = (ds.Tables[0].Rows[0]["ismanager"].ToString() == "1" ? strYes : strNo);
+                    lblBoard.Text = (ds.Tables[0].Rows[0]["board"].ToString() == "1" ? strYes : strNo);
+                    lblDirector.Text = (ds.Tables[0].Rows[0]["director"].ToString() == "1" ? strYes : strNo);
+                    txtPager.Text = ds.Tables[0].Rows[0]["pager"].ToString();
+                    ddlUserAt.SelectedValue = ds.Tables[0].Rows[0]["atid"].ToString();
+                    txtPhone.Text = ds.Tables[0].Rows[0]["phone"].ToString();
+                    txtSkills.Text = ds.Tables[0].Rows[0]["other"].ToString();
+                    imgPicture.ImageUrl = "/frame/picture.aspx?xid=" + ds.Tables[0].Rows[0]["xid"].ToString();
+                    imgPicture.Style["border"] = "solid 1px #999999";
+                    btnPicture.Attributes.Add("onclick", "return OpenWindow('IMAGE','');");
+                    panProfile.Visible = true;
+                    ds = oVacation.Gets(intProfile, DateTime.Today.Year);
+                    foreach (DataRow dr in ds.Tables[0].Rows)
+                    {
+                        if (dr["vacation"].ToString() == "1")
+                            dr["reason"] = "Vacation";
+                        else if (dr["holiday"].ToString() == "1")
+                            dr["reason"] = "Floating Holiday";
+                        else if (dr["personal"].ToString() == "1")
+                            dr["reason"] = "Personal / Sick Day";
+                        if (dr["morning"].ToString() == "1")
+                            dr["duration"] = "Morning";
+                        else if (dr["afternoon"].ToString() == "1")
+                            dr["duration"] = "Afternoon";
+                        else
+                            dr["duration"] = "Full Day";
+                    }
+                    lblNone.Visible = (ds.Tables[0].Rows.Count == 0);
+                    rptVacation.DataSource = ds;
+                    rptVacation.DataBind();
+                    foreach (RepeaterItem ri in rptVacation.Items)
+                        ((LinkButton)ri.FindControl("btnDeleteVacation")).Attributes.Add("onclick", "return confirm('Are you sure you want to delete this event?');");
+                    //panVacation.Visible = true;
+                    // Load Buddies
+                    rptBuddies.DataSource = oDelegate.Gets(intProfile);
+                    rptBuddies.DataBind();
+                    lblNoBuddies.Visible = (rptBuddies.Items.Count == 0);
+                    foreach (RepeaterItem ri in rptBuddies.Items)
+                        ((LinkButton)ri.FindControl("btnDeleteBuddy")).Attributes.Add("onclick", "return confirm('Are you sure you want to remove this buddy?');");
+                    btnAddBuddy.Attributes.Add("onclick", "return OpenWindow('DELEGATE','?id=" + intProfile.ToString() + "&parent=" + intPage.ToString() + "');");
+                   // panDeligates.Visible = true;
+                }
+                if (boolManager == true)
+                {
+                   // panReports.Visible = true;
+                    ds = oUser.GetManagerReports(intProfile);
+                    DataTable oTable = ds.Tables[0];
+                    DataColumn oColumn;
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "ff";
+                    oTable.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "pp";
+                    oTable.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "vv";
+                    oTable.Columns.Add(oColumn);
+                    foreach (DataRow drVacation in oTable.Rows)
+                    {
+                        int intTemp = Int32.Parse(drVacation["userid"].ToString());
+                        DataSet dsVacation = oVacation.Gets(intTemp, DateTime.Today.Year);
+                        double dblFloating = double.Parse(oSetting.Get("floating"));
+                        double dblPersonal = double.Parse(oSetting.Get("personal"));
+                        string strVacation = oUser.Get(intTemp, "vacation");
+                        double dblVacation = 0.00;
+                        if (strVacation != "")
+                        {
+                            dblVacation = double.Parse(strVacation);
+                            foreach (DataRow dr in dsVacation.Tables[0].Rows)
+                            {
+                                if (dr["vacation"].ToString() == "1")
+                                {
+                                    if (dr["morning"].ToString() == "1")
+                                        dblVacation = dblVacation - .5;
+                                    else if (dr["afternoon"].ToString() == "1")
+                                        dblVacation = dblVacation - .5;
+                                    else
+                                        dblVacation = dblVacation - 1;
+                                }
+                                else if (dr["holiday"].ToString() == "1")
+                                {
+                                    if (dr["morning"].ToString() == "1")
+                                        dblFloating = dblFloating - .5;
+                                    else if (dr["afternoon"].ToString() == "1")
+                                        dblFloating = dblFloating - .5;
+                                    else
+                                        dblFloating = dblFloating - 1;
+                                }
+                                else if (dr["personal"].ToString() == "1")
+                                {
+                                    if (dr["morning"].ToString() == "1")
+                                        dblPersonal = dblPersonal - .5;
+                                    else if (dr["afternoon"].ToString() == "1")
+                                        dblPersonal = dblPersonal - .5;
+                                    else
+                                        dblPersonal = dblPersonal - 1;
+                                }
+                            }
+                        }
+                        drVacation["ff"] = dblFloating.ToString();
+                        drVacation["pp"] = dblPersonal.ToString();
+                        drVacation["vv"] = dblVacation.ToString();
+                    }
+                    rptView.DataSource = oTable;
+                    rptView.DataBind();
+                    foreach (RepeaterItem ri in rptView.Items)
+                    {
+                        LinkButton oDelete = (LinkButton)ri.FindControl("btnDelete");
+                        oDelete.Attributes.Add("onclick", "return confirm('Are you sure you want to remove this employee?');");
+                    }
+                    ds = oUser.GetManagerReports(intProfile);
+                    DataTable oReports = new DataTable();
+//                    DataColumn oColumn;
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.Int32");
+                    oColumn.ColumnName = "vacationid";
+                    oReports.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.Int32");
+                    oColumn.ColumnName = "userid";
+                    oReports.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "start_date";
+                    oReports.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "duration";
+                    oReports.Columns.Add(oColumn);
+                    oColumn = new DataColumn();
+                    oColumn.DataType = System.Type.GetType("System.String");
+                    oColumn.ColumnName = "reason";
+                    oReports.Columns.Add(oColumn);
+                    foreach (DataRow drVacation in ds.Tables[0].Rows)
+                    {
+                        int intTemp = Int32.Parse(drVacation["userid"].ToString());
+                        DataSet dsReportsVacation = oVacation.Gets(intTemp, DateTime.Today.Year);
+                        foreach (DataRow dr in dsReportsVacation.Tables[0].Rows)
+                        {
+                            if (dr["approved"].ToString() == "0")
+                            {
+                                DataRow oRow = oReports.NewRow();
+                                oRow["vacationid"] = dr["vacationid"].ToString();
+                                oRow["userid"] = dr["userid"].ToString();
+                                oRow["start_date"] = dr["start_date"].ToString();
+                                oRow["duration"] = dr["duration"].ToString();
+                                if (dr["vacation"].ToString() == "1")
+                                    oRow["reason"] = "Vacation";
+                                else if (dr["holiday"].ToString() == "1")
+                                    oRow["reason"] = "Floating Holiday";
+                                else if (dr["personal"].ToString() == "1")
+                                    oRow["reason"] = "Personal / Sick Day";
+                                if (dr["morning"].ToString() == "1")
+                                    oRow["duration"] = "Morning";
+                                else if (dr["afternoon"].ToString() == "1")
+                                    oRow["duration"] = "Afternoon";
+                                else
+                                    oRow["duration"] = "Full Day";
+                                oReports.Rows.Add(oRow);
+                            }
+                        }
+                    }
+                    rptReportsVacation.DataSource = oReports;
+                    rptReportsVacation.DataBind();
+                    foreach (RepeaterItem ri in rptReportsVacation.Items)
+                    {
+                        LinkButton oApprove = (LinkButton)ri.FindControl("btnApprove");
+                        oApprove.Attributes.Add("onclick", "return confirm('Are you sure you want to APPROVE this request?');");
+                        LinkButton oDeny = (LinkButton)ri.FindControl("btnDeny");
+                        oDeny.Attributes.Add("onclick", "return confirm('Are you sure you want to DENY this request?');");
+                    }
+                    lblReports.Visible = (rptReportsVacation.Items.Count == 0);
+                }
+            }
+            else
+                panError.Visible = true;
+        }
+        txtSkills.Attributes.Add("onkeypress", "return CancelEnter();");
+        txtReport.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divReport.ClientID + "','" + lstReport.ClientID + "','" + hdnReport.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+        lstReport.Attributes.Add("ondblclick", "AJAXClickRow();");
+        btnProfile.Attributes.Add("onclick", "return ValidateText('" + txtUser.ClientID + "','Please enter a user ID')" +
+            " && ValidateText('" + txtFirst.ClientID + "','Please enter a first name')" +
+            " && ValidateText('" + txtLast.ClientID + "','Please enter a last name')" +
+            " && ValidateText('" + txtPager.ClientID + "','Please enter a pager number')" +
+            " && ValidateDropDown('" + ddlUserAt.ClientID + "','Please select a type of pager')" +
+            ";");
+        btnManager.Attributes.Add("onclick", "return ValidateText('" + txtManagerUser.ClientID + "','Please enter a user ID')" +
+            " && ValidateText('" + txtManagerFirst.ClientID + "','Please enter a first name')" +
+            " && ValidateText('" + txtManagerLast.ClientID + "','Please enter a last name')" +
+            " && ValidateText('" + txtManagerPager.ClientID + "','Please enter a pager number')" +
+            " && ValidateDropDown('" + ddlManagerUserAt.ClientID + "','Please select a type of pager')" +
+            " && ValidateNumber('" + txtManagerVacation.ClientID + "','Please enter a valid number of vacation days')" +
+            ";");
+        btnReport.Attributes.Add("onclick", "return ValidateHidden('" + hdnReport.ClientID + "','" + txtReport.ClientID + "','Please enter a valid LAN ID');"); 
+        btnClose.Attributes.Add("onclick", "return CloseWindow();");
+         
+        txtUserApp.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divUserApp.ClientID + "','" + lstUserApp.ClientID + "','" + hdnUserApp.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+        lstUserApp.Attributes.Add("ondblclick", "AJAXClickRow();");
+        btnAddUserApp.Attributes.Add("onclick", "return ValidateText('" + txtUserApp.ClientID + "','Please enter a user name or xid')");         
+        
+    }
+
+    private void Change_Apps(Object Sender, EventArgs e)
+    {
+        DropDownList ddl = (DropDownList)Sender;
+        if(ddl.SelectedValue != "-1")       
+           Response.Redirect(oPage.GetFullLink(intPage)+ "?applicationid=" + ddl.SelectedValue+"&div=App");       
+        else
+           Response.Redirect(oPage.GetFullLink(intPage) + "?div=App");             
+    }
+
+    private DataRow[] GetChildRows(DataTable table, string strFilter)
+    {
+        return table.Select(strFilter);
+    }
+     
+    private void LoadTreeView()
+    {     
+        DataSet ds = oUser.GetApplicationMgmt(intApplication);
+        btnSave.Visible = ds.Tables[0].Rows.Count > 0;
+        intOwner = oApplication.Get(intApplication, "userid") != "" ? Int32.Parse(oApplication.Get(intApplication, "userid")):0;
+        string strOwner = oUser.GetFullName(intOwner);         
+        DataTable dt = ds.Tables[0];
+        //DataTable dt2 = ds.Tables[1];         
+        int intRowCount = 0;         
+        DataRow[] drSelect = null;
+        string strDiv = "";
+        string strImg = "";
+        string strDrag = "";
+        string strFilter = "";
+        string strName = "";
+        intCount = 0;
+
+        strHTML += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"default\">";
+
+
+        //for (int intCt = 0; intCt <= dt.Rows.Count - 1; intCt++)
+        //{
+        //    intRowCount++;
+        //    strDiv = "DIV_" + intRowCount;
+        //    strImg = "IMG_" + intRowCount;             
+        //    strDrag = "DragContainer_" + dt.Rows[intCt]["userid"];
+        //    drSelect = GetChildRows(dt, "manager =" + dt.Rows[intCt]["userid"]);
+        //    strHTML += "<tr><td><img src=\"/images/spacer.gif\" width=\"15\" /><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv3('" + strDiv + "','" + strImg + "')\"><img id=\"" + strImg + "\" src=\"/images/collapse-icon.gif\" border=\"0\" style=\"" + (drSelect.Length > 0 ? "display:inline" : "display:none") + "\"/></a> " + dt.Rows[intCt]["name"] + (dt.Rows[intCt]["userid"].ToString() == intOwner.ToString() ? " (Application Owner)" : "") + "</td></tr>";
+        //    strHTML += "<tr><td id=\"TD_" + dt.Rows[intCt]["userid"] + "\" ondrop=\"onDrop3(this,'" + hdnUserID.ClientID + "');\" ondragover=\"overDrag();\" ondragenter=\"enterDrag(this);\" ondragleave=\"leaveDrag(this);\">&nbsp;</td></tr>";            
+        //    strHTML += "<tr><td colspan=\"2\"><div id =\"" + strDiv + "\" style=\"display:inline\" ><div class=\"DragContainer\" id =\"" + strDrag + "\" overClass=\"OverDragContainer\">";
+
+            
+
+        //    foreach (DataRow dr in drSelect)
+        //    {
+        //        if (dr["manager"].ToString() != dr["userid"].ToString())
+        //        { 
+        //            strHTML += "<div class=\"DragBox\" id=\"" + dr["userid"] + "\" overClass=\"OverDragBox\" dragClass=\"DragDragBox\">" + dr["name"] + "</div>";
+        //        }            
+        //    }
+        //    strHTML += "</div></div></td></tr>";             
+        //    strHTML += "<tr><td id=\"TD1_" + dt.Rows[intCt]["userid"] + "\" ondrop=\"onDrop3(this,'" + hdnUserID.ClientID + "');\" ondragover=\"overDrag();\" ondragenter=\"enterDrag(this);\" ondragleave=\"leaveDrag(this);\">&nbsp;</td></tr>";
+
+        //}      
+
+        //foreach (DataRow dr1 in ds.Tables[0].Rows)
+        //{
+        //    intRowCount++;
+        //    strDiv = "DIV_" + intRowCount;
+        //    strImg = "IMG_" + intRowCount;
+        //    strDrag = "DragContainer_" + intOwner;
+        //    if (dr1["userid"].ToString() == intOwner.ToString())
+        //    {
+        //        drSelect = GetChildRows(dt2, "manager =" + dr1["userid"]);
+        //        strHTML += "<tr><td><img src=\"/images/spacer.gif\" width=\"15\" /><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv3('" + strDiv + "','" + strImg + "')\"><img id=\"" + strImg + "\" src=\"/images/collapse-icon.gif\" border=\"0\" style=\"" + (drSelect.Length > 0 ? "display:inline" : "display:none") + "\"/></a> " + strOwner + " (Application Owner) </td></tr>";
+        //        strHTML += "<tr><td colspan=\"2\"><div id =\"" + strDiv + "\" style=\"display:inline\" ><div class=\"DragContainer\" id =\"" + strDrag + "\">";
+                
+        //        foreach (DataRow dr in drSelect)
+        //        {
+        //            strHTML += "<div class=\"DragBox\" id=\"" + dr["userid"] + "\" overClass=\"OverDragBox\" dragClass=\"DragDragBox\">" + dr["name"] + "</div>";
+                               
+        //        }
+        //        strHTML += "</div></div></td></tr>"; 
+        //    }             
+        //} 
+
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            intRowCount++;
+            strDiv = "DIV_" + intRowCount;
+            strImg = "IMG_" + intRowCount;
+            strDrag = "DragContainer_" + dr["userid"];
+            drSelect = GetChildRows(dt, "manager=" + dr["userid"]);
+            strHTML += "<tr><td><img src=\"/images/spacer.gif\" width=\"15\" /><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv3('" + strDiv + "','" + strImg + "')\"><img id=\"" + strImg + "\" src=\"/images/collapse-icon.gif\" border=\"0\" style=\"" + (drSelect.Length > 0 ? "display:inline" : "display:none") + "\"/></a> " + dr["name"] + "</td></tr>";
+            strHTML += "<tr><td colspan=\"2\"><div id =\"" + strDiv + "\" style=\"display:inline\" ><div class=\"DragContainer\" id =\"" + strDrag + "\" overClass=\"OverDragContainer\" >";
+
+            foreach (DataRow dr2 in drSelect)
+            {       
+               strHTML += "<div class=\"DragBox\" id=\"" + dr2["userid"] + "\" overClass=\"OverDragBox\" dragClass=\"DragDragBox\">" + dr2["name"] + "</div>";                
+            }
+            strHTML += "</div></div></td></tr>";
+               
+        }
+        //if (intOwner > 0)
+        //{
+        //    drSelect = GetChildRows(dt, "manager=" + intOwner);
+        //    strDiv = "DIV_" + intRowCount;
+        //    strImg = "IMG_" + intRowCount;
+        //    strDrag = "DragContainer_" + intOwner;
+        //    strHTML += "<tr><td><img src=\"/images/spacer.gif\" width=\"15\" /><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv3('" + strDiv + "','" + strImg + "')\"><img id=\"" + strImg + "\" src=\"/images/collapse-icon.gif\" border=\"0\" style=\"" + (drSelect.Length > 0 ? "display:inline" : "display:none") + "\"/></a> " + strOwner + " (Application Owner) </td></tr>";
+        //    strHTML += "<tr><td colspan=\"2\"><div id =\"" + strDiv + "\" style=\"display:inline\" ><div class=\"DragContainer\" id =\"" + strDrag + "\" >";
+
+        //    foreach (DataRow dr in drSelect)
+        //    {
+        //        intRowCount++;
+        //        if (dr["userid"].ToString() == intOwner.ToString()) continue;
+        //        DataRow[] drSelect2 = GetChildRows(dt, "manager = " + dr["userid"]);
+        //        strDiv = "DIV_" + intRowCount;
+        //        strImg = "IMG_" + intRowCount;
+        //        strDrag = "DragContainer_" + dr["userid"];
+        //        strHTML += "<div class=\"DragContainer\" id=\"" + strDrag + "\" overClass=\"OverDragContainer\">" + dr["name"];
+
+        //        foreach (DataRow dr2 in drSelect2)
+        //        {
+        //            strHTML += "<div class=\"DragBox\" id=\"" + dr2["userid"] + "\" overClass=\"OverDragBox\" dragClass=\"DragDragBox\">" + dr2["name"] + "</div>";
+        //        }
+        //        strHTML += "</div>";
+        //    }
+        //    strHTML += "</div></td></tr>";
+        //}
+        //for (int intCt = 0; intCt <= dt.Rows.Count - 1; intCt++)
+        //{
+        //    intRowCount++;
+        //    strDiv = "DIV_" + intRowCount;
+        //    strImg = "IMG_" + intRowCount;
+        //    strDrag = "DragContainer_" + dt.Rows[intCt]["userid"];
+        //    //string strFilter = "manager = " + dt.Rows[intCt]["userid"] " and " + dt.Rows[intCt]["userid"] + " <> " + intOwner;
+        //    strFilter = "manager = " + intOwner;
+        //    drSelect = dt.Select(strFilter);
+        //    strHTML += "<tr><td><img src=\"/images/spacer.gif\" width=\"15\" /><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv3('" + strDiv + "','" + strImg + "')\"><img id=\"" + strImg + "\" src=\"/images/collapse-icon.gif\" border=\"0\" style=\"" + (drSelect.Length > 0 ? "display:inline" : "display:none") + "\"/></a> " + dt.Rows[intCt]["name"] + "</td></tr>";
+        //    strHTML += "<tr><td colspan=\"2\"><div id =\"" + strDiv + "\" style=\"display:inline\" ><div class=\"DragContainer\" id =\"" + strDrag + "\" overClass=\"OverDragContainer\">";
+
+        //    foreach (DataRow dr in drSelect)
+        //    {
+        //        strHTML += "<div class=\"DragBox\" id=\"" + dr["userid"] + "\" overClass=\"OverDragBox\" dragClass=\"DragDragBox\">" + dr["name"] + "</div>";
+        //        dt.Rows.Remove(dr);
+        //    }
+        //    strHTML += "</div></div></td></tr>";
+        //}        
+        strHTML += "</table>";             
+    }
+
+
+    private void LoadList()
+    {
+        DataSet ds = oUserAt.Gets(1);
+        ddlUserAt.DataTextField = "name";
+        ddlUserAt.DataValueField = "atid";
+        ddlUserAt.DataSource = ds;
+        ddlUserAt.DataBind();
+        ddlUserAt.Items.Insert(0, new ListItem("-- SELECT --", "0"));    
+        ddlManagerUserAt.DataTextField = "name";
+        ddlManagerUserAt.DataValueField = "atid";
+        ddlManagerUserAt.DataSource = ds;
+        ddlManagerUserAt.DataBind();
+        ddlManagerUserAt.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+    }
+    private void btnProfile_Click(Object Sender, EventArgs e)
+    {
+        ds = oUser.Get(intProfile);
+        int intManger = Int32.Parse(ds.Tables[0].Rows[0]["manager"].ToString());
+        int intIsManager = (ds.Tables[0].Rows[0]["ismanager"].ToString() == "1" ? 1 : 0);
+        int intBoard = (ds.Tables[0].Rows[0]["board"].ToString() == "1" ? 1 : 0);
+        int intDirector = (ds.Tables[0].Rows[0]["director"].ToString() == "1" ? 1 : 0);
+        int intMultiple = (ds.Tables[0].Rows[0]["multiple_apps"].ToString() == "1" ? 1 : 0);
+        int intLocation = (ds.Tables[0].Rows[0]["add_location"].ToString() == "1" ? 1 : 0);
+        oUser.Update(intProfile, txtUser.Text, txtFirst.Text, txtLast.Text, intManger, intIsManager, intBoard, intDirector, txtPager.Text, Int32.Parse(ddlUserAt.SelectedItem.Value), txtPhone.Text, txtSkills.Text, Int32.Parse(lblVacation.Text), intMultiple, intLocation, 1);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=profile");
+    }
+    private void btnManager_Click(Object Sender, EventArgs e)
+    {
+        ds = oUser.Get(intModify);
+        int intManger = Int32.Parse(ds.Tables[0].Rows[0]["manager"].ToString());
+        int intIsManager = (ds.Tables[0].Rows[0]["ismanager"].ToString() == "1" ? 1 : 0);
+        int intBoard = (ds.Tables[0].Rows[0]["board"].ToString() == "1" ? 1 : 0);
+        int intDirector = (ds.Tables[0].Rows[0]["director"].ToString() == "1" ? 1 : 0);
+        int intMultiple = (ds.Tables[0].Rows[0]["multiple_apps"].ToString() == "1" ? 1 : 0);
+        int intLocation = (ds.Tables[0].Rows[0]["add_location"].ToString() == "1" ? 1 : 0);
+        oUser.Update(intModify, txtManagerUser.Text, txtManagerFirst.Text, txtManagerLast.Text, intManger, intIsManager, intBoard, intDirector, txtManagerPager.Text, Int32.Parse(ddlManagerUserAt.SelectedItem.Value), txtManagerPhone.Text, txtManagerSkills.Text, Int32.Parse(txtManagerVacation.Text), intMultiple, intLocation, 1);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=profile");
+    }
+    private void btnReport_Click(Object Sender, EventArgs e)
+    {
+        int intReport = Int32.Parse(Request.Form[hdnReport.UniqueID]);
+        if (intReport == intProfile)
+            Response.Redirect(oPage.GetFullLink(intPage) + "?action=same&div=myinfo");
+        else
+        {
+            oUser.Update(intReport, intProfile);
+            Response.Redirect(oPage.GetFullLink(intPage) + "?action=report&div=report");
+        }
+    }
+    
+    private void btnEdit_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        if (Int32.Parse(oButton.CommandArgument) == intProfile)
+            Response.Redirect(oPage.GetFullLink(intPage) + "?action=same");
+        else
+            Response.Redirect(oPage.GetFullLink(intPage) + "?id=" + oButton.CommandArgument+"&div=myinfo");
+    }
+    private void btnDelete_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        int intUser = Int32.Parse(oButton.CommandArgument);
+        oUser.Update(intUser, 0);
+        oFunction.SendEmail("ClearView Administration", strWorkflowBCC, "", "", "ClearView Administration", "<p><b>The user " + oUser.GetFullName(intUser) + " (USER ID: " + intUser.ToString() + ") was removed from the Direct Report list of " + oUser.GetFullName(intProfile) + ".</b><p>", true, false);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=delete&div=report");
+    }
+    private void btnApprove_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        int intVacation = Int32.Parse(oButton.CommandArgument);
+        oVacation.Update(intVacation, 1);
+        int intUser = Int32.Parse(oVacation.Get(intVacation, "userid"));
+        oFunction.SendEmail("ClearView Out of Office Request", oUser.GetName(intUser), "", strWorkflowBCC, "ClearView Out of Office Request", "<p><b>The following out of office request has been APPROVED by your MANAGER (" + oUser.GetFullName(intProfile) + ")</b><p><p>" + oVacation.GetBody(intVacation, intEnvironment) + "</p>", true, false);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=approve&div=timeoffrep");
+    }
+    private void btnDeny_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        int intVacation = Int32.Parse(oButton.CommandArgument);
+        oVacation.Update(intVacation, -1);
+        int intUser = Int32.Parse(oVacation.Get(intVacation, "userid"));
+        oFunction.SendEmail("ClearView Out of Office Request", oUser.GetName(intUser), "", strWorkflowBCC, "ClearView Out of Office Request", "<p><b>The following out of office request has been DENIED by your MANAGER (" + oUser.GetFullName(intProfile) + ")</b><p><p>" + oVacation.GetBody(intVacation, intEnvironment) + "</p>", true, false);
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=deny&div=timeoffrep");
+    }
+    private void btnDeleteVacation_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        oVacation.Delete(Int32.Parse(oButton.CommandArgument));
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=vacation&div=timeoff");
+    }
+    private void btnDeleteBuddy_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oButton = (LinkButton)Sender;
+        oDelegate.Delete(Int32.Parse(oButton.CommandArgument));
+        Response.Redirect(oPage.GetFullLink(intPage) + "?action=buddy&div=buddy");
+    }
+    private void btnCancel_Click(Object Sender, EventArgs e)
+    {
+        Response.Redirect(oPage.GetFullLink(intPage));
+    }
+    private void btnAddUserApp_Click(Object Sender, EventArgs e)
+    {
+        string strUserName = txtUserApp.Text.Substring(0, txtUserApp.Text.IndexOf("(")).Trim();
+        int intUserId = oUser.GetIdName(strUserName);                                
+        int intMultiple_Apps = Int32.Parse(oUser.Get(intUserId, "multiple_apps"));
+    
+        DataSet dsGroup = oRole.GetUser(intOwner);
+         if (intMultiple_Apps != 1) oRole.DeleteUser(intUserId);
+       
+        foreach(DataRow drGroup in dsGroup.Tables[0].Rows)
+        {      
+            if (drGroup["applicationname"].ToString() == oApplication.GetName(intApplication))
+            {
+                int intGroup = Int32.Parse(drGroup["groupid"].ToString());
+                oRole.Add(intUserId, intGroup);
+                break;
+            }
+        }         
+        Response.Redirect(oPage.GetFullLink(intPage));
+    }
+
+    private void btnSave_Click(Object Sender, EventArgs e)
+    {
+        
+        string[] strSplit =  hdnValues.Value.Split(',');
+        
+        for (int i = 0; i < strSplit.Length; i++)
+        {
+            string strTemp = strSplit[i];
+            if (strTemp != "")
+            {
+                string strManager = strTemp.Substring(strTemp.IndexOf("_") + 1);
+                strManager = strManager.Substring(0, strManager.IndexOf(":"));
+                string strUser = strTemp.Substring(strTemp.IndexOf(":") + 1);
+                int intUser = Int32.Parse(strUser);
+                int intManager = Int32.Parse(strManager);
+                if (oUser.Get(intUser, "manager") != strManager)
+                {
+                    oUser.Update(intUser, intManager);
+                }                      
+                 
+            }          
+        }         
+        Response.Redirect(oPage.GetFullLink(intPage) + "?applicationid=" + drpApps.SelectedValue + "&div=App");        
+    }
+</script> 
+<style type="text/css">
+<!--
+.dragme{position:relative;}
+.DragContainer, .OverDragContainer, .Container {
+  float: left;
+  margin: 3px;
+  width: 200px;
+  border: #669999 2px solid;
+  padding: 5px;
+}
+
+.DragBox, .OverDragBox, .DragDragBox, .miniDragBox {
+  border: #000 1px solid;
+  padding: 2px;
+  margin: 5px;
+  font-size: 10px;
+  margin-bottom: 5px;
+  width: 150px;
+  cursor: pointer;
+  font-family: verdana, tahoma, arial;
+  background-color: #eee;   
+   
+}
+
+.OverDragContainer {
+	background-color: #eee;
+}
+
+.OverDragBox, .DragDragBox {
+  background-color: #ffff99;
+}
+
+.DragDragBox {
+  filter: alpha(opacity=50);
+  background-color: #ff99cc;
+}
+
+legend {
+  font-weight: bold;
+  font-size: 12px;
+  color: #666699;
+  font-family: verdana, tahoma, arial;
+}
+
+.miniDragBox {
+  float: left;
+  margin: 0 5px 5px 0;
+  width: 20px;
+  height: 20px;
+} 
+-->
+</style>
+<script type="text/javascript">
+// iMouseDown represents the current mouse button state: up or down
+/*
+lMouseState represents the previous mouse button state so that we can
+check for button clicks and button releases:
+
+if(iMouseDown && !lMouseState) // button just clicked!
+if(!iMouseDown && lMouseState) // button just released!
+*/
+var mouseOffset = null;
+var iMouseDown  = false;
+var lMouseState = false;
+var dragObject  = null;
+
+// Demo 0 variables
+var DragDrops   = [];
+ 
+var curTarget   = null;
+var lastTarget  = null;
+var dragHelper  = null;
+var tempDiv     = null;
+var rootParent  = null;
+var rootSibling = null;
+
+Number.prototype.NaN0=function(){return isNaN(this)?0:this;}
+
+var dragObject  = null;
+var mouseOffset = null;
+
+
+var hiddenVals = null;
+
+var arrVals = new Array();   
+  
+ Array.prototype.find = function (element) 
+  {
+        var pos = -1; 
+          for (var i = 0; i < this.length; i++) 
+          {
+              var id = this[i].substring(this[i].indexOf(':')+1);        
+              if (id == element) 
+              {       
+                 pos = i; 
+              }
+          }
+          return pos;
+  };   
+
+
+function CreateDragContainer(){ 
+  
+    
+	/*
+	Create a new "Container Instance" so that items from one "Set" can not
+	be dragged into items from another "Set"
+	*/
+	var cDrag        = DragDrops.length;
+	DragDrops[cDrag] = [];	
+	var split = arguments[0].split(',');
+ 
+	 
+	 
+	/*
+	Each item passed to this function should be a "container".  Store each
+	of these items in our current container
+	*/
+	//for(var i=0; i<arguments.length; i++){
+	for(var i=0; i<split.length; i++){
+	  
+	    //var cObj = arguments[i];	 	
+	    var obj = split[i].replace(/'/g,"");    	    
+	    var cObj = document.getElementById(obj);	     	     
+		DragDrops[cDrag].push(cObj);		 	  	 
+        cObj.setAttribute('DropObj', cDrag);  	    	                 
+		/*
+		Every top level item in these containers should be draggable.  Do this
+		by setting the DragObj attribute on each item and then later checking
+		this attribute in the mouseMove function
+		*/
+		for(var j=0; j<cObj.childNodes.length; j++){
+          
+			// Firefox puts in lots of #text nodes...skip these
+			if(cObj.childNodes[j].nodeName=='#text') continue;
+			cObj.childNodes[j].setAttribute('DragObj', cDrag);
+		}
+	}
+	 
+}
+
+function getMouseOffset(target, ev){
+	ev = ev || window.event;
+	var docPos    = getPosition(target);
+	var mousePos  = mouseCoords(ev);
+	return {x:mousePos.x - docPos.x, y:mousePos.y - docPos.y};
+}
+
+function getPosition(e){
+	var left = 0;
+	var top  = 0;
+
+	while (e.offsetParent){
+		left += e.offsetLeft;
+		top  += e.offsetTop;
+		e     = e.offsetParent;
+	}
+
+	left += e.offsetLeft;
+	top  += e.offsetTop;
+
+	return {x:left, y:top};
+}
+
+function mouseMove(ev){
+	ev           = ev || window.event;
+	var mousePos = mouseCoords(ev);
+
+	if(dragObject){
+		dragObject.style.position = 'absolute';
+		dragObject.style.top      = mousePos.y - mouseOffset.y;
+		dragObject.style.left     = mousePos.x - mouseOffset.x;
+
+		return false;
+	}
+}
+function mouseUp(){
+	dragObject = null;
+}
+
+function makeDraggable(item){
+	if(!item) return;
+	item.onmousedown = function(ev){
+		dragObject  = this;
+		mouseOffset = getMouseOffset(this, ev);
+		return false;
+	}
+} 
+
+function mouseCoords(ev){   
+     if(ev.pageX || ev.pageY){   
+         return {x:ev.pageX, y:ev.pageY};   
+     }   
+     return {   
+         x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,   
+         y:ev.clientY + document.body.scrollTop  - document.body.clientTop   
+     };   
+ }   
+
+
+function mouseMove(ev){
+	ev         = ev || window.event;
+
+	/*
+	We are setting target to whatever item the mouse is currently on
+
+	Firefox uses event.target here, MSIE uses event.srcElement
+	*/
+	var target   = ev.target || ev.srcElement;
+	var mousePos = mouseCoords(ev);
+
+	// mouseOut event - fires if the item the mouse is on has changed
+	if(lastTarget && (target!==lastTarget)){
+		// reset the classname for the target element
+		var origClass = lastTarget.getAttribute('origClass');
+		if(origClass) lastTarget.className = origClass;
+	}
+
+	/*
+	dragObj is the grouping our item is in (set from the createDragContainer function).
+	if the item is not in a grouping we ignore it since it can't be dragged with this
+	script.
+	*/
+	var dragObj = target.getAttribute('DragObj');
+
+	 // if the mouse was moved over an element that is draggable
+	if(dragObj!=null){
+
+		// mouseOver event - Change the item's class if necessary
+		if(target!=lastTarget){
+			var oClass = target.getAttribute('overClass');
+			if(oClass){
+				target.setAttribute('origClass', target.className);
+				target.className = oClass;
+			}
+		}
+
+		// if the user is just starting to drag the element
+		if(iMouseDown && !lMouseState){
+			// mouseDown target
+			curTarget     = target;
+			
+
+			// Record the mouse x and y offset for the element
+			rootParent    = curTarget.parentNode;
+			rootSibling   = curTarget.nextSibling;
+
+			mouseOffset   = getMouseOffset(target, ev);
+
+			// We remove anything that is in our dragHelper DIV so we can put a new item in it.
+			for(var i=0; i<dragHelper.childNodes.length; i++) dragHelper.removeChild(dragHelper.childNodes[i]);
+
+			// Make a copy of the current item and put it in our drag helper.
+			dragHelper.appendChild(curTarget.cloneNode(true));
+			dragHelper.style.display = 'block';
+
+			// set the class on our helper DIV if necessary
+			var dragClass = curTarget.getAttribute('dragClass');
+			if(dragClass){
+				dragHelper.firstChild.className = dragClass;
+			}
+
+			// disable dragging from our helper DIV (it's already being dragged)
+			dragHelper.firstChild.removeAttribute('DragObj');
+
+			/*
+			Record the current position of all drag/drop targets related
+			to the element.  We do this here so that we do not have to do
+			it on the general mouse move event which fires when the mouse
+			moves even 1 pixel.  If we don't do this here the script
+			would run much slower.
+			*/
+			var dragConts = DragDrops[dragObj];
+
+			/*
+			first record the width/height of our drag item.  Then hide it since
+			it is going to (potentially) be moved out of its parent.
+			*/
+			curTarget.setAttribute('startWidth',  parseInt(curTarget.offsetWidth));
+			curTarget.setAttribute('startHeight', parseInt(curTarget.offsetHeight));
+			curTarget.style.display  = 'none';
+
+			// loop through each possible drop container
+			for(var i=0; i<dragConts.length; i++){
+				with(dragConts[i]){
+					var pos = getPosition(dragConts[i]);
+
+					/*
+					save the width, height and position of each container.
+
+					Even though we are saving the width and height of each
+					container back to the container this is much faster because
+					we are saving the number and do not have to run through
+					any calculations again.  Also, offsetHeight and offsetWidth
+					are both fairly slow.  You would never normally notice any
+					performance hit from these two functions but our code is
+					going to be running hundreds of times each second so every
+					little bit helps!
+
+					Note that the biggest performance gain here, by far, comes
+					from not having to run through the getPosition function
+					hundreds of times.
+					*/
+					setAttribute('startWidth',  parseInt(offsetWidth));
+					setAttribute('startHeight', parseInt(offsetHeight));
+					setAttribute('startLeft',   pos.x);
+					setAttribute('startTop',    pos.y);
+				}
+
+				// loop through each child element of each container
+				for(var j=0; j<dragConts[i].childNodes.length; j++){
+					with(dragConts[i].childNodes[j]){
+						if((nodeName=='#text') || (dragConts[i].childNodes[j]==curTarget)) continue;
+
+						var pos = getPosition(dragConts[i].childNodes[j]);
+
+						// save the width, height and position of each element
+						setAttribute('startWidth',  parseInt(offsetWidth));
+						setAttribute('startHeight', parseInt(offsetHeight));
+						setAttribute('startLeft',   pos.x);
+						setAttribute('startTop',    pos.y);
+					}
+				}
+			}
+		}
+	}
+
+	// If we get in here we are dragging something
+	if(curTarget){
+		// move our helper div to wherever the mouse is (adjusted by mouseOffset)
+		dragHelper.style.top  = mousePos.y - mouseOffset.y;
+		dragHelper.style.left = mousePos.x - mouseOffset.x;
+
+		var dragConts  = DragDrops[curTarget.getAttribute('DragObj')];
+		var activeCont = null;
+
+		var xPos = mousePos.x - mouseOffset.x + (parseInt(curTarget.getAttribute('startWidth')) /2);
+		var yPos = mousePos.y - mouseOffset.y + (parseInt(curTarget.getAttribute('startHeight'))/2);
+
+		// check each drop container to see if our target object is "inside" the container
+		for(var i=0; i<dragConts.length; i++){
+			with(dragConts[i]){
+				if(((getAttribute('startLeft'))                               < xPos) &&
+					((getAttribute('startTop'))                                < yPos) &&
+					((getAttribute('startLeft') + getAttribute('startWidth'))  > xPos) &&
+					((getAttribute('startTop')  + getAttribute('startHeight')) > yPos)){
+
+						/*
+						our target is inside of our container so save the container into
+						the activeCont variable and then exit the loop since we no longer
+						need to check the rest of the containers
+						*/
+						activeCont = dragConts[i];
+						 
+
+						// exit the for loop
+						break;
+				}
+			}
+		}
+
+		// Our target object is in one of our containers.  Check to see where our div belongs
+		if(activeCont){
+			// beforeNode will hold the first node AFTER where our div belongs
+			var beforeNode = null;
+
+			// loop through each child node (skipping text nodes).
+			for(var i=activeCont.childNodes.length-1; i>=0; i--){
+				with(activeCont.childNodes[i]){
+					if(nodeName=='#text') continue;
+
+					// if the current item is "After" the item being dragged
+					if(
+						curTarget != activeCont.childNodes[i]                              &&
+						((getAttribute('startLeft') + getAttribute('startWidth'))  > xPos) &&
+						((getAttribute('startTop')  + getAttribute('startHeight')) > yPos)){
+							beforeNode = activeCont.childNodes[i];
+					}
+				}
+			}
+
+			// the item being dragged belongs before another item
+			if(beforeNode){
+				if(beforeNode!=curTarget.nextSibling){	
+				   // hiddenVals.value += curTarget.parentNode.id + ':'+ beforeNode.id+',';  				       
+				      var pos1 = arrVals.find(curTarget.id);
+				      if(pos1 == -1) arrVals[arrVals.length] =  beforeNode.parentNode.id+':'+curTarget.id;
+				      else arrVals.splice(pos1,1,beforeNode.parentNode.id+':'+curTarget.id);				     			           
+					activeCont.insertBefore(curTarget, beforeNode);
+				}
+
+			// the item being dragged belongs at the end of the current container
+			} else {
+				if((curTarget.nextSibling) || (curTarget.parentNode!=activeCont)){
+				    
+				      var pos2 = arrVals.find(curTarget.id);
+				      if(pos2 == -1) arrVals[arrVals.length] =  activeCont.id+':'+curTarget.id;
+				      else arrVals.splice(pos2,1,activeCont.id+':'+curTarget.id);   
+					  activeCont.appendChild(curTarget);
+				}
+			}
+
+			// make our drag item visible
+			if(curTarget.style.display!=''){			    
+				curTarget.style.display  = '';
+			}
+		} else {
+
+			// our drag item is not in a container, so hide it.
+			if(curTarget.style.display!='none'){		    
+				curTarget.style.display  = 'none';
+			}
+		}
+	}
+
+	// track the current mouse state so we can compare against it next time
+	lMouseState = iMouseDown;
+
+	// mouseMove target
+	lastTarget  = target;
+
+	// track the current mouse state so we can compare against it next time
+	lMouseState = iMouseDown;
+	
+	if(hiddenVals != null)
+	  hiddenVals.value = arrVals;
+
+	// this helps prevent items on the page from being highlighted while dragging
+	return false;
+}
+
+
+
+function mouseUp(ev){
+	if(curTarget){
+		// hide our helper object - it is no longer needed
+		dragHelper.style.display = 'none';
+
+		// if the drag item is invisible put it back where it was before moving it
+		if(curTarget.style.display == 'none'){
+			if(rootSibling){
+				rootParent.insertBefore(curTarget, rootSibling);
+			} else {
+				rootParent.appendChild(curTarget);
+			}
+			
+		}
+
+		// make sure the drag item is visible
+		curTarget.style.display = '';
+	}
+	curTarget  = null;
+	iMouseDown = false;
+}
+
+function mouseDown(){
+	iMouseDown = true;
+	if(lastTarget){
+		return false;
+	}
+}
+
+
+
+document.onmousemove = mouseMove;
+document.onmousedown = mouseDown;
+document.onmouseup   = mouseUp;
+
+
+window.onload = function(){         
+     
+	// Create our helper object that will show the item while dragging
+	var MyInfo = '<%= boolMyInfo  %>';
+    var MySchdTimeOff = '<%= boolMySchdTimeOff %>';
+    var OutofOfficeBuddies = '<%= boolOutofOfficeBuddies %>';
+    var MyDirectReports = '<%= boolMyDirectReports  %>';     
+    var MyDirectReportsSchdTimeOff = '<%= boolMyDirectReportsSchdTimeOff %> ';
+    var ApplicationMgmt = '<%= boolApplicationMgmt %>'; 
+    
+	if(ApplicationMgmt == 'True') {	
+   	  dragHelper = document.createElement('DIV');
+      dragHelper.style.cssText = 'position:absolute;display:none;'; 
+  	  var oDiv = document.getElementsByTagName('div');	 
+  	  var args = "";
+      for(var i = 0; i < oDiv.length ; i++) {
+        if(oDiv.item(i).id.match('DragContainer') != null) {
+           var oItem = oDiv.item(i);                           
+           args +=oItem.id+',';
+        }  
+      }  
+      args = args.slice(0,-1); // Remove the last ','
+      if(args != "") CreateDragContainer(args);  	
+      document.body.appendChild(dragHelper);	
+	}	
+	hiddenVals = document.getElementById('<%= hdnValues.ClientID %>');       
+    var a1 = document.getElementById('a1');   
+    var a2 = document.getElementById('a2');   
+    var a3 = document.getElementById('a3');   
+    var a4 = document.getElementById('a4');   
+    var a5 = document.getElementById('a5');   
+    var a6 = document.getElementById('a6');
+    
+    if(MyInfo == 'True') ChangeTab(a1,'divTab1',null,null,false);
+    else if(MySchdTimeOff == 'True') ChangeTab(a2,'divTab2',null,null,false);
+    else if(OutofOfficeBuddies == 'True') ChangeTab(a3,'divTab3',null,null,false);
+    else if(MyDirectReports == 'True') ChangeTab(a4,'divTab4',null,null,false);
+    else if(MyDirectReportsSchdTimeOff == 'True') ChangeTab(a5,'divTab5',null,null,false);
+    else if(ApplicationMgmt == 'True') ChangeTab(a6,'divTab6',null,null,false); 
+    
+}
+</script>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="default">
+    <tr>
+        <td><img src="/images/table_topleft.gif" border="0" width="5" height="26" /></td>
+        <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%"><asp:Label ID="lblTitle" runat="server" CssClass="greentableheader" /></td>
+        <td><img src="/images/table_topright.gif" border="0" width="5" height="26" /></td>
+    </tr>
+    <tr>
+        <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+        <td width="100%" bgcolor="#FFFFFF">
+            <br />  
+            <asp:Panel id="panSettings" runat="server">
+             <table cellpadding="0" cellspacing="0" border="0">
+                 <tr>
+                     <td><img src="/images/TabEmptyBackground.gif" /></td>
+                     <td><img src="/images/TabOnLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOnBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab1',null,null,false);" class="tabheader" id="a1">My Information</a></td>
+                     <td><img src="/images/TabOnRightCap.gif" /></td>
+                     <td><img src="/images/TabOffLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOffBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab2',null,null,false);" class="tabheader" id="a2">My Scheduled Time Off</a></td>
+                     <td><img src="/images/TabOffRightCap.gif" /></td>
+                     <td><img src="/images/TabOffLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOffBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab3',null,null,false);" class="tabheader" id="a3">Out of Office Buddies</a></td>
+                     <td><img src="/images/TabOffRightCap.gif" /></td>
+                     <td><img src="/images/TabOffLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOffBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab4',null,null,false);" class="tabheader" id="a4">My Direct Reports</a></td>
+                     <td><img src="/images/TabOffRightCap.gif" /></td>
+                     <td><img src="/images/TabOffLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOffBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab5',null,null,false);" class="tabheader" id="a5">My Direct Reports Scheduled Time Off</a></td>                                                
+                     <td><img src="/images/TabOffRightCap.gif" /></td>
+                     <td><img src="/images/TabOffLeftCap.gif" /></td>
+                     <td nowrap background="/images/TabOffBackground.gif"><a href="javascript:void(0);" onclick="ChangeTab(this,'divTab6',null,null,false);" class="tabheader" id="a6">Application Management</a></td>                                                
+                     <td><img src="/images/TabOffRightCap.gif" /></td>
+                     <td width="100%" background="/images/TabEmptyBackground.gif">&nbsp;</td>
+                 </tr>
+             </table>
+             <div id="divTab1" style='<%=boolMyInfo == true ? "display:inline" : "display:none" %>'>
+                <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                <asp:Panel ID="panProfile" runat="server" Visible="false">
+                <tr>
+                    <td colspan="2" align="center" class="bigcheck">
+                        <asp:Label ID="lblSaved" runat="server" Text="" Visible="false" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="hugeheader" colspan="2"><asp:Image ID="imgHeader" runat="server" BorderStyle="None" ImageAlign="AbsMiddle" /> My Information</td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Username:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtUser" CssClass="default" runat="server" Width="150" MaxLength="30" Enabled="false"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>First name:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtFirst" CssClass="default" runat="server" Width="200" MaxLength="100"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Last name:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtLast" CssClass="default" runat="server" Width="200" MaxLength="100"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Phone:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtPhone" CssClass="default" runat="server" Width="100" MaxLength="15"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Pager:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtPager" CssClass="default" runat="server" Width="100" MaxLength="15"/> @ <asp:dropdownlist ID="ddlUserAt" CssClass="default" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Reports To:</b></td>
+                    <td width="100%"><asp:Label ID="lblManager" CssClass="default" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Vacation Days:</b></td>
+                    <td width="100%"><asp:Label ID="lblVacation" CssClass="default" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Is Manager:</b></td>
+                    <td width="100%"><asp:Label ID="lblIsManager" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Board Member:</b></td>
+                    <td width="100%"><asp:Label ID="lblBoard" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Director:</b></td>
+                    <td width="100%"><asp:Label ID="lblDirector" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap valign="top"><b>Special Skills:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtSkills" CssClass="default" runat="server" Width="300" Rows="5" TextMode="MultiLine" /></td>
+                </tr>
+                <tr>
+                    <td nowrap valign="top"><b>Picture:</b></td>
+                    <td width="100%"><asp:Image ID="imgPicture" runat="server" Width="90" Height="90" /> <asp:LinkButton ID="btnPicture" runat="server" Text="Change Photo" /></td>
+                </tr>
+                <tr>
+                    <td nowrap>&nbsp;</td>
+                    <td><asp:Button ID="btnProfile" CssClass="default" runat="server" Text="Save Profile" Width="125" OnClick="btnProfile_Click" /></td>
+                </tr>
+              </asp:Panel>
+                <asp:Panel ID="panManagerProfile" runat="server" Visible="false">
+                <tr>
+                    <td class="hugeheader" colspan="2"><asp:Image ID="imgManagerHeader" runat="server" BorderStyle="None" ImageAlign="AbsMiddle" /> Employee Information <asp:Label ID="lblHeader" CssClass="hugeheader" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Username:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerUser" CssClass="default" runat="server" Width="150" MaxLength="30" Enabled="false"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>First name:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerFirst" CssClass="default" runat="server" Width="200" MaxLength="100"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Last name:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerLast" CssClass="default" runat="server" Width="200" MaxLength="100"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Phone:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerPhone" CssClass="default" runat="server" Width="100" MaxLength="15"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Pager:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerPager" CssClass="default" runat="server" Width="100" MaxLength="15"/> @ <asp:dropdownlist ID="ddlManagerUserAt" CssClass="default" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Reports To:</b></td>
+                    <td width="100%"><asp:Label ID="lblManagerReports" CssClass="default" runat="server"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Vacation Days:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerVacation" CssClass="default" runat="server" Width="75" MaxLength="4"/></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Is Manager:</b></td>
+                    <td width="100%"><asp:CheckBox ID="chkManagerIsManager" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Board Member:</b></td>
+                    <td width="100%"><asp:Label ID="lblManagerBoard" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap><b>Director:</b></td>
+                    <td width="100%"><asp:Label ID="lblManagerDirector" CssClass="default" runat="server" /></td>
+                </tr>
+                <tr> 
+                    <td nowrap valign="top"><b>Special Skills:</b></td>
+                    <td width="100%"><asp:TextBox ID="txtManagerSkills" CssClass="default" runat="server" Width="300" Rows="5" TextMode="MultiLine" /></td>
+                </tr>
+                <tr>
+                    <td nowrap valign="top"><b>Picture:</b></td>
+                    <td width="100%"><asp:Image ID="imgManagerPicture" runat="server" Width="90" Height="90" /></td>
+                </tr>
+                <tr>
+                    <td nowrap>&nbsp;</td>
+                    <td><asp:Button ID="btnManager" CssClass="default" runat="server" Text="Save Profile" Width="125" OnClick="btnManager_Click" /> <asp:Button ID="btnCancel" CssClass="default" runat="server" Text="Cancel Changes" Width="125" OnClick="btnCancel_Click" /></td>
+                </tr>
+            </asp:Panel>
+                   
+                </table>   
+             </div>
+             <div id="divTab2" style='<%=boolMySchdTimeOff == true ? "display:inline" : "display:none" %>'>
+               <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                
+                 <tr>
+                    <td class="hugeheader" colspan="2"><img src="/images/clock.gif" border="0" align="absmiddle" /> My Scheduled Time Off <asp:Label ID="lblVacationName" CssClass="hugeheader" runat="server"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table width="100%" cellpadding="4" cellspacing="0" border="0" align="center" style="border:solid 1px #CCCCCC">
+                            <tr bgcolor="#EEEEEE">
+                                <td><b>Date</b></td>
+                                <td><b>Type</b></td>
+                                <td><b>Reason</b></td>
+                                <td><b>Status</b></td>
+                                <td></td>
+                            </tr>
+                            <asp:repeater ID="rptVacation" runat="server">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# DateTime.Parse(DataBinder.Eval(Container.DataItem, "start_date").ToString()).ToString("ddd, MMM dd, yyyy")%></td>
+                                        <td><%# DataBinder.Eval(Container.DataItem, "duration") %></td>
+                                        <td><%# DataBinder.Eval(Container.DataItem, "reason") %></td>
+                                        <td><%# (DataBinder.Eval(Container.DataItem, "approved").ToString() == "1" ? "Approved" : "Pending") %></td>
+                                        <td align="right">[<asp:LinkButton ID="btnDeleteVacation" runat="server" Text="Delete" OnClick="btnDeleteVacation_Click" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "vacationid") %>' />]</td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:repeater>
+                            <tr>
+                                <td colspan="5">
+                                    <asp:Label ID="lblNone" runat="server" CssClass="default" Visible="false" Text="<img src='/images/spacer.gif' border='0' height='1' width='25' /><img src='/images/alert.gif' border='0' align='absmiddle'> No scheduled time off" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>                   
+                </table> 
+             </div> 
+             <div id="divTab3" style='<%=boolOutofOfficeBuddies == true ? "display:inline" : "display:none" %>'>
+               <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                     <tr>
+                    <td class="hugeheader" colspan="2">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td class="hugeheader"><img src="/images/buddy.gif" border="0" align="absmiddle" /> Out of Office Buddies</td>
+                                <td align="right"><asp:Button ID="btnAddBuddy" runat="server" CssClass="default" Width="100" Text="Add Buddy" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table width="100%" cellpadding="4" cellspacing="0" border="0" align="center" style="border:solid 1px #CCCCCC">
+                            <tr bgcolor="#EEEEEE">
+                                <td><b>Buddy Name</b></td>
+                                <td></td>
+                            </tr>
+                            <asp:repeater ID="rptBuddies" runat="server">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# DataBinder.Eval(Container.DataItem, "fullname") %></td>
+                                        <td align="right">[<asp:LinkButton ID="btnDeleteBuddy" runat="server" Text="Delete" OnClick="btnDeleteBuddy_Click" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "id") %>' />]</td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:repeater>
+                            <tr>
+                                <td colspan="2">
+                                    <asp:Label ID="lblNoBuddies" runat="server" CssClass="default" Visible="false" Text="<img src='/images/spacer.gif' border='0' height='1' width='25' /><img src='/images/alert.gif' border='0' align='absmiddle'> No buddies" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                   </tr>              
+                </table> 
+             </div>
+             <div id="divTab4" style='<%=boolMyDirectReports == true ? "display:inline" : "display:none" %>'>
+               <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                   <tr>
+                    <td class="hugeheader" colspan="2"><img src="/images/reports.gif" border="0" align="absmiddle" /> My Direct Reports</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <asp:repeater ID="rptView" runat="server">
+                            <HeaderTemplate>
+                                <table width="100%" cellpadding="4" cellspacing="0" border="0" align="center" style="border:solid 1px #CCCCCC">
+                                    <tr bgcolor="#EEEEEE">
+                                        <td><b>&nbsp;</b></td>
+                                        <td><b>Employee Name</b></td>
+                                        <td><b>Vacation</b></td>
+                                        <td><b>Personal</b></td>
+                                        <td><b>Floating</b></td>
+                                        <td><b>&nbsp;</b></td>
+                                        <td><b>&nbsp;</b></td>
+                                    </tr>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <tr>
+                                    <td nowrap><%=intCount++%>)</td>
+                                    <td width="100%"><%# DataBinder.Eval(Container.DataItem, "username") %></td>
+                                    <td nowrap align="center"><%# DataBinder.Eval(Container.DataItem, "vv") %></td>
+                                    <td nowrap align="center"><%# DataBinder.Eval(Container.DataItem, "pp") %></td>
+                                    <td nowrap align="center"><%# DataBinder.Eval(Container.DataItem, "ff") %></td>
+                                    <td nowrap>[<asp:LinkButton ID="btnEdit" OnClick="btnEdit_Click" runat="server" ToolTip="Edit" Text="Edit" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "userid") %>' />]</td>
+                                    <td nowrap>[<asp:LinkButton ID="btnDelete" OnClick="btnDelete_Click" runat="server" ToolTip="Remove" Text="Remove" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "userid") %>' />]</td>
+                                </tr>
+                            </ItemTemplate>
+                            <FooterTemplate>
+                                </table>
+                            </FooterTemplate>
+                        </asp:repeater>
+                    </td>
+                </tr> 
+                    <tr>
+                    <td colspan="2">
+                        <table cellpadding="3" cellspacing="2" border="0">
+                            <tr>
+                                <td colspan="3" class="header">Add Existing User to My Direct Reports</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2"><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                                <td nowrap>LAN ID:</td>
+                                <td width="100%">
+                                    <table cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td><asp:TextBox ID="txtReport" runat="server" Width="300" CssClass="default" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div id="divReport" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                                    <asp:ListBox ID="lstReport" runat="server" CssClass="default" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap>&nbsp;</td>
+                                <td width="100%"><asp:Button ID="btnReport" CssClass="default" runat="server" Text="Add User" Width="100" OnClick="btnReport_Click" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+	            <tr>
+	                <td colspan="2"><span style="width:100%;border-bottom:1 dotted #999999;"/></td>
+	            </tr>             
+                </table> 
+             </div>
+             <div id="divTab5" style='<%=boolMyDirectReportsSchdTimeOff == true ? "display:inline" : "display:none" %>'>
+               <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                    <tr>
+                    <td class="hugeheader" colspan="2"><img src="/images/reportstime.gif" border="0" align="absmiddle" /> My Direct Reports Scheduled Time Off</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                    <table width="100%" cellpadding="4" cellspacing="0" border="0" align="center" style="border:solid 1px #CCCCCC">
+                        <tr bgcolor="#EEEEEE">
+                            <td><b>Employee Name</b></td>
+                            <td><b>Date</b></td>
+                            <td><b>Type</b></td>
+                            <td><b>Reason</b></td>
+                            <td><b>&nbsp;</b></td>
+                            <td><b>&nbsp;</b></td>
+                        </tr>
+                            <asp:repeater ID="rptReportsVacation" runat="server">
+                            <ItemTemplate>
+                                <tr>
+                                    <td width="100%"><%# oUser.GetFullName(Int32.Parse(DataBinder.Eval(Container.DataItem, "userid").ToString())) %></td>
+                                    <td nowrap><%# DateTime.Parse(DataBinder.Eval(Container.DataItem, "start_date").ToString()).ToString("ddd, MMM dd, yyyy")%></td>
+                                    <td nowrap><%# DataBinder.Eval(Container.DataItem, "duration") %></td>
+                                    <td nowrap><%# DataBinder.Eval(Container.DataItem, "reason") %></td>
+                                    <td nowrap>[<asp:LinkButton ID="btnApprove" OnClick="btnApprove_Click" runat="server" ToolTip="Approve" Text="Approve" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "vacationid") %>' />]</td>
+                                    <td nowrap>[<asp:LinkButton ID="btnDeny" OnClick="btnDeny_Click" runat="server" ToolTip="Deny" Text="Deny" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "vacationid") %>' />]</td>
+                                </tr>
+                            </ItemTemplate>
+                            </asp:repeater>
+                        <tr>
+                            <td colspan="6">
+                                <asp:Label ID="lblReports" runat="server" CssClass="default" Visible="false" Text="<img src='/images/spacer.gif' border='0' height='1' width='25' /><img src='/images/alert.gif' border='0' align='absmiddle'> None of your direct reports have pending requests" />
+                            </td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+                </table> 
+             </div>
+             <div id="divTab6" style='<%=boolApplicationMgmt == true ? "display:inline" : "display:none" %>'>
+                <br />
+                <table width="100%" cellpadding="0" cellspacing="5" border="0" class="default">
+                    <tr>
+                       <td>Application:</td>
+                       <td width="100%"><asp:DropDownList ID="drpApps" runat="server" CssClass="default" AutoPostBack="true" OnSelectedIndexChanged="Change_Apps" /> <asp:Button ID="btnSave" runat="server" CssClass="default" Text="Save" Width="75" OnClick="btnSave_Click" Visible="false"/></td>                                                
+                    </tr>  
+                   <asp:Panel ID="panAppMgmtView" runat="server" Visible="false">
+                    <tr>                       
+                       <td colspan="2">
+                           <%= strHTML %>                       
+                       </td>                                               
+                    </tr>
+                    <tr>               
+                       <td><b>Add User:</b></td>                     
+                       <td width="100%">
+                         <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td><asp:TextBox ID="txtUserApp" runat="server" Width="250" CssClass="default" /> <asp:Button ID="btnAddUserApp" runat="server" CssClass="default" Text="Add" width="75" OnClick="btnAddUserApp_Click"/></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="divUserApp" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                        <asp:ListBox ID="lstUserApp" runat="server" CssClass="default" /> 
+                                    </div>
+                                </td>                                 
+                            </tr>                                                
+                         </table>
+                       </td>                       
+                    </tr>                     
+                   </asp:Panel>                                                         
+                </table>                              
+             </div>           
+            </asp:Panel>                
+            <asp:Panel ID="panError" runat="server" Visible="false">
+                <table width="100%" cellpadding="2" cellspacing="2" border="0">
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td class="header"><img src="/images/bigX.gif" border="0" align="absmiddle" /> Profile Problem</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td>There is a problem with your profile, or it has been deleted from the system.  Please contact the system administrator.</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="2"><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td class="footer"></td>
+                                    <td align="right"><asp:Button ID="btnClose" runat="server" CssClass="default" Width="75" Text="Close" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <p>&nbsp;</p>
+        </td>
+        <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+    </tr>
+    <tr>
+        <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+        <td width="100%" background="/images/table_bottom.gif"></td>
+        <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+    </tr>
+</table>
+<asp:HiddenField ID="hdnReport" runat="server" /> 
+<asp:HiddenField ID="hdnUserID" runat="server" />
+<asp:HiddenField ID="hdnUserApp" runat="server" />
+<asp:HiddenField ID="hdnValues" runat="server" />

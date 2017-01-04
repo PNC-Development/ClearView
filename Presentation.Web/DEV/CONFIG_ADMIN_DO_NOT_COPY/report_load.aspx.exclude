@@ -1,0 +1,58 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Reports oReport = new Reports(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "select distinct	cv_users.userid from cv_users inner join cv_roles on cv_users.userid = cv_roles.userid and cv_roles.deleted = 0 and cv_roles.groupid <> 308");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intUser = Int32.Parse(dr["userid"].ToString());
+            oReport.AddRole(intUser, 1);
+        }
+    }
+    private void btnLoad2_Click(Object Sender, EventArgs e)
+    {
+        AppPages oAppPage = new AppPages(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "select applicationid from cv_applications where deleted = 0 and applicationid <> 187");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intApplication = Int32.Parse(dr["applicationid"].ToString());
+            oAppPage.Add(31, intApplication);
+        }
+    }
+</script>
+<html>
+<head>
+<title>Report Groups</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Reporting Load</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Load  Groups</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad_Click" /></td>
+        </tr>
+        <tr>
+            <td>Load  Page</td>
+            <td><asp:Button ID="btnLoad2" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad2_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

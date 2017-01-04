@@ -1,0 +1,85 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<%@ Import Namespace="System.Globalization" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Models oModel = new Models(0, dsn);
+        Types oType = new Types(0, dsn);
+        Platforms oPlatform = new Platforms(0, dsn);
+        int intCount = 0;
+        string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\NewFolder\\models.xls;Extended Properties=Excel 8.0;";
+        OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", strConn);
+        DataSet ds = new DataSet();
+        myCommand.Fill(ds, "ExcelInfo");
+        TextInfo oText = new CultureInfo("en-US", false).TextInfo;
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            string strPlatform = dr[0].ToString().Trim();
+            int intPlatform = GetPlatform(strPlatform);
+            if (intPlatform == 0)
+            {
+                oPlatform.Add(strPlatform, 0, "", 0, "", 1, 1, 1);
+                intPlatform = GetPlatform(strPlatform);
+            }
+            string strType = dr[1].ToString().Trim();
+            int intType = GetType(strType);
+            if (intType == 0)
+            {
+                oType.Add(intPlatform, strType, 1);
+                intType = GetType(strType);
+            }
+            string strModel = dr[2].ToString().Trim();
+            oModel.Add(intType, strModel, "", 1);
+            intCount = intCount + 1;
+        }
+        Response.Write("DONE<br/>");
+        Response.Write("Total Added: " + intCount.ToString() + "<br/>");
+    }
+    private int GetPlatform(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_platforms WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+            return 0;
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["platformid"].ToString());
+    }
+    private int GetType(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_types WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+            return 0;
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+</script>
+<html>
+<head>
+<title>II Database Models Import</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">II Database Models Import</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

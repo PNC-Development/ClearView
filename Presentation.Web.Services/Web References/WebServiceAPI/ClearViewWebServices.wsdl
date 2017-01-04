@@ -1,0 +1,1508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="CreateDNSforPNC">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectClass" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Aliases" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameService" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DynamicDNSUpdate" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="intUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="intAnswer" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="boolDeleteFiles" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateDNSforPNCResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateDNSforPNCResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateDNSforPNC">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectClass" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Aliases" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DomainName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NameService" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="DynamicDNSUpdate" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="intUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="intAnswer" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="boolDeleteFiles" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateDNSforPNCResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UpdateDNSforPNCResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteDNSforPNC">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="intUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="boolDeleteFiles" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteDNSforPNCResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteDNSforPNCResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchDNSforPNC">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="boolIsAlias" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="boolDeleteFiles" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchDNSforPNCResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchDNSforPNCResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetMacFromILO">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="_ilo" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="_environment" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="_delete_files" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetMacFromILOResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetMacFromILOResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateBluecatDNS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MacAddress" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateBluecatDNSResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateBluecatDNSResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateBluecatDNS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="MacAddress" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateBluecatDNSResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UpdateBluecatDNSResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteBluecatDNS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="IncludeStaging" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="Decommission" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteBluecatDNSResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteBluecatDNSResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchBluecatDNS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SearchBluecatDNSResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SearchBluecatDNSResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateBluecatDescriptionDNS">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObjectAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateBluecatDescriptionDNSResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UpdateBluecatDescriptionDNSResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGrid">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGridResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarGridResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddAvamarClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ipaddress" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddAvamarClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddAvamarClientResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarClientResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateAvamarClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="enabled" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateAvamarClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UpdateAvamarClientResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActivateAvamarClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActivateAvamarClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ActivateAvamarClientResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAvamarClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAvamarClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteAvamarClientResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarDomains">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarDomainsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarDomainsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarDomainClients">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="domain" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarDomainClientsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarDomainClientsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGroups">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGroupsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarGroupsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddAvamarGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_group_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddAvamarGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddAvamarGroupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGroupClients">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_group_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarGroupClientsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarGroupClientsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAvamarGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_group_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAvamarGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteAvamarGroupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarBackup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAvamarBackupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAvamarBackupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="StartAvamarBackup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="grid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_domain_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_group_name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fully_qualified_client_name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="StartAvamarBackupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="StartAvamarBackupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ConfigureWindowsIPAddress">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="intAnswer" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="intNumber" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="ScriptEnvironment" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strIP" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strServersDNS" type="tns:ArrayOfString" />
+            <s:element minOccurs="0" maxOccurs="1" name="strMACAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strSerial" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ConfigureWindowsIPAddressResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ConfigureWindowsIPAddressResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateServiceNowServer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IP" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Manufacturer" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Mnemonic" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Model" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ZeusBuildTypeForOperatingSystem" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Serial" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ServiceNowClass" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ServiceNowEnvironment" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="IsVirtual" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="Installed" type="s:dateTime" />
+            <s:element minOccurs="0" maxOccurs="1" name="ServiceNowLocation" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BuildingCodeForDataCenter" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CreateServiceNowServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CreateServiceNowServerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowServer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetServiceNowServerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DecomServiceNowServer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DecomServiceNowServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DecomServiceNowServerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DestroyServiceNowServer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DestroyServiceNowServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DestroyServiceNowServerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecomServiceNowServer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecomServiceNowServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecomServiceNowServerResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowIncidentNumber">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Number" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowIncidentNumberResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetServiceNowIncidentNumberResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowIncident">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="URL" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="ErrorID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="What" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetServiceNowIncidentResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetServiceNowIncidentResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="CreateDNSforPNCSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateDNSforPNC" />
+  </wsdl:message>
+  <wsdl:message name="CreateDNSforPNCSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateDNSforPNCResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateDNSforPNCSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateDNSforPNC" />
+  </wsdl:message>
+  <wsdl:message name="UpdateDNSforPNCSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateDNSforPNCResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteDNSforPNCSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteDNSforPNC" />
+  </wsdl:message>
+  <wsdl:message name="DeleteDNSforPNCSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteDNSforPNCResponse" />
+  </wsdl:message>
+  <wsdl:message name="SearchDNSforPNCSoapIn">
+    <wsdl:part name="parameters" element="tns:SearchDNSforPNC" />
+  </wsdl:message>
+  <wsdl:message name="SearchDNSforPNCSoapOut">
+    <wsdl:part name="parameters" element="tns:SearchDNSforPNCResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetMacFromILOSoapIn">
+    <wsdl:part name="parameters" element="tns:GetMacFromILO" />
+  </wsdl:message>
+  <wsdl:message name="GetMacFromILOSoapOut">
+    <wsdl:part name="parameters" element="tns:GetMacFromILOResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateBluecatDNSSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateBluecatDNS" />
+  </wsdl:message>
+  <wsdl:message name="CreateBluecatDNSSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateBluecatDNSResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateBluecatDNSSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateBluecatDNS" />
+  </wsdl:message>
+  <wsdl:message name="UpdateBluecatDNSSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateBluecatDNSResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteBluecatDNSSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteBluecatDNS" />
+  </wsdl:message>
+  <wsdl:message name="DeleteBluecatDNSSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteBluecatDNSResponse" />
+  </wsdl:message>
+  <wsdl:message name="SearchBluecatDNSSoapIn">
+    <wsdl:part name="parameters" element="tns:SearchBluecatDNS" />
+  </wsdl:message>
+  <wsdl:message name="SearchBluecatDNSSoapOut">
+    <wsdl:part name="parameters" element="tns:SearchBluecatDNSResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateBluecatDescriptionDNSSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateBluecatDescriptionDNS" />
+  </wsdl:message>
+  <wsdl:message name="UpdateBluecatDescriptionDNSSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateBluecatDescriptionDNSResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGridSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarGrid" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGridSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarGridResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddAvamarClientSoapIn">
+    <wsdl:part name="parameters" element="tns:AddAvamarClient" />
+  </wsdl:message>
+  <wsdl:message name="AddAvamarClientSoapOut">
+    <wsdl:part name="parameters" element="tns:AddAvamarClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarClientSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarClient" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarClientSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateAvamarClientSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateAvamarClient" />
+  </wsdl:message>
+  <wsdl:message name="UpdateAvamarClientSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateAvamarClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActivateAvamarClientSoapIn">
+    <wsdl:part name="parameters" element="tns:ActivateAvamarClient" />
+  </wsdl:message>
+  <wsdl:message name="ActivateAvamarClientSoapOut">
+    <wsdl:part name="parameters" element="tns:ActivateAvamarClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAvamarClientSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteAvamarClient" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAvamarClientSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteAvamarClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarDomainsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarDomains" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarDomainsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarDomainsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarDomainClientsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarDomainClients" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarDomainClientsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarDomainClientsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGroupsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarGroups" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGroupsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarGroupsResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddAvamarGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:AddAvamarGroup" />
+  </wsdl:message>
+  <wsdl:message name="AddAvamarGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:AddAvamarGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGroupClientsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarGroupClients" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarGroupClientsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarGroupClientsResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAvamarGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteAvamarGroup" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAvamarGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteAvamarGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarBackupSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAvamarBackup" />
+  </wsdl:message>
+  <wsdl:message name="GetAvamarBackupSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAvamarBackupResponse" />
+  </wsdl:message>
+  <wsdl:message name="StartAvamarBackupSoapIn">
+    <wsdl:part name="parameters" element="tns:StartAvamarBackup" />
+  </wsdl:message>
+  <wsdl:message name="StartAvamarBackupSoapOut">
+    <wsdl:part name="parameters" element="tns:StartAvamarBackupResponse" />
+  </wsdl:message>
+  <wsdl:message name="ConfigureWindowsIPAddressSoapIn">
+    <wsdl:part name="parameters" element="tns:ConfigureWindowsIPAddress" />
+  </wsdl:message>
+  <wsdl:message name="ConfigureWindowsIPAddressSoapOut">
+    <wsdl:part name="parameters" element="tns:ConfigureWindowsIPAddressResponse" />
+  </wsdl:message>
+  <wsdl:message name="CreateServiceNowServerSoapIn">
+    <wsdl:part name="parameters" element="tns:CreateServiceNowServer" />
+  </wsdl:message>
+  <wsdl:message name="CreateServiceNowServerSoapOut">
+    <wsdl:part name="parameters" element="tns:CreateServiceNowServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowServerSoapIn">
+    <wsdl:part name="parameters" element="tns:GetServiceNowServer" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowServerSoapOut">
+    <wsdl:part name="parameters" element="tns:GetServiceNowServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="DecomServiceNowServerSoapIn">
+    <wsdl:part name="parameters" element="tns:DecomServiceNowServer" />
+  </wsdl:message>
+  <wsdl:message name="DecomServiceNowServerSoapOut">
+    <wsdl:part name="parameters" element="tns:DecomServiceNowServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="DestroyServiceNowServerSoapIn">
+    <wsdl:part name="parameters" element="tns:DestroyServiceNowServer" />
+  </wsdl:message>
+  <wsdl:message name="DestroyServiceNowServerSoapOut">
+    <wsdl:part name="parameters" element="tns:DestroyServiceNowServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecomServiceNowServerSoapIn">
+    <wsdl:part name="parameters" element="tns:RecomServiceNowServer" />
+  </wsdl:message>
+  <wsdl:message name="RecomServiceNowServerSoapOut">
+    <wsdl:part name="parameters" element="tns:RecomServiceNowServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowIncidentNumberSoapIn">
+    <wsdl:part name="parameters" element="tns:GetServiceNowIncidentNumber" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowIncidentNumberSoapOut">
+    <wsdl:part name="parameters" element="tns:GetServiceNowIncidentNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowIncidentSoapIn">
+    <wsdl:part name="parameters" element="tns:GetServiceNowIncident" />
+  </wsdl:message>
+  <wsdl:message name="GetServiceNowIncidentSoapOut">
+    <wsdl:part name="parameters" element="tns:GetServiceNowIncidentResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ClearViewWebServicesSoap">
+    <wsdl:operation name="CreateDNSforPNC">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Create a DNS entry in QIP</wsdl:documentation>
+      <wsdl:input message="tns:CreateDNSforPNCSoapIn" />
+      <wsdl:output message="tns:CreateDNSforPNCSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateDNSforPNC">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Update a DNS entry in QIP</wsdl:documentation>
+      <wsdl:input message="tns:UpdateDNSforPNCSoapIn" />
+      <wsdl:output message="tns:UpdateDNSforPNCSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDNSforPNC">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Delete a DNS entry in QIP</wsdl:documentation>
+      <wsdl:input message="tns:DeleteDNSforPNCSoapIn" />
+      <wsdl:output message="tns:DeleteDNSforPNCSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchDNSforPNC">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Search a DNS entry in QIP</wsdl:documentation>
+      <wsdl:input message="tns:SearchDNSforPNCSoapIn" />
+      <wsdl:output message="tns:SearchDNSforPNCSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetMacFromILO">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the MAC Address of a Physical Server using the ILO</wsdl:documentation>
+      <wsdl:input message="tns:GetMacFromILOSoapIn" />
+      <wsdl:output message="tns:GetMacFromILOSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateBluecatDNS">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Create a DNS entry in Bluecat</wsdl:documentation>
+      <wsdl:input message="tns:CreateBluecatDNSSoapIn" />
+      <wsdl:output message="tns:CreateBluecatDNSSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDNS">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Update a DNS entry in Bluecat</wsdl:documentation>
+      <wsdl:input message="tns:UpdateBluecatDNSSoapIn" />
+      <wsdl:output message="tns:UpdateBluecatDNSSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteBluecatDNS">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Delete a DNS entry in Bluecat</wsdl:documentation>
+      <wsdl:input message="tns:DeleteBluecatDNSSoapIn" />
+      <wsdl:output message="tns:DeleteBluecatDNSSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchBluecatDNS">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Search a DNS entry in Bluecat</wsdl:documentation>
+      <wsdl:input message="tns:SearchBluecatDNSSoapIn" />
+      <wsdl:output message="tns:SearchBluecatDNSSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDescriptionDNS">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Update a DNS entry description in Bluecat</wsdl:documentation>
+      <wsdl:input message="tns:UpdateBluecatDescriptionDNSSoapIn" />
+      <wsdl:output message="tns:UpdateBluecatDescriptionDNSSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGrid">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the grid properties (server show-prop)</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarGridSoapIn" />
+      <wsdl:output message="tns:GetAvamarGridSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarClient">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Registers a client to the grid and adds it to the default group</wsdl:documentation>
+      <wsdl:input message="tns:AddAvamarClientSoapIn" />
+      <wsdl:output message="tns:AddAvamarClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarClient">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Gets the information related to a client</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarClientSoapIn" />
+      <wsdl:output message="tns:GetAvamarClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateAvamarClient">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Enable or Disable a client</wsdl:documentation>
+      <wsdl:input message="tns:UpdateAvamarClientSoapIn" />
+      <wsdl:output message="tns:UpdateAvamarClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActivateAvamarClient">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Activate a client</wsdl:documentation>
+      <wsdl:input message="tns:ActivateAvamarClientSoapIn" />
+      <wsdl:output message="tns:ActivateAvamarClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarClient">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retire a client</wsdl:documentation>
+      <wsdl:input message="tns:DeleteAvamarClientSoapIn" />
+      <wsdl:output message="tns:DeleteAvamarClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomains">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the domains for the grid (domain show)</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarDomainsSoapIn" />
+      <wsdl:output message="tns:GetAvamarDomainsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomainClients">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the clients of a domain</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarDomainClientsSoapIn" />
+      <wsdl:output message="tns:GetAvamarDomainClientsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroups">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the groups for the grid (group show)</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarGroupsSoapIn" />
+      <wsdl:output message="tns:GetAvamarGroupsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarGroup">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Registers a client to the grid and adds it to the default group</wsdl:documentation>
+      <wsdl:input message="tns:AddAvamarGroupSoapIn" />
+      <wsdl:output message="tns:AddAvamarGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroupClients">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the clients of a group</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarGroupClientsSoapIn" />
+      <wsdl:output message="tns:GetAvamarGroupClientsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarGroup">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Removes the group from a client</wsdl:documentation>
+      <wsdl:input message="tns:DeleteAvamarGroupSoapIn" />
+      <wsdl:output message="tns:DeleteAvamarGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarBackup">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get the output of a backup that was started</wsdl:documentation>
+      <wsdl:input message="tns:GetAvamarBackupSoapIn" />
+      <wsdl:output message="tns:GetAvamarBackupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="StartAvamarBackup">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Starts an on-demand backup</wsdl:documentation>
+      <wsdl:input message="tns:StartAvamarBackupSoapIn" />
+      <wsdl:output message="tns:StartAvamarBackupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ConfigureWindowsIPAddress">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Configure a server's IP Address</wsdl:documentation>
+      <wsdl:input message="tns:ConfigureWindowsIPAddressSoapIn" />
+      <wsdl:output message="tns:ConfigureWindowsIPAddressSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CreateServiceNowServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Create a server entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:CreateServiceNowServerSoapIn" />
+      <wsdl:output message="tns:CreateServiceNowServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get a server entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:GetServiceNowServerSoapIn" />
+      <wsdl:output message="tns:GetServiceNowServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DecomServiceNowServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Decom a server entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:DecomServiceNowServerSoapIn" />
+      <wsdl:output message="tns:DecomServiceNowServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DestroyServiceNowServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Destroy a server entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:DestroyServiceNowServerSoapIn" />
+      <wsdl:output message="tns:DestroyServiceNowServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecomServiceNowServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Recommission a server entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:RecomServiceNowServerSoapIn" />
+      <wsdl:output message="tns:RecomServiceNowServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncidentNumber">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get an incident entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:GetServiceNowIncidentNumberSoapIn" />
+      <wsdl:output message="tns:GetServiceNowIncidentNumberSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncident">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Get an incident entry in ServiceNow</wsdl:documentation>
+      <wsdl:input message="tns:GetServiceNowIncidentSoapIn" />
+      <wsdl:output message="tns:GetServiceNowIncidentSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ClearViewWebServicesSoap" type="tns:ClearViewWebServicesSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CreateDNSforPNC">
+      <soap:operation soapAction="http://tempuri.org/CreateDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateDNSforPNC">
+      <soap:operation soapAction="http://tempuri.org/UpdateDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDNSforPNC">
+      <soap:operation soapAction="http://tempuri.org/DeleteDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchDNSforPNC">
+      <soap:operation soapAction="http://tempuri.org/SearchDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMacFromILO">
+      <soap:operation soapAction="http://tempuri.org/GetMacFromILO" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateBluecatDNS">
+      <soap:operation soapAction="http://tempuri.org/CreateBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDNS">
+      <soap:operation soapAction="http://tempuri.org/UpdateBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteBluecatDNS">
+      <soap:operation soapAction="http://tempuri.org/DeleteBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchBluecatDNS">
+      <soap:operation soapAction="http://tempuri.org/SearchBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDescriptionDNS">
+      <soap:operation soapAction="http://tempuri.org/UpdateBluecatDescriptionDNS" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGrid">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarGrid" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarClient">
+      <soap:operation soapAction="http://tempuri.org/AddAvamarClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarClient">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateAvamarClient">
+      <soap:operation soapAction="http://tempuri.org/UpdateAvamarClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivateAvamarClient">
+      <soap:operation soapAction="http://tempuri.org/ActivateAvamarClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarClient">
+      <soap:operation soapAction="http://tempuri.org/DeleteAvamarClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomains">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarDomains" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomainClients">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarDomainClients" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroups">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarGroups" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarGroup">
+      <soap:operation soapAction="http://tempuri.org/AddAvamarGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroupClients">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarGroupClients" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarGroup">
+      <soap:operation soapAction="http://tempuri.org/DeleteAvamarGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarBackup">
+      <soap:operation soapAction="http://tempuri.org/GetAvamarBackup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="StartAvamarBackup">
+      <soap:operation soapAction="http://tempuri.org/StartAvamarBackup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConfigureWindowsIPAddress">
+      <soap:operation soapAction="http://tempuri.org/ConfigureWindowsIPAddress" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateServiceNowServer">
+      <soap:operation soapAction="http://tempuri.org/CreateServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowServer">
+      <soap:operation soapAction="http://tempuri.org/GetServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DecomServiceNowServer">
+      <soap:operation soapAction="http://tempuri.org/DecomServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DestroyServiceNowServer">
+      <soap:operation soapAction="http://tempuri.org/DestroyServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecomServiceNowServer">
+      <soap:operation soapAction="http://tempuri.org/RecomServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncidentNumber">
+      <soap:operation soapAction="http://tempuri.org/GetServiceNowIncidentNumber" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncident">
+      <soap:operation soapAction="http://tempuri.org/GetServiceNowIncident" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ClearViewWebServicesSoap12" type="tns:ClearViewWebServicesSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CreateDNSforPNC">
+      <soap12:operation soapAction="http://tempuri.org/CreateDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateDNSforPNC">
+      <soap12:operation soapAction="http://tempuri.org/UpdateDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDNSforPNC">
+      <soap12:operation soapAction="http://tempuri.org/DeleteDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchDNSforPNC">
+      <soap12:operation soapAction="http://tempuri.org/SearchDNSforPNC" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMacFromILO">
+      <soap12:operation soapAction="http://tempuri.org/GetMacFromILO" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateBluecatDNS">
+      <soap12:operation soapAction="http://tempuri.org/CreateBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDNS">
+      <soap12:operation soapAction="http://tempuri.org/UpdateBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteBluecatDNS">
+      <soap12:operation soapAction="http://tempuri.org/DeleteBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchBluecatDNS">
+      <soap12:operation soapAction="http://tempuri.org/SearchBluecatDNS" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateBluecatDescriptionDNS">
+      <soap12:operation soapAction="http://tempuri.org/UpdateBluecatDescriptionDNS" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGrid">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarGrid" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarClient">
+      <soap12:operation soapAction="http://tempuri.org/AddAvamarClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarClient">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateAvamarClient">
+      <soap12:operation soapAction="http://tempuri.org/UpdateAvamarClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivateAvamarClient">
+      <soap12:operation soapAction="http://tempuri.org/ActivateAvamarClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarClient">
+      <soap12:operation soapAction="http://tempuri.org/DeleteAvamarClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomains">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarDomains" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarDomainClients">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarDomainClients" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroups">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarGroups" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddAvamarGroup">
+      <soap12:operation soapAction="http://tempuri.org/AddAvamarGroup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarGroupClients">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarGroupClients" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAvamarGroup">
+      <soap12:operation soapAction="http://tempuri.org/DeleteAvamarGroup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAvamarBackup">
+      <soap12:operation soapAction="http://tempuri.org/GetAvamarBackup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="StartAvamarBackup">
+      <soap12:operation soapAction="http://tempuri.org/StartAvamarBackup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConfigureWindowsIPAddress">
+      <soap12:operation soapAction="http://tempuri.org/ConfigureWindowsIPAddress" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CreateServiceNowServer">
+      <soap12:operation soapAction="http://tempuri.org/CreateServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowServer">
+      <soap12:operation soapAction="http://tempuri.org/GetServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DecomServiceNowServer">
+      <soap12:operation soapAction="http://tempuri.org/DecomServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DestroyServiceNowServer">
+      <soap12:operation soapAction="http://tempuri.org/DestroyServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecomServiceNowServer">
+      <soap12:operation soapAction="http://tempuri.org/RecomServiceNowServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncidentNumber">
+      <soap12:operation soapAction="http://tempuri.org/GetServiceNowIncidentNumber" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetServiceNowIncident">
+      <soap12:operation soapAction="http://tempuri.org/GetServiceNowIncident" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ClearViewWebServices">
+    <wsdl:port name="ClearViewWebServicesSoap" binding="tns:ClearViewWebServicesSoap">
+      <soap:address location="http://localhost:64919/ClearViewWebServices.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ClearViewWebServicesSoap12" binding="tns:ClearViewWebServicesSoap12">
+      <soap12:address location="http://localhost:64919/ClearViewWebServices.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

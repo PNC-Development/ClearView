@@ -1,0 +1,159 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private string dsnIP = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["IpDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intProfile;
+    private Asset oAsset;
+    private Forecast oForecast;
+    private Workstations oWorkstation;
+    private ServiceRequests oServiceRequest;
+    private int intID = 0;
+    private int intRequest = 0;
+    private string strMenuTab1 = "";
+    private string strDivs = "";
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oAsset = new Asset(intProfile, dsnAsset);
+        oForecast = new Forecast(intProfile, dsn);
+        oWorkstation = new Workstations(intProfile, dsn);
+        oServiceRequest = new ServiceRequests(intProfile, dsn);
+
+        //Menu
+        int intMenuTab = 0;
+        if (Request.QueryString["menu_tab"] != null && Request.QueryString["menu_tab"] != "")
+            intMenuTab = Int32.Parse(Request.QueryString["menu_tab"]);
+        Tab oTab = new Tab("", intMenuTab, "divMenu1", true, false);
+        //End Menu
+        
+        if (Request.QueryString["id"] != null && Request.QueryString["id"] != "")
+        {
+            intID = Int32.Parse(Request.QueryString["id"]);
+            intRequest = oForecast.GetRequestID(intID, true);
+            DataSet dsRequest = oServiceRequest.Get(intRequest);
+            if (dsRequest.Tables[0].Rows.Count > 0)
+                Response.Redirect(Request.Path + "?rid=" + intRequest);
+        }
+        if (Request.QueryString["rid"] != null && Request.QueryString["rid"] != "")
+            intRequest = Int32.Parse(Request.QueryString["rid"]);
+        if (intID > 0)
+            panBegin.Visible = true;
+        else if (intRequest > 0)
+        {
+            intRequest = Int32.Parse(Request.QueryString["rid"]);
+            panStart.Visible = true;
+            DataSet ds = oWorkstation.GetVirtualRequests(intRequest);
+            int intCount = 0;
+            Functions oFunction = new Functions(intProfile, dsn, intEnvironment);
+            string strTab = "";
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                intCount++;
+                int intDevice = Int32.Parse(dr["id"].ToString());
+                int intAsset = Int32.Parse(dr["assetid"].ToString());
+                string strName = "Device " + intCount.ToString();
+                if (intAsset > 0)
+                {
+                    string strTempName = oAsset.Get(intAsset, "name");
+                    if (strTempName != "")
+                        strName = strTempName;
+                }
+                if (intCount == 1)
+                {
+                 
+                    
+                   // strTab += "<td><img src=\"/images/TabOnLeftCap.gif\"></td><td nowrap background=\"/images/TabOnBackground.gif\"><a href=\"javascript:void(0);\" onclick=\"ChangeTab(this,'divTab" + intCount.ToString() + "',null,null,true);\" class=\"tabheader\">" + strName + "</a></td><td><img src=\"/images/TabOnRightCap.gif\"></td>";
+                    oTab.AddTab(strName, "");
+                    strDivs += "<div id=\"divTab" + intCount.ToString() + "\" style=\"display:inline\"><iframe width=\"100%\" height=\"100%\" frameborder=\"0\" scrolling=\"no\" src=\"/ondemand/workstation.aspx?id=" + oFunction.encryptQueryString(intDevice.ToString()) + "&c=" + intCount.ToString() + "\"></iframe></div>";
+                }
+                else
+                {
+                    //strTab += "<td><img src=\"/images/TabOffLeftCap.gif\"></td><td nowrap background=\"/images/TabOffBackground.gif\"><a href=\"javascript:void(0);\" onclick=\"ChangeTab(this,'divTab" + intCount.ToString() + "',null,null,true);\" class=\"tabheader\">" + strName + "</a></td><td><img src=\"/images/TabOffRightCap.gif\"></td>";
+                    oTab.AddTab(strName, "");
+                    strDivs += "<div id=\"divTab" + intCount.ToString() + "\" style=\"display:none\"><iframe width=\"100%\" height=\"100%\" frameborder=\"0\" scrolling=\"no\" src=\"/ondemand/workstation.aspx?id=" + oFunction.encryptQueryString(intDevice.ToString()) + "&c=" + intCount.ToString() + "\"></iframe></div>";
+                }
+            }
+            //if (strTab != "")
+            //    strMenuTab1 += "<tr>" + strTab + "<td width=\"100%\" background=\"/images/TabEmptyBackground.gif\">&nbsp;</td></tr>";
+            //strMenuTab1 = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">" + strMenuTab1 + "</table>";
+            strMenuTab1 = oTab.GetTabs();
+            
+        }
+        btnStart.Attributes.Add("onclick", "return ProcessButton(this);");
+    }
+    private void btnStart_Click(Object Sender, EventArgs e)
+    {
+        intRequest = oForecast.GetRequestID(intID, true);
+        oForecast.UpdateAnswer(intID, intRequest);
+        oForecast.DeleteReset(intID);
+        oServiceRequest.Add(intRequest, 1, 1);
+        oForecast.UpdateAnswerExecuted(intID, intProfile);
+        oWorkstation.Start(intRequest);
+        Response.Redirect(Request.Path + "?rid=" + intRequest);
+    }
+    private void btnRefresh_Click(Object Sender, EventArgs e)
+    {
+        Response.Redirect(Request.Url.PathAndQuery);
+    }
+</script>
+<script type="text/javascript">
+</script>
+<asp:Panel ID="panBegin" runat="server" Visible="false">
+<table width="100%" height="100%" cellpadding="4" cellspacing="2" border="0">
+    <tr height="1">
+        <td colspan="2"><b>You are now ready to start the Auto-Provisioning Process.</b></td>
+    </tr>
+    <tr height="1">
+        <td valign="top" colspan="2">
+            <ul>
+                <li>You can view the status of this process at any time by clicking <b>Execute</b> on the line item in Design Builder.<br /><br /></li>
+                <li>You will be sent a <b>Birth Certificate</b> from your implementor when this process is completed.<br /><br /></li>
+                <li>Click <b>Start the Build</b> to Begin!<br /></li>
+            </ul>
+        </td>
+    </tr>
+    <tr height="1">
+        <td nowrap><img src="/images/spacer.gif" border="0" width="50" height="1" /></td>
+        <td width="100%">
+            <table width="100%" cellpadding="2" cellspacing="2" border="0">
+                <tr>
+                    <td rowspan="2"><img src="/images/step_1.gif" border="0" align="absmiddle" /></td>
+                    <td class="bigblue" width="100%" valign="bottom">Start the Build Now</td>
+                </tr>
+                <tr>
+                    <td valign="top">Click <b>Start the Build</b> to start your auto-provisioning build.</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><asp:Button ID="btnStart" runat="server" OnClick="btnStart_Click" Text="Start the Build" CssClass="default" Width="125" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+</table>
+</asp:Panel>
+<asp:Panel ID="panStart" runat="server" Visible="false">
+<table width="100%" height="100%" cellpadding="4" cellspacing="2" border="0">
+    <tr height="1">
+        <td valign="top">
+                <%=strMenuTab1 %>
+	            <div id="divMenu1"> 
+	            <%=strDivs %>
+	            </div> 
+	    </td>
+    </tr>
+    <!-- 
+    <tr height="1">
+        <td valign="top"><%=strMenuTab1 %></td>
+    </tr>
+    <tr>
+        <td valign="top"><%=strDivs %></td>
+    </tr>
+    -->
+</table>
+</asp:Panel>

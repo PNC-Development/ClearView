@@ -1,0 +1,93 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnUsers_Click(Object Sender, EventArgs e)
+    {
+        Users oUser = new Users(0, dsn);
+        int intXID = 0;
+        int intFirst = 1;
+        int intLast = 2;
+        int intManager = 3;
+        if (oFile.PostedFile != null)
+        {
+            string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + oFile.PostedFile.FileName + ";Extended Properties=Excel 8.0;";
+            OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [" + txtUser.Text + "$]", strConn);
+            DataSet ds = new DataSet();
+            myCommand.Fill(ds, "ExcelInfo");
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                string strXID = GetTestID(dr[intXID].ToString().Trim());
+                string strFirst = dr[intFirst].ToString().Trim();
+                string strLast = dr[intLast].ToString().Trim();
+                string strManager = GetTestID(dr[intManager].ToString().Trim());
+                int intNewManager = oUser.GetId(strManager);
+                if (chkTest.Checked == false)
+                    oUser.Add(strXID, strFirst, strLast, intNewManager, 0, 0, 0, "", 0, "", "", 0, 0, 1);
+                Response.Write("Successfully added " + strFirst + " " + strLast + "<br>");
+            }
+        }
+    }
+    private string GetTestID(string strID)
+    {
+        AD oAD = new AD(0, dsn, intEnvironment);
+        strID = "t" + strID.Substring(1);
+        SearchResultCollection oResult = oAD.Search(strID, "cn");
+        if (oResult.Count == 1)
+            return strID;
+        else
+        {
+            strID = "e" + strID.Substring(1);
+            oResult = oAD.Search(strID, "cn");
+            if (oResult.Count == 1)
+                return strID;
+            else
+                return "x" + strID.Substring(1);
+        }
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title>IMPORT FUNCTIONS</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+        <table>
+            <tr>
+                <td colspan="2" class="header">Import Users</td>
+            </tr>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td>File:</td>
+                <td><asp:FileUpload ID="oFile" runat="server" Width="450" CssClass="default" /></td>
+            </tr>
+            <tr>
+                <td>Sheet Name:</td>
+                <td><asp:TextBox ID="txtUser" runat="server" Width="100" CssClass="default" Text="Sheet1" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:CheckBox ID="chkTest" runat="server" CssClass="default" Text="Test Mode" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:Button ID="btnUsers" runat="server" CssClass="default" Width="150" Text="Import Users" OnClick="btnUsers_Click" /></td>
+            </tr>
+        </table>
+</form>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<%@ Page Language="C#" Debug="false" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intOSQuestion = Int32.Parse(ConfigurationManager.AppSettings["ForecastOSQuestionID"]);
+    private int intProfile;
+    private OnDemand oOnDemand;
+    private Forecast oForecast;
+    private Requests oRequest;
+    private Workstations oWorkstation;
+    private Storage oStorage;
+    private Models oModel;
+    private ModelsProperties oModelsProperties;
+    private OperatingSystems oOperatingSystem;
+    private int intAnswer = 0;
+    private int intNumber = 0;
+    private int intRequest = 0;
+    private int intOS = 0;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oOnDemand = new OnDemand(intProfile, dsn);
+        oForecast = new Forecast(intProfile, dsn);
+        oRequest = new Requests(intProfile, dsn);
+        oWorkstation = new Workstations(intProfile, dsn);
+        oStorage = new Storage(intProfile, dsn);
+        oModel = new Models(intProfile, dsn);
+        oModelsProperties = new ModelsProperties(intProfile, dsn);
+        oOperatingSystem = new OperatingSystems(intProfile, dsn);
+        if (Request.QueryString["aid"] != null && Request.QueryString["aid"] != "")
+            intAnswer = Int32.Parse(Request.QueryString["aid"]);
+        if (Request.QueryString["num"] != null && Request.QueryString["num"] != "")
+            intNumber = Int32.Parse(Request.QueryString["num"]);
+        int intWorkstation = 0;
+        if (intAnswer > 0)
+        {
+            DataSet ds = oForecast.GetAnswer(intAnswer);
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                int intModel = oForecast.GetModel(intAnswer);
+                intModel = Int32.Parse(oModelsProperties.Get(intModel, "modelid"));
+                int _classid = Int32.Parse(ds.Tables[0].Rows[0]["classid"].ToString());
+                int _environmentid = Int32.Parse(ds.Tables[0].Rows[0]["environmentid"].ToString());
+                intRequest = oForecast.GetRequestID(intAnswer, true);
+                if (!IsPostBack)
+                {
+                    if (ds.Tables[0].Rows.Count > 0)
+                    {
+                        LoadLists(_classid, _environmentid);
+                        ds = oWorkstation.Get(intAnswer, intNumber);
+                        if (ds.Tables[0].Rows.Count > 0)
+                        {
+                            intWorkstation = Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+                            lblId.Text = intWorkstation.ToString();
+                            intOS = Int32.Parse(ds.Tables[0].Rows[0]["osid"].ToString());
+                            if (intOS > 0)
+                            {
+                                ddlOS.SelectedValue = intOS.ToString();
+                                ddlServicePack.Enabled = true;
+                                ddlServicePack.DataValueField = "id";
+                                ddlServicePack.DataTextField = "name";
+                                ddlServicePack.DataSource = oOperatingSystem.GetServicePack(intOS);
+                                ddlServicePack.DataBind();
+                                ddlServicePack.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+                            }
+                            else
+                            {
+                                ServicePacks oServicePack = new ServicePacks(intProfile, dsn);
+                                ddlServicePack.DataValueField = "id";
+                                ddlServicePack.DataTextField = "name";
+                                ddlServicePack.DataSource = oServicePack.Gets(1);
+                                ddlServicePack.DataBind();
+                                ddlServicePack.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+                            }
+                            ddlServicePack.SelectedValue = ds.Tables[0].Rows[0]["spid"].ToString();
+                            ddlDomain.SelectedValue = ds.Tables[0].Rows[0]["domainid"].ToString();
+                        }
+                    }
+                }
+                btnClose.Attributes.Add("onclick", "return window.close();");
+                btnSaveConfig.Attributes.Add("onclick", "return ValidateDropDown('" + ddlServicePack.ClientID + "','Please select a service pack')" +
+                    " && ValidateDropDown('" + ddlDomain.ClientID + "','Please select a domain')" +
+                    ";");
+                ddlOS.Attributes.Add("onchange", "PopulateServicePacks('" + ddlOS.ClientID + "','" + ddlServicePack.ClientID + "');");
+                ddlServicePack.Attributes.Add("onchange", "UpdateDropDownHidden('" + ddlServicePack.ClientID + "','" + hdnServicePack.ClientID + "');");
+            }
+        }
+    }
+    private void LoadLists(int _classid, int _environmentid)
+    {
+        ddlOS.DataValueField = "id";
+        ddlOS.DataTextField = "name";
+        ddlOS.DataSource = oOperatingSystem.Gets(1, 1);
+        ddlOS.DataBind();
+        ddlOS.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+        Domains oDomain = new Domains(intProfile, dsn);
+        ddlDomain.DataValueField = "id";
+        ddlDomain.DataTextField = "name";
+        ddlDomain.DataSource = oDomain.GetClassEnvironment(_classid, _environmentid);
+        ddlDomain.DataBind();
+        ddlDomain.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+    }
+    private void btnSaveConfig_Click(Object Sender, EventArgs e)
+    {
+        int intConfigured = ((ddlOS.SelectedIndex > 0 && ddlServicePack.SelectedIndex > 0 && ddlDomain.SelectedIndex > 0) ? 1 : 0);
+        int intWorkstation = 0;
+        if (lblId.Text != "")
+        {
+            intWorkstation = Int32.Parse(lblId.Text);
+            oWorkstation.Update(intWorkstation, Int32.Parse(ddlOS.SelectedItem.Value), Int32.Parse(ddlServicePack.SelectedItem.Value), Int32.Parse(ddlDomain.SelectedItem.Value), intConfigured);
+        }
+        else
+            intWorkstation = oWorkstation.Add(intRequest, intAnswer, intNumber, Int32.Parse(ddlOS.SelectedItem.Value), Int32.Parse(ddlServicePack.SelectedItem.Value), Int32.Parse(ddlDomain.SelectedItem.Value), intConfigured);
+        Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "save", "<script type=\"text/javascript\">RefreshOpeningWindow();window.close();<" + "/" + "script>");
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title>ClearView | Workstation Configuration</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+<script src="/javascript/both.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+<table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr height="1">
+        <td>
+            <table width="100%" cellpadding="0" cellspacing="5" border="0">
+                <tr>
+                    <td rowspan="2"><img src="/images/device_config.gif" border="0" align="middle" /></td>
+                    <td class="header" width="100%" valign="bottom">Configure a Workstation</td>
+                </tr>
+                <tr>
+                    <td width="100%" valign="top">Prepare your workstation for build by completing the following questions.</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <div style="height:100%; overflow:auto">
+            <table width="100%" cellpadding="4" cellspacing="0" border="0">
+                <tr>
+                    <td nowrap>Operating System:<font class="required">&nbsp;*</font></td>
+                    <td width="100%"><asp:DropDownList ID="ddlOS" runat="server" CssClass="default" Width="250" /></td>
+                </tr>
+                <tr>
+                    <td nowrap>Service Pack Level:<font class="required">&nbsp;*</font></td>
+                    <td width="100%">
+                        <asp:DropDownList ID="ddlServicePack" CssClass="default" runat="server" Width="250" Enabled="false" >
+                            <asp:ListItem Value="-- Please select an Operating System --" />
+                        </asp:DropDownList>
+                    </td>
+                </tr>
+                <tr>
+                    <td nowrap>Domain:<font class="required">&nbsp;*</font></td>
+                    <td width="100%"><asp:DropDownList ID="ddlDomain" runat="server" CssClass="default" Width="250" /></td>
+                </tr>
+            </table>
+            </div>
+        </td>
+    </tr>
+    <tr height="1">
+        <td>
+            <table width="100%" cellpadding="4" cellspacing="2" border="0">
+                <tr>
+                    <td colspan="3"><hr size="1" noshade /></td>
+                </tr>
+                <tr>
+                    <td class="required">* = Required Field</td>
+                    <td align="center">
+                    </td>
+                    <td align="right">
+                        <asp:Button ID="btnSaveConfig" runat="server" Text="Save" CssClass="default" Width="75" OnClick="btnSaveConfig_Click" /> 
+                        <asp:Button ID="btnClose" runat="server" Text="Close" CssClass="default" Width="75" />
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<asp:Label ID="lblId" runat="server" Visible="false" />
+<input type="hidden" id="hdnServicePack" runat="server" />
+</form>
+</body>
+</html>

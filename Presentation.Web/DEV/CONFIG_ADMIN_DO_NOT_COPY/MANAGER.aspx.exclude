@@ -1,0 +1,85 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private DataSet ds;
+    private DataSet dsExcel;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnGo_Click(Object Sender, EventArgs e)
+    {
+        Users oUser = new Users(0, dsn);
+        int intXID = 0;
+        int intManager = 1;
+        if (oFile.PostedFile != null)
+        {
+            string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + oFile.PostedFile.FileName + ";Extended Properties=Excel 8.0;";
+            OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [" + txtSheet.Text + "$]", strConn);
+            dsExcel = new DataSet();
+            myCommand.Fill(dsExcel, "ExcelInfo");
+            ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_users WHERE deleted = 0");
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                int intId = 0;
+                bool boolFound = false;
+                foreach (DataRow drExcel in dsExcel.Tables[0].Rows)
+                {
+                    if (drExcel[intXID].ToString().Trim().ToUpper() == dr["xid"].ToString().Trim().ToUpper())
+                    {
+                        if (drExcel[intManager].ToString() == "1")
+                            intId = Int32.Parse(dr["userid"].ToString());
+                        boolFound = true;
+                        break;
+                    }
+                }
+                if (boolFound == true)
+                {
+                    if (intId > 0)
+                        SqlHelper.ExecuteDataset(dsn, CommandType.Text, "UPDATE cv_users SET ismanager = 1 WHERE userid = " + intId.ToString());
+                    Response.Write("Successfully found " + dr["xid"].ToString() + "<br>");
+                }
+                else
+                    Response.Write("NOT FOUND " + dr["xid"].ToString() + "<br>");
+            }
+        }
+        Response.Write("DONE!!");
+    }
+</script>
+<html>
+<head>
+<title>IMPORT DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">MANAGER FLAG LOAD</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+            <tr>
+                <td>File:</td>
+                <td><asp:FileUpload ID="oFile" runat="server" Width="450" CssClass="default" /></td>
+            </tr>
+            <tr>
+                <td>Sheet Name:</td>
+                <td><asp:TextBox ID="txtSheet" runat="server" Width="100" CssClass="default" Text="Sheet1" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:CheckBox ID="chkTest" runat="server" CssClass="default" Text="Test Mode" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><asp:Button ID="btnGo" runat="server" CssClass="default" Width="150" Text="Submit" OnClick="btnGo_Click" /></td>
+            </tr>
+    </table>
+</form>
+</body>
+</html>

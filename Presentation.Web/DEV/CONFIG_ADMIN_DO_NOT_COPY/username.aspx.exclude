@@ -1,0 +1,60 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private RequestFields oRequestField;
+    private void Page_Load()
+    {
+        oRequestField = new RequestFields(0, dsn);
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Users oUser = new Users(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_request_field_values WHERE deleted = 0 AND nameid = " + txtName.Text);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            try
+            {
+                int intTemp = Int32.Parse(dr["value"].ToString());
+            }
+            catch
+            {
+                string strName = dr["value"].ToString();
+                int intUser = oUser.GetIdName(strName);
+                if (intUser > 0)
+                    SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_request_field_values SET value = '" + intUser.ToString() + "' WHERE deleted = 0 AND requestid = " + dr["requestid"].ToString() + " AND itemid = " + dr["itemid"].ToString() + " AND nameid = " + dr["nameid"].ToString());
+            }
+        }
+        Response.Write("DONE");
+    }
+</script>
+<html>
+<head>
+<title>Clearview</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Fix Username</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Textbox ID="txtName" runat="server" CssClass="default" Width="150" /></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

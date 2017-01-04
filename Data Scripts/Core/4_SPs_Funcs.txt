@@ -1,0 +1,414 @@
+/*==============================================================
+The purpose of this script is to create procedures, functions and synonyms
+==============================================================*/
+
+CREATE PROCEDURE [dbo].[pr_addIncidentKB]
+	@error varchar(MAX),
+	@compare varchar(50),
+	@route varchar(100),
+	@automatic int,
+	@message varchar(MAX),
+	@priority int,
+	@workstation int,
+	@enabled int,
+	@id int output
+AS
+INSERT INTO
+	cv_incidents_kb
+VALUES
+(
+	@error,
+	@compare,
+	@route,
+	@automatic,
+	@message,
+	@priority,
+	@workstation,
+	@enabled,
+	getdate(),
+	getdate(),
+	0
+)
+SET @id = SCOPE_IDENTITY()
+GO
+
+CREATE PROCEDURE [dbo].[pr_updateIncidentKB]
+	@id int,
+	@error varchar(MAX),
+	@compare varchar(50),
+	@route varchar(100),
+	@automatic int,
+	@message varchar(MAX),
+	@priority int,
+	@workstation int,
+	@enabled int
+AS
+UPDATE
+	cv_incidents_kb
+SET
+	[error] = @error,
+	[compare] = @compare,
+	[route] = @route,
+	[automatic] = @automatic,
+	[message] = @message,
+	[priority] = @priority,
+	[workstation] = @workstation,
+	[enabled] = @enabled,
+	[modified] = getdate()
+WHERE
+	id = @id
+GO
+
+CREATE PROCEDURE [dbo].[pr_updateIncidentKBEnabled]
+	@id int,
+	@enabled int
+AS
+UPDATE
+	cv_incidents_kb
+SET
+	enabled = @enabled,
+	modified = getdate()
+WHERE
+	id = @id
+GO
+
+CREATE PROCEDURE [dbo].[pr_deleteIncidentKB]
+	@id int
+AS
+UPDATE
+	cv_incidents_kb
+SET
+	deleted = 1,
+	modified = getdate()
+WHERE
+	id = @id
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncidentKB]
+	@id int
+AS
+SELECT
+	*
+FROM
+	cv_incidents_kb
+WHERE
+	id = @id
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncidentKBs]
+	@enabled int
+AS
+SELECT
+	*
+FROM
+	cv_incidents_kb
+WHERE
+	deleted = 0
+	AND enabled >= @enabled
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncidentKBsError]
+	@error varchar(MAX)
+AS
+SELECT
+	*
+FROM
+	cv_incidents_kb
+WHERE
+	deleted = 0
+	AND enabled = 1
+	AND @error LIKE error + '%'
+GO
+
+CREATE PROCEDURE [dbo].[pr_addIncident]
+	@errorid int,
+	@workstation int,
+	@kbid int
+AS
+INSERT INTO
+	cv_incidents
+VALUES
+(
+	@errorid,
+	@workstation,
+	@kbid,
+	getdate(),
+	null, --@retrieved,
+	null, --@incident,
+	null, --@resolved,
+	null, --@resolved_by,
+	null, --@resolved_comments,
+	0
+)
+GO
+
+ALTER procedure [dbo].[pr_getWorkstationVirtualErrorsAll]
+AS
+SELECT
+	cv_workstation_virtual_errors.*,
+	cv_workstation_virtual.assetid,
+	CASE
+		WHEN cv_users.pnc_id IS NOT NULL AND cv_users.pnc_id <> '' THEN cv_users.pnc_id
+		ELSE cv_users.xid
+	END AS xid,
+	cv_workstation_names.environment + cv_workstation_names.code + cv_workstation_names.identifier + cv_workstation_names.prefix1 + cv_workstation_names.prefix2 + cv_workstation_names.prefix3 + cv_workstation_names.prefix4 + cv_workstation_names.prefix5 + cv_workstation_names.prefix6 AS name,
+	cv_domains.name AS domain
+FROM
+	cv_workstation_virtual_errors
+		INNER JOIN
+			cv_workstation_virtual
+				INNER JOIN 
+					cv_forecast_answers
+						INNER JOIN
+							cv_users
+						ON
+							cv_forecast_answers.userid = cv_users.userid
+							AND cv_users.deleted = 0
+				ON 
+					cv_workstation_virtual.answerid = cv_forecast_answers.id 
+					AND cv_forecast_answers.deleted = 0 
+				INNER JOIN 
+					cv_domains
+				ON 
+					cv_workstation_virtual.domainid = cv_domains.id 
+					AND cv_domains.enabled = 1
+					AND cv_domains.deleted = 0 
+				LEFT OUTER JOIN
+					cv_workstation_names
+				ON
+					cv_workstation_virtual.nameid = cv_workstation_names.id
+					AND cv_workstation_names.deleted = 0
+		ON
+			cv_workstation_virtual_errors.workstationid = cv_workstation_virtual.id
+			AND cv_workstation_virtual.deleted = 0
+			AND cv_workstation_virtual.step < 999
+		-- Exclude those that have already generated incidents (if they fail, a new error will appear)
+		LEFT OUTER JOIN
+			cv_incidents
+		ON
+			cv_workstation_virtual_errors.id = cv_incidents.errorid
+			AND cv_incidents.workstation = 1
+			AND cv_incidents.deleted = 0
+WHERE
+	cv_workstation_virtual_errors.deleted = 0
+	AND cv_workstation_virtual_errors.fixed IS NULL
+	AND cv_incidents.id IS NULL
+ORDER BY
+	cv_workstation_virtual_errors.created
+GO
+
+ALTER procedure [dbo].[pr_getServerErrorsAll]
+AS
+-- exec pr_getServerErrorsAll
+SELECT
+	'sid' AS url,
+	cv_servers_errors.serverid AS id,
+	cv_servers_errors.id AS errorid,
+	cv_servers_errors.reason,
+	cv_servers_errors.incident,
+	cv_servers_errors.fixed,
+	CASE
+		WHEN cv_servers.pnc IS NULL OR cv_servers.pnc = 0 THEN cv_servernames.prefix1 + cv_servernames.prefix2 + cv_servernames.sitecode + cv_servernames.name1 + cv_servernames.name2
+		ELSE cv_servernames_factory.os + cv_servernames_factory.location + cv_servernames_factory.mnemonic + cv_servernames_factory.environment + cv_servernames_factory.name1 + cv_servernames_factory.name2 + cv_servernames_factory.func + cv_servernames_factory.specific
+	END AS name,
+	cv_servers_errors.created,
+	cv_servers_errors.step,
+	ISNULL((SELECT TOP 1 title FROM cv_ondemand_steps WHERE typeid = cv_models.typeid AND deleted = 0 AND step = cv_servers_errors.step),'Unknown') AS title
+FROM
+	cv_servers_errors
+		INNER JOIN
+			cv_servers
+				INNER JOIN 
+					cv_forecast_answers
+				ON 
+					cv_servers.answerid = cv_forecast_answers.id 
+					AND cv_forecast_answers.deleted = 0 
+				LEFT OUTER JOIN
+					cv_servers_assets
+						INNER JOIN
+							clearviewasset.dbo.cva_assets
+						ON
+							cv_servers_assets.assetid = cva_assets.id
+							AND cva_assets.deleted = 0
+				ON
+					cv_servers.id = cv_servers_assets.serverid
+					AND cv_servers_assets.latest = 1
+					AND cv_servers_assets.deleted = 0
+				LEFT OUTER JOIN 
+					cv_domains
+				ON 
+					cv_servers.domainid = cv_domains.id 
+					AND cv_domains.enabled = 1
+					AND cv_domains.deleted = 0 
+				LEFT OUTER JOIN 
+					cv_domains AS cv_domains_test
+				ON 
+					cv_servers.test_domainid = cv_domains_test.id 
+					AND cv_domains_test.enabled = 1
+					AND cv_domains_test.deleted = 0 
+				LEFT OUTER JOIN
+					cv_servernames
+				ON
+					cv_servers.nameid = cv_servernames.id
+					AND cv_servernames.deleted = 0
+					AND cv_servers.pnc = 0
+				LEFT OUTER JOIN
+					cv_servernames_factory
+				ON
+					cv_servers.nameid = cv_servernames_factory.id
+					AND cv_servernames_factory.deleted = 0
+					AND cv_servers.pnc = 1
+				INNER JOIN
+					cv_models_property
+						INNER JOIN
+							cv_models
+						ON
+							cv_models_property.modelid = cv_models.id
+							AND cv_models.enabled = 1
+							AND cv_models.deleted = 0
+				ON
+					cv_servers.modelid = cv_models_property.id
+					AND cv_models_property.enabled = 1
+					AND cv_models_property.deleted = 0
+		ON
+			cv_servers_errors.serverid = cv_servers.id
+			AND cv_servers.deleted = 0
+		-- Exclude those that have already generated incidents (if they fail, a new error will appear)
+		LEFT OUTER JOIN
+			cv_incidents
+		ON
+			cv_servers_errors.id = cv_incidents.errorid
+			AND cv_incidents.workstation = 0
+			AND cv_incidents.deleted = 0
+WHERE
+	cv_servers_errors.deleted = 0
+	AND cv_servers_errors.fixed IS NULL
+	AND cv_incidents.id IS NULL
+UNION ALL
+SELECT
+	'aid' AS url,
+	cv_forecast_answer_errors.answerid AS id,
+	0 AS errorid,
+	cv_forecast_answer_errors.reason,
+	cv_forecast_answer_errors.incident,
+	cv_forecast_answer_errors.fixed,
+	'Design # ' + CAST(cv_forecast_answers.id AS varchar(50)) AS name,
+	cv_forecast_answer_errors.created,
+	cv_forecast_answer_errors.step,
+	'Unknown' AS title
+FROM
+	cv_forecast_answer_errors
+		INNER JOIN
+			cv_forecast_answers
+		ON
+			cv_forecast_answer_errors.answerid = cv_forecast_answers.id
+			AND cv_forecast_answer_errors.deleted = 0
+WHERE
+	cv_forecast_answer_errors.deleted = 0
+	AND cv_forecast_answer_errors.fixed IS NULL
+ORDER BY
+	created
+GO
+
+CREATE PROCEDURE [dbo].[pr_updateIncident1]
+	@errorid int,
+	@workstation int,
+	@retrieved datetime,
+	@incident varchar(25)
+AS
+UPDATE
+	cv_incidents
+SET
+	[retrieved] = @retrieved,
+	[incident] = @incident
+WHERE
+	[errorid] = @errorid
+	AND [workstation] = @workstation
+	AND deleted = 0
+GO
+
+CREATE PROCEDURE [dbo].[pr_updateIncident2]
+	@errorid int,
+	@workstation int,
+	@resolved datetime,
+	@resolved_by varchar(100),
+	@resolved_comments varchar(MAX)
+AS
+UPDATE
+	cv_incidents
+SET
+	[resolved] = @resolved,
+	[resolved_by] = @resolved_by,
+	[resolved_comments] = @resolved_comments
+WHERE
+	[errorid] = @errorid
+	AND [workstation] = @workstation
+	AND deleted = 0
+GO
+
+CREATE PROCEDURE [dbo].[pr_deleteIncident]
+	@errorid int,
+	@workstation int
+AS
+UPDATE
+	cv_incidents
+SET
+	deleted = 1
+WHERE
+	[errorid] = @errorid
+	AND [workstation] = @workstation
+	AND deleted = 0
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncident]
+	@errorid int,
+	@workstation int
+AS
+SELECT
+	*
+FROM
+	cv_incidents
+WHERE
+	[errorid] = @errorid
+	AND [workstation] = @workstation
+	AND deleted = 0
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncidentsCreated]
+AS
+SELECT
+	*
+FROM
+	cv_incidents
+WHERE
+	created IS NOT NULL
+	AND retrieved IS NULL
+	AND deleted = 0
+GO
+
+CREATE PROCEDURE [dbo].[pr_getIncidentsUpdated]
+AS
+SELECT
+	ISNULL(cv_servers_errors.serverid, ISNULL(cv_workstation_virtual_errors.workstationid, 0)) AS relatedid,
+	ISNULL(cv_servers_errors.step, ISNULL(cv_workstation_virtual_errors.step, 0)) AS step,
+	cv_incidents.*
+FROM
+	cv_incidents
+		LEFT OUTER JOIN
+			cv_workstation_virtual_errors
+		ON
+			cv_incidents.errorid = cv_workstation_virtual_errors.id
+			AND cv_workstation_virtual_errors.deleted = 0
+			AND cv_incidents.workstation = 1
+		LEFT OUTER JOIN
+			cv_servers_errors
+		ON
+			cv_incidents.errorid = cv_servers_errors.id
+			AND cv_servers_errors.deleted = 0
+			AND cv_incidents.workstation = 0
+WHERE
+	retrieved IS NOT NULL
+	AND resolved IS NULL
+	AND cv_incidents.deleted = 0
+GO
+

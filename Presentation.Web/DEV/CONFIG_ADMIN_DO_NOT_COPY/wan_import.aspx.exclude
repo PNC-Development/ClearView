@@ -1,0 +1,218 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<%@ Import Namespace="System.Data.SqlTypes" %>
+
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsnAsset, CommandType.Text, "SELECT * FROM tblWANAsset");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            intCount++;
+            int intTechnician = GetTechnician(dr["technician"].ToString());
+            string strReceive = (dr["receivedate"].ToString() == "" ? "null" : "'" + dr["receivedate"].ToString() + "'");
+            string strComm = (dr["commissiondate"].ToString() == "" ? "null" : "'" + dr["commissiondate"].ToString() + "'");
+            string strDecom = (dr["decomdate"].ToString() == "" ? "null" : "'" + dr["decomdate"].ToString() + "'");
+            string strRecom = (dr["recomdate"].ToString() == "" ? "null" : "'" + dr["recomdate"].ToString() + "'");
+            SqlHelper.ExecuteNonQuery(dsnAsset, CommandType.Text, "INSERT INTO cva_WAN VALUES(" + GetModel(dr["model"].ToString()) + ",'" + dr["description"].ToString() + "','" + dr["serial"].ToString() + "','" + dr["asset_tag"].ToString() + "',0,0,0," + strReceive + ",'" + dr["ponumber"].ToString() + "','" + dr["projectnumber"].ToString() + "'," + intTechnician + "," + GetBank(dr["bankname"].ToString()) + "," + GetAddress(dr["siteaddress"].ToString(), "", dr["sitecity"].ToString(), dr["sitestate"].ToString()) + "," + GetRack(dr["rack"].ToString()) + ",0,0," + GetClass(dr["class"].ToString()) + "," + GetRoom(dr["room"].ToString()) + "," + GetFloor(dr["floor"].ToString()) + ",'" + dr["devicename"].ToString() + "'," + GetEnvironment(dr["environment"].ToString()) + "," + GetIP(dr["ipaddress"].ToString()) + "," + strComm + ",'" + dr["decomreason"].ToString() + "'," + strDecom + "," + intTechnician + "," + strRecom + "," + intTechnician + "," + strComm + ",getdate(),0)");
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+    private int GetModel(string _model)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_models WHERE name = '" + _model + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count > 0)
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+        else
+            return 0;
+    }
+    private int GetTechnician(string _name)
+    {
+        if (_name.Contains("Schulz"))
+            return 14865;
+        else if (_name.Contains("Schultz"))
+            return 14865;
+        else if (_name.Contains("Lucas"))
+            return 14782;
+        else if (_name.Contains("Fischer"))
+            return 14783;
+        else if (_name.Contains("Chartier"))
+            return 15135;
+        else if (_name.Contains("Perusek"))
+            return 14851;
+        else if (_name.Contains("Anderson"))
+            return 14916;
+        else if (_name.Contains("Brown"))
+            return 15131;
+        else
+            return 15686;
+    }
+    private int GetBank(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_banks WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Banks oTemp = new Banks(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetBank(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetRack(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_racks WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Racks oTemp = new Racks(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetRack(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetClass(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_classs WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Classes oTemp = new Classes(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetClass(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetEnvironment(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_environment WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Environments oTemp = new Environments(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetEnvironment(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetRoom(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_rooms WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Rooms oTemp = new Rooms(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetRoom(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetFloor(string _name)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_floors WHERE name = '" + _name + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Floor oTemp = new Floor(0, dsn);
+            oTemp.Add(_name, 1);
+            return GetFloor(_name);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetIP(string _name)
+    {
+        try
+        {
+            string _first = _name.Substring(0, _name.IndexOf("."));
+            _name = _name.Substring(_name.IndexOf(".") + 1);
+            string _second = _name.Substring(0, _name.IndexOf("."));
+            _name = _name.Substring(_name.IndexOf(".") + 1);
+            string _third = _name.Substring(0, _name.IndexOf("."));
+            string _fourth = _name.Substring(_name.IndexOf(".") + 1);
+            DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_ipaddresses WHERE add1 = '" + _first + "' AND add2 = '" + _second + "' AND add3 = '" + _third + "' AND add4 = '" + _fourth + "' AND deleted = 0");
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                NCC.ClearView.Application.Core.IPAddress oTemp = new NCC.ClearView.Application.Core.IPAddress(0, dsn);
+                return oTemp.Add(_first, _second, _third, _fourth);
+            }
+            else
+                return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+    private int GetAddress(string _address, string _code, string _city, string _state)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_location_address WHERE UPPER(name) = UPPER('" + _address + "')");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            int intState = GetState(_state);
+            int intCity = GetCity(_city, _state);
+            Locations oTemp = new Locations(0, dsn);
+            oTemp.AddAddress(intCity, _address, _code, 1);
+            return GetAddress(_address, _code, _city, _state);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetCity(string _city, string _state)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_location_city WHERE UPPER(name) = UPPER('" + _city + "')");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            int intState = GetState(_state);
+            Locations oTemp = new Locations(0, dsn);
+            oTemp.AddCity(intState, _city, "", 1);
+            return GetCity(_city, _state);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+    private int GetState(string _state)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_location_state WHERE UPPER(name) = UPPER('" + _state + "')");
+        if (ds.Tables[0].Rows.Count == 0)
+        {
+            Locations oTemp = new Locations(0, dsn);
+            oTemp.AddState(_state, 1);
+            return GetState(_state);
+        }
+        else
+            return Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+    }
+</script>
+<html>
+<head>
+<title>Truth</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Truth</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

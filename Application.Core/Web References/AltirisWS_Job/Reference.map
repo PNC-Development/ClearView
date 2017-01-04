@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DiscoveryClientResultsFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Results>
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.DiscoveryDocumentReference" url="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx?disco" filename="JobManagementService.disco" />
+    <DiscoveryClientResult referenceType="System.Web.Services.Discovery.ContractReference" url="http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx?wsdl" filename="JobManagementService.wsdl" />
+  </Results>
+</DiscoveryClientResultsFile>

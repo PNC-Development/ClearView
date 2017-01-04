@@ -1,0 +1,613 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private DataSet ds;
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intWorkload = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private int intWorkloadManager = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkloadManager"]);
+    private int intViewRequest = Int32.Parse(ConfigurationManager.AppSettings["ViewRequest"]);
+    private int intViewResourceRequest = Int32.Parse(ConfigurationManager.AppSettings["ResourceRequest"]);
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private Projects oProject;
+    private Organizations oOrganization;
+    private ResourceRequest oResourceRequest;
+    private RequestItems oRequestItem;
+    private Pages oPage;
+    private Variables oVariable;
+    private Applications oApplication;
+    private Requests oRequest;
+    private Users oUser;
+    private Services oService;
+    private string strRedirect = "";
+    private string strRedirectManager = "";
+    private int intProfile;
+    private int intPage = 0;
+    private int intApplication = 0;
+    private int intRecords = 20;
+    private int intRecordStart = 1;
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oOrganization = new Organizations(intProfile, dsn);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oRequestItem = new RequestItems(intProfile, dsn);
+        oProject = new Projects(intProfile, dsn);
+        oPage = new Pages(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        oApplication = new Applications(intProfile, dsn);
+        oRequest = new Requests(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oService = new Services(intProfile, dsn);
+        if (Request.QueryString["save"] != null && Request.QueryString["save"] != "")
+            lblSaved.Visible = true;
+        if (Request.QueryString["applicationid"] != null && Request.QueryString["applicationid"] != "")
+            intApplication = Int32.Parse(Request.QueryString["applicationid"]);
+        if (Request.QueryString["pageid"] != null && Request.QueryString["pageid"] != "")
+            intPage = Int32.Parse(Request.QueryString["pageid"]);
+        if (Request.Cookies["application"] != null && Request.Cookies["application"].Value != "")
+            intApplication = Int32.Parse(Request.Cookies["application"].Value);
+        strRedirect = oPage.GetFullLink(intWorkload);
+        strRedirectManager = oPage.GetFullLink(intWorkloadManager);
+        if (!IsPostBack)
+        {
+            if (Request.QueryString["rrid"] != null && Request.QueryString["rrid"] != "")
+            {
+                int intResource = Int32.Parse(Request.QueryString["rrid"]);
+                lblRequest.Text = intResource.ToString();
+                ds = oResourceRequest.Get(intResource);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    int intItem = Int32.Parse(ds.Tables[0].Rows[0]["itemid"].ToString());
+                    int intService = Int32.Parse(ds.Tables[0].Rows[0]["serviceid"].ToString());
+                    int intApp = oRequestItem.GetItemApplication(intItem);
+                    int intUser = Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+                    int intRequest = Int32.Parse(ds.Tables[0].Rows[0]["requestid"].ToString());
+                    int intProject = oRequest.GetProjectNumber(intRequest);
+                    bool boolManager = false;
+                    lblName.Text = oProject.Get(intProject, "name");
+                    lblNumber.Text = oProject.Get(intProject, "number");
+                    lblOrganization.Text = oOrganization.GetName(Int32.Parse(oProject.Get(intProject, "organization")));
+                    lblSubmitter.Text = oUser.GetFullName(oRequest.GetUser(intRequest));
+                    lblStart.Text = DateTime.Parse(oRequest.Get(intRequest, "start_date")).ToShortDateString();
+                    lblEnd.Text = DateTime.Parse(oRequest.Get(intRequest, "end_date")).ToShortDateString();
+                    double dblUsed = oResourceRequest.GetUsed(intResource);
+                    lblUsed.Text = dblUsed.ToString("F");
+                    lblAllocated.Text = ds.Tables[0].Rows[0]["allocated"].ToString();
+                    txtAllocated.Text = ds.Tables[0].Rows[0]["allocated"].ToString();
+                    txtDevices.Text = ds.Tables[0].Rows[0]["devices"].ToString();
+                    lblDevices.Text = ds.Tables[0].Rows[0]["devices"].ToString();
+                    if (ds.Tables[0].Rows[0]["solo"].ToString() == "0")
+                    {
+                        hypView.NavigateUrl = oPage.GetFullLink(intViewRequest) + "?rid=" + intRequest.ToString();
+                        hypView.Text = "View Project Request";
+                    }
+                    else
+                    {
+                        hypView.NavigateUrl = oPage.GetFullLink(intViewResourceRequest) + "?rrid=" + intResource.ToString();
+                        hypView.Text = "View Service Request";
+                    }
+                    string strStatus = ds.Tables[0].Rows[0]["status"].ToString();
+                    int intAppManager = oApplication.GetManager(intApp);
+                    LoadList(intAppManager, intApp);
+                    LoadAvailable(intAppManager, intApp);
+//                    if (oService.IsManager(intService, intProfile) || (oApplication.IsManager(intApp, intProfile) && oApplication.Get(intApp, "disable_manager") != "1") || (oUser.IsManager(intUser, intProfile, true) && oApplication.Get(intApp, "disable_manager") != "1") || (oApplication.Get(intApp, "tpm") == "1" && oApplication.IsManager(intApp, oUser.GetManager(intProfile, true))))
+                    if (oService.IsManager(intService, intProfile) || (oApplication.IsManager(intApp, intProfile) && oApplication.Get(intApp, "disable_manager") != "1") || (oUser.IsManager(intUser, intProfile, true) && oApplication.Get(intApp, "disable_manager") != "1"))
+                            boolManager = true;
+                    try
+                    {
+                        ddlActivity.SelectedValue = intItem.ToString();
+                        lblActivity.Text = ddlActivity.SelectedItem.Text;
+                        ddlUser.SelectedValue = intUser.ToString();
+                        lblUser.Text = ddlUser.SelectedItem.Text;
+                    }
+                    catch { }
+                    if (boolManager == true)
+                    {
+                        panView.Visible = true;
+                        panManager.Visible = true;
+                        chkOpen.Enabled = (strStatus == "3");
+                        txtAllocated.Visible = true;
+                        txtDevices.Visible = true;
+                        ddlActivity.Visible = true;
+                        ddlUser.Visible = true;
+                        lnkAvailable.Visible = true;
+                        btnSave.Attributes.Add("onclick", "return ValidateNumber('" + txtAllocated.ClientID + "','Please enter a valid number for the allocated hours')" +
+                            " && ValidateNumber('" + txtDevices.ClientID + "','Please enter a valid number for the device count')" +
+                            " && ValidateDropDown('" + ddlActivity.ClientID + "','Please make a selection for the activity type')" +
+                            " && ValidateDropDown('" + ddlUser.ClientID + "','Please make a selection for the assigned technician')" +
+                            ";");
+                    }
+                    else
+                    {
+                        panView.Visible = true;
+                        lblAllocated.Visible = true;
+                        lblDevices.Visible = true;
+                        lblActivity.Visible = true;
+                        lblUser.Visible = true;
+                    }
+                }
+            }
+            else if (Request.QueryString["pid"] != null && Request.QueryString["pid"] != "")
+            {
+                ds = oResourceRequest.GetProject(Int32.Parse(Request.QueryString["pid"]));
+                lblPage.Text = "1";
+                lblSort.Text = "";
+                if (Request.QueryString["page"] != null && Request.QueryString["page"] != "")
+                    lblPage.Text = Request.QueryString["page"];
+                if (Request.QueryString["sort"] != null && Request.QueryString["sort"] != "")
+                    lblSort.Text = Request.QueryString["sort"];
+                lblTopPaging.Text = "";
+                LoadPaging(Int32.Parse(lblPage.Text), lblSort.Text);
+            }
+        }
+        btnDenied.Attributes.Add("onclick", "return CloseWindow();");
+        lnkAvailable.Attributes.Add("onclick", "return ShowHideAvailable('" + divAvailable.ClientID + "');");
+    }
+    private void LoopRepeater(string _sort, int _start)
+    {
+        if (_start > ds.Tables[0].Rows.Count)
+            _start = 0;
+        intRecordStart = _start + 1;
+        DataView dv = ds.Tables[0].DefaultView;
+        if (Request.QueryString["sort"] != null)
+            dv.Sort = Request.QueryString["sort"];
+        int intCount = _start + intRecords;
+        if (dv.Count < intCount)
+            intCount = dv.Count;
+        int ii = 0;
+        lblRecords.Text = "Requests " + intRecordStart.ToString() + " - " + intCount.ToString() + " of " + dv.Count.ToString();
+        for (ii = 0; ii < _start; ii++)
+            dv[0].Delete();
+        int intTotalCount = (dv.Count - intRecords);
+        for (ii = 0; ii < intTotalCount; ii++)
+            dv[intRecords].Delete();
+        rptView.DataSource = dv;
+        rptView.DataBind();
+        foreach (RepeaterItem ri in rptView.Items)
+        {
+            Label _number = (Label)ri.FindControl("lblNumber");
+            if (_number.Text == "")
+                _number.Text = "<i>TBD...</i>";
+        }
+        lblNone.Visible = (rptView.Items.Count == 0);
+        _start++;
+    }
+    public void btnOrder_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oOrder = (LinkButton)Sender;
+        string strPage = "";
+        string strOrder = "";
+        if (Request.QueryString["sort"] != null)
+        {
+            if (Request.QueryString["sort"] == oOrder.CommandArgument)
+                strOrder = oOrder.CommandArgument + " DESC";
+        }
+        if (strOrder == "")
+            strOrder = oOrder.CommandArgument;
+        if (Request.QueryString["page"] != null)
+            strPage = Request.QueryString["page"];
+        Response.Redirect(oPage.GetFullLink(intPage) + "?sid=" + Request.QueryString["sid"] + "&sort=" + strOrder + "&page=" + strPage);
+    }
+    public void btnPage_Click(Object Sender, ImageClickEventArgs e)
+    {
+        string strOrder = "";
+        if (Request.QueryString["sort"] != null)
+            strOrder = Request.QueryString["sort"];
+        Response.Redirect(oPage.GetFullLink(intPage) + "?sid=" + Request.QueryString["sid"] + "&sort=" + strOrder + "&page=" + txtPage.Text);
+    }
+    private void LoadPaging(int intStart, string _sort)
+    {
+        int intCount = ds.Tables[0].Rows.Count;
+        double dblEnd = Math.Ceiling(Double.Parse(intCount.ToString()) / Double.Parse(intRecords.ToString()));
+        int intEnd = Int32.Parse(dblEnd.ToString());
+        int ii = 0;
+        txtPage.Text = intStart.ToString();
+        lblPages.Text = intEnd.ToString();
+        if (intEnd < 7)
+        {
+            for (ii = 1; ii < intEnd; ii++)
+            {
+                LoadLink(lblTopPaging, ii, ", ", intStart);
+                LoadLink(lblBottomPaging, ii, ", ", intStart);
+            }
+            LoadLink(lblTopPaging, intEnd, "", intStart);
+            LoadLink(lblBottomPaging, intEnd, "", intStart);
+        }
+        else
+        {
+            if (intStart < 5)
+            {
+                for (ii = 1; ii < 6 && ii < intEnd; ii++)
+                {
+                    LoadLink(lblTopPaging, ii, ", ", intStart);
+                    LoadLink(lblBottomPaging, ii, ", ", intStart);
+                }
+                if (ii < intEnd)
+                {
+                    LoadLink(lblTopPaging, ii, " .... ", intStart);
+                    LoadLink(lblBottomPaging, ii, " .... ", intStart);
+                }
+                LoadLink(lblTopPaging, intEnd, "", intStart);
+                LoadLink(lblBottomPaging, intEnd, "", intStart);
+            }
+            else if (intStart > (intEnd - 4))
+            {
+                LoadLink(lblTopPaging, 1, " .... ", intStart);
+                LoadLink(lblBottomPaging, 1, " .... ", intStart);
+                for (ii = (intEnd - 5); ii < intEnd && ii > 0; ii++)
+                {
+                    LoadLink(lblTopPaging, ii, ", ", intStart);
+                    LoadLink(lblBottomPaging, ii, ", ", intStart);
+                }
+                LoadLink(lblTopPaging, intEnd, "", intStart);
+                LoadLink(lblBottomPaging, intEnd, "", intStart);
+            }
+            else
+            {
+                LoadLink(lblTopPaging, 1, " .... ", intStart);
+                LoadLink(lblBottomPaging, 1, " .... ", intStart);
+                for (ii = (intStart - 2); ii < (intStart + 3) && ii < intEnd && ii > 0; ii++)
+                {
+                    if (ii == (intStart + 2))
+                    {
+                        LoadLink(lblTopPaging, ii, " .... ", intStart);
+                        LoadLink(lblBottomPaging, ii, " .... ", intStart);
+                    }
+                    else
+                    {
+                        LoadLink(lblTopPaging, ii, ", ", intStart);
+                        LoadLink(lblBottomPaging, ii, ", ", intStart);
+                    }
+                }
+                LoadLink(lblTopPaging, intEnd, "", intStart);
+                LoadLink(lblBottomPaging, intEnd, "", intStart);
+            }
+        }
+        LoopRepeater(_sort, ((intStart - 1) * intRecords));
+    }
+    private void LoadLink(Label _label, int _number, string _spacer, int _start)
+    {
+        if (_number == _start)
+            _label.Text += "<b><font style=\"color:#CC0000\">" + _number.ToString() + "</font></b>";
+        else
+        {
+            string strSort = "";
+            if (Request.QueryString["sort"] != null)
+                strSort = Request.QueryString["sort"];
+            _label.Text += "<a href=\"" + oPage.GetFullLink(intPage) + "?sid=" + Request.QueryString["sid"] + "&sort=" + strSort + "&page=" + _number.ToString() + "\" title=\"Go to Page " + _number.ToString() + "\">" + _number.ToString() + "</a>";
+        }
+        if (_spacer != "")
+            _label.Text += _spacer;
+    }
+    private void LoadList(int _appmanager, int _app)
+    {
+        ds = oUser.GetManagerReports(_appmanager);
+        ddlUser.DataValueField = "userid";
+        ddlUser.DataTextField = "username";
+        ddlUser.DataSource = ds;
+        ddlUser.DataBind();
+        ddlUser.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+        ds = oRequestItem.GetItems(_app, 0, 1);
+        ddlActivity.DataValueField = "itemid";
+        ddlActivity.DataTextField = "name";
+        ddlActivity.DataSource = ds;
+        ddlActivity.DataBind();
+        ddlActivity.Items.Insert(0, new ListItem("-- SELECT --", "0"));
+    }
+    private void LoadAvailable(int _appmanager, int _app)
+    {
+        DataTable dt = new DataTable();
+        dt.Columns.Add(new DataColumn("name", System.Type.GetType("System.String")));
+        dt.Columns.Add(new DataColumn("hours", System.Type.GetType("System.Double")));
+        dt.Columns.Add(new DataColumn("graph", System.Type.GetType("System.Double")));
+        ds = oUser.GetManagerReports(_appmanager);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intUser = Int32.Parse(dr["userid"].ToString());
+            DataSet dsAss = oResourceRequest.GetAssigned(intUser, 2);
+            double dblTotal = 0;
+            foreach (DataRow drAss in dsAss.Tables[0].Rows)
+            {
+                int intId = Int32.Parse(drAss["id"].ToString());
+                double dblAllocated = double.Parse(drAss["allocated"].ToString());
+                double dblUsed = oResourceRequest.GetUsed(intId);
+                dblTotal += dblAllocated - dblUsed;
+            }
+            DataRow drRow = dt.NewRow();
+            drRow["name"] = oUser.GetFullName(intUser);
+            drRow["hours"] = dblTotal;
+            dt.Rows.Add(drRow);
+        }
+        ds = new DataSet();
+        ds.Tables.Add(dt);
+        double dblMax = 0;
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            double dblHours = double.Parse(dr["hours"].ToString());
+            if (dblMax < dblHours)
+                dblMax = dblHours;
+        }
+        if (dblMax > 0)
+        {
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                double dblHours = double.Parse(dr["hours"].ToString());
+                dblHours = dblHours / dblMax;
+                dr["graph"] = dblHours * 400;
+            }
+        }
+        rptAvailable.DataSource = ds;
+        rptAvailable.DataBind();
+    }
+    private void btnSave_Click(Object Sender, EventArgs e)
+    {
+        int intResource = Int32.Parse(lblRequest.Text);
+        int intOldUser = Int32.Parse(oResourceRequest.Get(intResource, "userid"));
+        int intNewUser = Int32.Parse(ddlUser.SelectedItem.Value);
+        int intOldItem = Int32.Parse(oResourceRequest.Get(intResource, "itemid"));
+        int intItem = Int32.Parse(ddlActivity.SelectedItem.Value);
+        int intNumber = Int32.Parse(oResourceRequest.Get(intResource, "number"));
+        int intService = Int32.Parse(oResourceRequest.Get(intResource, "serviceid"));
+        int intApp = oRequestItem.GetItemApplication(intItem);
+        int intRequest = Int32.Parse(oResourceRequest.Get(intResource, "requestid"));
+        int intProject = oRequest.GetProjectNumber(intRequest);
+        int intRequester = oRequest.GetUser(intRequest);
+        int intStatus = Int32.Parse(oResourceRequest.Get(intResource, "status"));
+        Functions oFunction = new Functions(intProfile, dsn, intEnvironment);
+        if (intOldUser != intNewUser)
+        {
+            string strSpacerRow = "<tr><td colspan=\"3\"><img src=\"" + oVariable.ImageURL() + "/images/spacer.gif\" border=\"0\" width=\"1\" height=\"7\" /></td></tr>";
+            string strDefault = oUser.GetApplicationUrl(intNewUser, intWorkload);
+            // Notify Old User
+            oFunction.SendEmail("Request Assignment", oUser.GetName(intOldUser), "", strBCC, "Request Assignment", "<p><b>The following request has been removed from your workload</b><p><p>" + oResourceRequest.GetBody(intResource, intEnvironment, true) + "</p>", true, false);
+            // Notify New User
+            if (strDefault == "")
+                oFunction.SendEmail("Request Assignment", oUser.GetName(intNewUser), "", strBCC, "Request Assignment", "<p><b>The following request has been assigned to you by " + oUser.GetFullName(intProfile) + "</b><p><p>" + oResourceRequest.GetBody(intResource, intEnvironment, true) + "</p>", true, false);
+            else
+                oFunction.SendEmail("Request Assignment", oUser.GetName(intNewUser), "", strBCC, "Request Assignment", "<p><b>The following request has been assigned to you by " + oUser.GetFullName(intProfile) + "</b><p><p>" + oResourceRequest.GetBody(intResource, intEnvironment, true) + "</p><p><a href=\"" + oVariable.URL() + "/redirect.aspx?referrer=/" + strDefault + oPage.GetFullLink(intWorkload) + "?pid=" + intProject.ToString() + "\" target=\"_blank\">Click here to review your new assignment.</a></p>", true, false);
+            string strActivity = "<tr><td><b>Resource:</b></td><td>&nbsp;&nbsp;&nbsp;</td><td>" + oUser.GetFullName(intNewUser) + "</td></tr>";
+            strActivity += strSpacerRow;
+            strActivity += "<tr><td><b>Activity Type:</b></td><td>&nbsp;&nbsp;&nbsp;</td><td>" + oService.GetName(intService) + "</td></tr>";
+            strActivity = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"" + oVariable.DefaultFontStyle() + "\">" + strActivity + "</table>";
+            string strDeliverable = oApplication.Get(intApp, "deliverables_doc");
+            if (strDeliverable.Trim() != "")
+                strDeliverable = "<p><a href=\"" + oVariable.URL() + strDeliverable + "\">Click here to view the service deliverables</a></p>";
+            if (oService.Get(intService, "notify_client") != "0")
+                oFunction.SendEmail("Request Assignment", oUser.GetName(intRequester), "", strBCC, "Request Assignment", "<p><b>A resource has been assigned to the following request...</b><p><p>" + oResourceRequest.GetBody(intResource, intEnvironment, true) + "</p><p>" + strActivity + "</p>" + strDeliverable, true, false);
+        }
+        oResourceRequest.Update(intResource, intRequest, intItem, intNumber, intNewUser, Int32.Parse(txtDevices.Text), double.Parse(txtAllocated.Text), 1, (chkOpen.Checked ? 2 : intStatus));
+        Response.Redirect(oPage.GetFullLink(intPage) + "?rrid=" + intResource.ToString() + "&save=true");
+    }
+</script>
+<script type="text/javascript">
+    function ShowHideAvailable(oDiv) {
+        oDiv = document.getElementById(oDiv);
+        if (oDiv.style.display == "inline")
+            oDiv.style.display = "none";
+        else
+            oDiv.style.display = "inline";
+        return false;
+    }
+</script>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="default">
+    <tr>
+        <td><img src="/images/table_topleft.gif" border="0" width="5" height="26"></td>
+        <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%"><asp:label ID="lblTitle" runat="server" CssClass="greetableheader" />Workload Manager</td>
+        <td><img src="/images/table_topright.gif" border="0" width="5" height="26"></td>
+    </tr>
+    <tr>
+        <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+        <td width="100%" bgcolor="#FFFFFF">
+            <br />
+            <asp:Panel ID="panDenied" runat="server" Visible="false">
+                <table width="100%" cellpadding="2" cellspacing="2" border="0">
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td class="header"><img src="/images/bigX.gif" border="0" align="absmiddle" /> Access Denied</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                        <td>You do not have rights to view this item.</td>
+                    </tr>
+                    <tr><td colspan="2">&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="2"><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td class="footer"></td>
+                                    <td align="right"><asp:Button ID="btnDenied" runat="server" CssClass="default" Width="75" Text="Close" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <asp:Panel ID="panView" runat="server" Visible="false">
+                <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                    <tr>
+                        <td colspan="2" align="center" class="bigcheck">
+                            <asp:Label ID="lblSaved" runat="server" Text="<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Record Updated" Visible="false" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="hugeheader"><img src="/images/view_request.gif" border="0" align="absmiddle" /> Request Detail</td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Project Name:</b></td>
+                        <td width="100%"><asp:Label ID="lblName" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Project Number:</b></td>
+                        <td width="100%"><asp:Label ID="lblNumber" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Organization:</b></td>
+                        <td width="100%"><asp:Label ID="lblOrganization" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Submitter:</b></td>
+                        <td width="100%"><asp:Label ID="lblSubmitter" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Estimated Start Date:</b></td>
+                        <td width="100%"><asp:Label ID="lblStart" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Estimated End Date:</b></td>
+                        <td width="100%"><asp:Label ID="lblEnd" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Hours Allocated:</b></td>
+                        <td width="100%"><asp:Label ID="lblAllocated" runat="server" CssClass="default" Visible="false" /><asp:TextBox ID="txtAllocated" runat="server" CssClass="default" Width="100" MaxLength="10" Visible="false" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Hours Used:</b></td>
+                        <td width="100%"><asp:Label ID="lblUsed" runat="server" CssClass="default" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Device Count:</b></td>
+                        <td width="100%"><asp:Label ID="lblDevices" runat="server" CssClass="default" Visible="false" /><asp:TextBox ID="txtDevices" runat="server" CssClass="default" Width="100" MaxLength="10" Visible="false" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Activity Type:</b></td>
+                        <td width="100%"><asp:Label ID="lblActivity" runat="server" CssClass="default" Visible="false" /><asp:DropDownList ID="ddlActivity" runat="server" CssClass="default" Visible="false" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Assigned Resource:</b></td>
+                        <td width="100%"><asp:Label ID="lblUser" runat="server" CssClass="default" Visible="false" /><asp:DropDownList ID="ddlUser" runat="server" CssClass="default" Visible="false" />&nbsp;&nbsp;&nbsp;<asp:LinkButton ID="lnkAvailable" runat="server" Text="View Availability" Visible="false" /></td>
+                    </tr>
+                    <tr>
+                        <td nowrap><b>Re-Open this Request:</b></td>
+                        <td width="100%"><asp:Checkbox ID="chkOpen" runat="server" CssClass="default" Enabled="false" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><br /><asp:HyperLink ID="hypView" runat="server" Target="_blank" /></td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <asp:Panel ID="panManager" runat="server" Visible="false">
+                <table width="100%" cellpadding="3" cellspacing="2" border="0">
+                    <tr>
+                        <td>
+                            <div id="divAvailable" runat="server" style="display:none">
+                                <br />
+                                <table width="100%" cellpadding="2" cellspacing="0" border="0" style="border:solid 1px #999999" bgcolor="#fefefe">
+                                    <tr>
+                                        <td colspan="2"><b>Resource Availability</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">The following graph represents the amount of allocated hours unused.</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">&nbsp;</td>
+                                    </tr>
+                                <asp:repeater ID="rptAvailable" runat="server">
+                                    <ItemTemplate>
+                                        <tr>
+                                            <td><%# DataBinder.Eval(Container.DataItem, "name").ToString() %></td>
+                                            <td><img src="/images/table_top.gif" width='<%# DataBinder.Eval(Container.DataItem, "graph").ToString() %>' height="16" />&nbsp;<b><%# Double.Parse(DataBinder.Eval(Container.DataItem, "hours").ToString()).ToString("F") %></b></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" height="1"><img src="/images/spacer.gif" border="0" width="1" height="1" /></td>
+                                        </tr>
+                                    </ItemTemplate>
+                                </asp:repeater>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><hr size="1" noshade /></td>
+                    </tr>
+                    <tr>
+                        <td align="right"><asp:Button ID="btnSave" runat="server" CssClass="default" Width="75" Text="Save" OnClick="btnSave_Click" /></td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <asp:Panel ID="panResult" runat="server" Visible="false">
+                <table width="100%" cellpadding="4" cellspacing="3" border="0">
+                    <tr>
+                        <td class="hugeheader"><img src="/images/bigSearch.gif" border="0" align="absmiddle" /> Search Results</td>
+                        <td align="right"><img src="/images/check.gif" border="0" align="absmiddle" /> <asp:HyperLink ID="hypClear" runat="server" Text="Start a New Search" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <table width="100%" cellpadding="3" cellspacing="0" border="0">
+                                <tr>
+                                    <td>
+                                        <b>Page <asp:TextBox ID="txtPage" runat="server" CssClass="default" Width="25" /> of <asp:Label ID="lblPages" runat="server" /> <asp:ImageButton ID="btnPage" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/search.gif" OnClick="btnPage_Click" ToolTip="Go to this page" /></b>
+                                        <b><asp:Label ID="lblRecords" runat="server" Visible="false" /></b>
+                                    </td>
+                                    <td align="right"><asp:Label ID="lblTopPaging" runat="server" /></td>
+                                </tr>
+                            </table>
+                            <br />
+                            <table width="100%" cellpadding="3" cellspacing="0" border="0" align="center" style="border:solid 1px #CCCCCC">
+                            <asp:repeater ID="rptView" runat="server">
+                                <HeaderTemplate>
+                                    <tr bgcolor="#EEEEEE">
+                                        <td><asp:LinkButton ID="btnOrderName" runat="server" CssClass="tableheader" Text="<b>Project Name</b>" OnClick="btnOrder_Click" CommandArgument="ProjectName" /></td>
+                                        <td><asp:LinkButton ID="btnOrderNumber" runat="server" CssClass="tableheader" Text="<b>Project Number</b>" OnClick="btnOrder_Click" CommandArgument="number" /></td>
+                                        <td><asp:LinkButton ID="btnOrderActivity" runat="server" CssClass="tableheader" Text="<b>Activity Type</b>" OnClick="btnOrder_Click" CommandArgument="activitytype" /></td>
+                                        <td><asp:LinkButton ID="btnOrderAssigned" runat="server" CssClass="tableheader" Text="<b>Technician</b>" OnClick="btnOrder_Click" CommandArgument="assigned" /></td>
+                                        <td><asp:LinkButton ID="btnOrderSubmitted" runat="server" CssClass="tableheader" Text="<b>Submitted</b>" OnClick="btnOrder_Click" CommandArgument="modified" /></td>
+                                    </tr>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <tr class="default" onmouseover="CellRowOver(this);" onmouseout="CellRowOut(this);" onclick="ViewWorkload('<%# (DataBinder.Eval(Container.DataItem, "userid").ToString() == intProfile.ToString() ? strRedirect + "?rrid=" + DataBinder.Eval(Container.DataItem, "id") : strRedirectManager + "?rrid=" + DataBinder.Eval(Container.DataItem, "id")) %>');">
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "ProjectName") %></td>
+                                        <td valign="top"><asp:label ID="lblNumber" runat="server" CssClass="default" Text='<%# DataBinder.Eval(Container.DataItem, "number") %>' /></td>
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "ActivityType") %></td>
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "Assigned") %></td>
+                                        <td valign="top"><%# DateTime.Parse(DataBinder.Eval(Container.DataItem, "modified").ToString()).ToShortDateString() %></td>
+                                    </tr>
+                                </ItemTemplate>
+                                <AlternatingItemTemplate>
+                                    <tr class="default" bgcolor="#F6F6F6" onmouseover="CellRowOver(this);" onmouseout="CellRowOut(this);" onclick="ViewWorkload('<%# (DataBinder.Eval(Container.DataItem, "userid").ToString() == intProfile.ToString() ? strRedirect + "?rrid=" + DataBinder.Eval(Container.DataItem, "id") : strRedirectManager + "?rrid=" + DataBinder.Eval(Container.DataItem, "id")) %>');">
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "ProjectName")%></td>
+                                        <td valign="top"><asp:label ID="lblNumber" runat="server" CssClass="default" Text='<%# DataBinder.Eval(Container.DataItem, "number") %>' /></td>
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "ActivityType") %></td>
+                                        <td valign="top"><%# DataBinder.Eval(Container.DataItem, "Assigned") %></td>
+                                        <td valign="top"><%# DateTime.Parse(DataBinder.Eval(Container.DataItem, "modified").ToString()).ToShortDateString() %></td>
+                                    </tr>
+                                </AlternatingItemTemplate>
+                            </asp:repeater>
+                            <tr>
+                                <td colspan="2"><asp:Label ID="lblNone" runat="server" CssClass="error" Visible="false" Text="<img src='/images/alert.gif' border='0' align='absmiddle'> There are no items" /></td>
+                            </tr>
+                            </table>
+                            <br />
+                            <table width="100%" cellpadding="3" cellspacing="0" border="0">
+                                <tr>
+                                    <td><img src='/images/bigPrint.gif' border='0' align='absmiddle' /> <asp:HyperLink ID="hypPrinter" runat="server" Text="Click here for printer-friendly results" Target="_blank" /></td>
+                                    <td align="right"><asp:Label ID="lblBottomPaging" runat="server" /></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><b>Search Criteria:</b></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><asp:Label ID="lblResults" runat="server" CssClass="default" /></td>
+                    </tr>
+                </table>
+            </asp:Panel>
+            <p>&nbsp;</p>
+        </td>
+        <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+    </tr>
+    <tr>
+        <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+        <td width="100%" background="/images/table_bottom.gif"></td>
+        <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+    </tr>
+</table>
+<asp:Label ID="lblRequest" runat="server" Visible="false" />
+<asp:Label ID="lblProject" runat="server" Visible="false" />
+<asp:Label ID="lblPage" runat="server" Visible="false" />
+<asp:Label ID="lblSort" runat="server" Visible="false" />

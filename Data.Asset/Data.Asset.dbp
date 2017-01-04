@@ -1,0 +1,34 @@
+# Microsoft Developer Studio Project File - Database Project
+Begin DataProject = "Data.Asset"
+   MSDTVersion = "80"
+   DefDBRef = "ohcleiis4333.ClearViewAsset.dbo"
+   SccProjectName = "SAK"
+   SccLocalPath = "SAK"
+   SccAuxPath = "SAK"
+   SccProvider = "SAK"
+   Begin Folder = "Change Scripts"
+      Script = "1_Backups.sql"
+      Script = "2_Tables.sql"
+      Script = "3_Views.sql"
+      Script = "4_SPs_Funcs.sql"
+      Script = "5_DML.sql"
+      Script = "6_Cleanup.sql"
+      Script = "storage.sql"
+   End
+   Begin Folder = "Create Scripts"
+      Script = "Database.sql"
+      Script = "Security.Roles.Roles.sql"
+      Script = "Security.Schemas.sql"
+      Script = "Security.Users.sql"
+      Script = "StoredProcedures.sql"
+      Script = "Tables.sql"
+      Script = "Views.sql"
+   End
+   Begin DBRefFolder = "Database References"
+      Begin DBRefNode = "ohcleiis4333.ClearViewAsset.dbo"
+         ConnectStr = "Data Source=OHCLEIIS4333;Initial Catalog=ClearViewAsset;Integrated Security=True"
+         Provider = "{91510608-8809-4020-8897-FBA057E22D54}"
+         Colorizer = 6
+      End
+   End
+End

@@ -1,0 +1,134 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private string dsnIP = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["IpDSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private VMWare oVMWare;
+    private void Page_Load()
+    {
+        string strError = "";
+        Servers oServer = new Servers(0, dsn);
+        OnDemand oOnDemand = new OnDemand(0, dsn);
+        oVMWare = new VMWare(0, dsn);
+        int intRequest = 0;
+        if (Request.QueryString["rid"] != null && Request.QueryString["rid"] != "")
+            intRequest = Int32.Parse(Request.QueryString["rid"]);
+        if (intRequest > 0)
+        {
+            oVMWare.Connect(intEnvironment, "Dev", "https://ohclesql4257/sdk");
+//            oVMWare.Connect(intEnvironment, "ClevelandOperations", "https://ohclesql4230/sdk");
+            DataSet ds = oServer.GetRequests(intRequest);
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                int intServer = Int32.Parse(dr["id"].ToString());
+                int intAnswer = Int32.Parse(dr["answerid"].ToString());
+                int intCurrent = Int32.Parse(dr["step"].ToString());
+                int intClass = Int32.Parse(dr["classid"].ToString());
+                int intEnv = Int32.Parse(dr["environmentid"].ToString());
+                int intAddress = Int32.Parse(dr["addressid"].ToString());
+                int intServerName = Int32.Parse(dr["servernameid"].ToString());
+                ServerName oServerName = new ServerName(0, dsn);
+                string strName = oservername.getname2(intServerName, 0);
+                VimService _service = oVMWare.GetService();
+                ManagedObjectReference vmRef = oVMWare.GetVM(strName);
+                VirtualMachineConfigSpec cs = new VirtualMachineConfigSpec();
+                VirtualDeviceConfigSpec controlVMSpec = Controller();
+                VirtualDeviceConfigSpec diskVMSpec1 = Disk(strName, "10485760", 0, "");    // 10485760 KB = 10 GB = 10 x 1024 x 1024
+                VirtualDeviceConfigSpec diskVMSpec2 = Disk(strName, "4194304", 1, "_1");   // 4194304 KB = 4 GB = 4 x 1024 x 1024
+                VirtualDeviceConfigSpec diskVMSpec3 = Disk(strName, "10485760", 2, "_2");  // 10485760 KB = 10 GB = 10 x 1024 x 1024
+                cs.deviceChange = new VirtualDeviceConfigSpec[] { controlVMSpec, diskVMSpec1, diskVMSpec2, diskVMSpec3 };
+                ManagedObjectReference _task = _service.ReconfigVM_Task(vmRef, cs);
+                TaskInfo oInfo = (TaskInfo)oVMWare.getObjectProperty(_task, "info");
+                while (oInfo.state == TaskInfoState.running)
+                    oInfo = (TaskInfo)oVMWare.getObjectProperty(_task, "info");
+                if (oInfo.state == TaskInfoState.success)
+                {
+                    oOnDemand.AddStepDone(intAnswer, intCurrent, "Network Adapter Created", 0, true);
+                    oServer.NextStep(intServer);
+                    Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "completed", "<script type=\"text/javascript\">window.onload = new Function(\"redirect();\");<" + "/" + "script>");
+                }
+                else
+                    oOnDemand.AddStepDone(intAnswer, intCurrent, "Network Adapter Was Not Created", 1, true);
+            }
+            Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "completed", "<script type=\"text/javascript\">window.onload = new Function(\"redirectWait();\");<" + "/" + "script>");
+        }
+    }
+    public VirtualDeviceConfigSpec Controller()
+    {
+        VirtualLsiLogicController scsi = new VirtualLsiLogicController();
+        VirtualDeviceConnectInfo ci = new VirtualDeviceConnectInfo();
+        ci.startConnected = false;
+        scsi.key = 1000;
+        scsi.controllerKey = 100;
+        scsi.controllerKeySpecified = true;
+        scsi.busNumber = 0;
+        scsi.hotAddRemove = true;
+        scsi.hotAddRemoveSpecified = true;
+        scsi.scsiCtlrUnitNumber = 7;
+        scsi.scsiCtlrUnitNumberSpecified = true;
+        scsi.sharedBus = VirtualSCSISharing.noSharing;
+        scsi.unitNumber = 2;
+        scsi.unitNumberSpecified = true;
+        scsi.connectable = ci;
+        VirtualDeviceConfigSpec dcs = new VirtualDeviceConfigSpec();
+        dcs.device = scsi;
+        dcs.operation = VirtualDeviceConfigSpecOperation.add;
+        dcs.operationSpecified = true;
+        return dcs;
+    }
+    public VirtualDeviceConfigSpec Disk(string strName, string strSize, int intUnitNumber, string strSuffix)
+    {
+        // Get Datastores
+        ManagedObjectReference datastoreRef = null;
+        PropertySpec[] psDCarray = new PropertySpec[] { new PropertySpec() };
+        psDCarray[0].all = false;
+        psDCarray[0].allSpecified = true;
+        psDCarray[0].pathSet = new string[] { "datastore" };
+        psDCarray[0].type = "Datacenter";
+        PropertyFilterSpec spec = new PropertyFilterSpec();
+        spec.propSet = psDCarray;
+        spec.objectSet = new ObjectSpec[] { new ObjectSpec() };
+        spec.objectSet[0].obj = oVMWare.GetDataCenter();
+        spec.objectSet[0].skip = true;
+        ObjectContent[] ocary = oVMWare.GetService().RetrieveProperties(oVMWare.GetSic().propertyCollector, new PropertyFilterSpec[] { spec });
+        ManagedObjectReference[] datastores = null;
+        foreach (ObjectContent oc in ocary)
+            datastores = (ManagedObjectReference[])oc.propSet[0].val;
+        if (datastores != null)
+            datastoreRef = datastores[0];
+
+        // Create disk
+        VirtualDisk disk = new VirtualDisk();
+        disk.key = 2000;
+        disk.controllerKey = 1000;
+        disk.controllerKeySpecified = true;
+        disk.unitNumber = intUnitNumber;
+        disk.unitNumberSpecified = true;
+        VirtualDiskFlatVer2BackingInfo diskBack = new VirtualDiskFlatVer2BackingInfo();
+        diskBack.diskMode = "persistent";
+        diskBack.fileName = "[ds001] " + strName + "/" + strName + strSuffix + ".vmdk";
+        diskBack.datastore = datastoreRef;
+        diskBack.thinProvisioned = false;
+        diskBack.thinProvisionedSpecified = true;
+        diskBack.writeThrough = false;
+        diskBack.writeThroughSpecified = true;
+        disk.backing = diskBack;
+        disk.capacityInKB = long.Parse(strSize);  
+        VirtualDeviceConfigSpec dcs = new VirtualDeviceConfigSpec();
+        dcs.device = disk;
+        dcs.fileOperation = VirtualDeviceConfigSpecFileOperation.create;
+        dcs.fileOperationSpecified = true;
+        dcs.operation = VirtualDeviceConfigSpecOperation.add;
+        dcs.operationSpecified = true;
+        return dcs;
+    }
+</script>
+<script type="text/javascript">
+	function redirect() {
+		setTimeout("redirectGo()",1000);
+	}
+	function redirectGo() {
+		window.navigate(window.location.href);
+	}
+</script>

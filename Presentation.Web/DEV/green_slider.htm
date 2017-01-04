@@ -1,0 +1,106 @@
+<html>
+<head><title>
+	ClearView | View Task
+</title><link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body bgcolor="#F8F8F8" leftmargin="0" topmargin="0">
+<script type="text/javascript">
+var oOldStartsldHours = null;var oStartsldHours = null;var oEndsldHours = null;var oArrowsldHours = null;var oDivsldHours = null;var oMovingsldHours = null;var xStartPossldHours = null;var xEndPossldHours = null;var yPossldHours = null;var oHiddensldHours = null;var intOffSetsldHours = 8;var intOffHeightsldHours = 8;var boolDivsldHours = null;var dblTotalsldHours = 2.5;
+addLoadEvent(function() {LoadSlidersldHours();});
+function LoadSlidersldHours(){
+	oMovingsldHours = false;boolDivsldHours = true;
+	var oTDsldHours = document.getElementById('slidesldHours');
+	oTDsldHours.onmouseover = function() {oTDsldHours.style.cursor = 'hand';}
+	oTDsldHours.onmouseout = function() {oTDsldHours.style.cursor = 'default';}
+	oTDsldHours.onclick = function() {MoveSlidersldHours(parseInt(window.event.x) - intOffSetsldHours);}
+	var oParent = document.getElementById('divExecution');
+	var oTablesldHours = document.getElementById('tblSlidersldHours');
+	// Next 2 lines
+	oTablesldHours.width = 300;
+	if (dblTotalsldHours > 0.0) {
+	oHiddensldHours = document.getElementById('hdnHours');
+	var odblTemp = parseFloat('.03');
+	oHiddensldHours.value = odblTemp * dblTotalsldHours;
+	oStartsldHours = document.getElementById('slideStartsldHours');
+	oEndsldHours = document.getElementById('slideEndsldHours');
+	oArrowsldHours = document.createElement('IMG');
+	oArrowsldHours.src = '/images/slide_green.gif';
+	oArrowsldHours.style.display = 'none';
+	oArrowsldHours.style.position = 'absolute';
+	oArrowsldHours.title = '3%';
+	oArrowsldHours.style.zIndex = 200;
+	oParent.appendChild(oArrowsldHours);
+	oDivsldHours = document.createElement('DIV');
+	oDivsldHours.className = 'default';
+	oDivsldHours.style.width = '40';
+	oDivsldHours.style.height = '16';
+	oDivsldHours.style.backgroundColor = '#FFFFDD';
+	oDivsldHours.style.border = 'solid 1px black';
+	oDivsldHours.style.padding = '2';
+	oDivsldHours.align = 'right';
+	oDivsldHours.style.position = 'absolute';
+	oDivsldHours.style.display = 'inline';
+	oDivsldHours.innerText = '3%';
+	oParent.appendChild(oDivsldHours);
+	for (ii=1; ii<10; ii++) {var oBarsldHours = document.createElement('IMG');oBarsldHours.id = 'IMGBar' + ii + 'sldHours';oBarsldHours.src = '/images/slide_bar.gif';oBarsldHours.style.position = 'absolute';oBarsldHours.style.zIndex = 100;oParent.appendChild(oBarsldHours);}
+	ConfigureSlidersldHours();
+	oArrowsldHours.onmouseover = function() {oArrowsldHours.style.cursor = 'hand';}
+	oArrowsldHours.onmouseout = function() {oArrowsldHours.style.cursor = 'default';}
+	oArrowsldHours.onmousedown = function() {oMovingsldHours = true;}
+	oArrowsldHours.ondrag = function() {return false;}
+	document.attachEvent("onmousemove", MouseMovesldHours);
+	document.attachEvent("onmouseup", MouseUpsldHours);
+	document.body.attachEvent("onmouseleave", MouseLeavesldHours);
+	window.attachEvent("onresize", WindowResizesldHours);
+	oParent.attachEvent("onpropertychange", ActivateSlidersldHours);
+	}
+}
+function ActivateSlidersldHours() {oArrowsldHours.style.display='none';setTimeout("ConfigureSlidersldHours()",100);}
+function MouseUpsldHours() {StopMovesldHours();}
+function MouseMovesldHours() {if (oMovingsldHours == true) {oArrowsldHours.style.posTop = yPossldHours;MoveSlidersldHours(parseInt(window.event.x) - intOffSetsldHours);}}
+function MouseLeavesldHours() {StopMovesldHours();}
+function StopMovesldHours() {oMovingsldHours = false;oDivsldHours.style.display='none';}
+function WindowResizesldHours() {StopMovesldHours();ConfigureSlidersldHours();}
+function ConfigureSlidersldHours() {xStartPossldHours = parseInt(findPosX(oStartsldHours) + intOffSetsldHours);xEndPossldHours = parseInt(findPosX(oEndsldHours));var intTotal = xEndPossldHours - xStartPossldHours;yPossldHours = findPosY(oStartsldHours) - intOffHeightsldHours;var intStart = parseFloat(oHiddensldHours.value) / dblTotalsldHours * 100;intStart = intStart * .01;oArrowsldHours.style.posLeft = (intStart * intTotal) + xStartPossldHours - intOffSetsldHours;oOldStartsldHours = oArrowsldHours.style.posLeft;oArrowsldHours.style.posTop = yPossldHours;
+oArrowsldHours.style.display='inline';
+oDivsldHours.style.posLeft = (intStart * intTotal) + xStartPossldHours - intOffSetsldHours - 15;oDivsldHours.style.posTop = yPossldHours + 25;intTotal = intTotal / 10;for (ii=1; ii<10; ii++) {var intSpot = intTotal * ii;intSpot = intSpot + xStartPossldHours;var oBarsldHours = document.getElementById('IMGBar' + ii + 'sldHours');oBarsldHours.style.posLeft = intSpot;oBarsldHours.style.posTop = yPossldHours + 2;}xStartPossldHours = xStartPossldHours - intOffSetsldHours;}
+function MoveSlidersldHours(intSpot) {
+	if (parseInt(oOldStartsldHours) < parseInt(intSpot)) {
+		var intStart = xStartPossldHours;
+		var intEnd = xEndPossldHours;
+		if (intSpot < intStart){
+			intSpot = intStart;
+		}
+		else if (intSpot > (intEnd - intOffSetsldHours)){intSpot = intEnd - intOffSetsldHours;}
+		oArrowsldHours.style.posLeft = intSpot;
+		oDivsldHours.style.posLeft = intSpot - 15;
+		var intTotal = intEnd - intStart - intOffSetsldHours;
+		intSpot = intSpot - intStart;
+		if (intSpot < 0){alert('There was a problem with the slider control : ' + intSpot);}
+		if (intSpot == 0) {oDivsldHours.innerText = '0%';oDivsldHours.style.display = 'none';oHiddensldHours.value = '0';}
+		else {
+			var intPercent = parseFloat(intSpot / intTotal);
+			intPercent = intPercent * 100;
+			var strPercent = intPercent.toString();
+			if (strPercent.indexOf('.') > -1){strPercent = strPercent.substring(0, strPercent.indexOf('.'));}
+			oDivsldHours.innerText = strPercent + '%';
+			if (boolDivsldHours == true){oDivsldHours.style.display = 'inline';}
+			var odblTemp = parseFloat(strPercent);odblTemp = odblTemp / 100;
+			oHiddensldHours.value = odblTemp * dblTotalsldHours;
+			oArrowsldHours.title = strPercent + '%';}}}
+function ShowHide() {
+	var otest = document.getElementById('divExecution');
+	if (otest.style.display == "inline")
+		otest.style.display = "none";
+	else
+		otest.style.display = "inline";
+}
+</script>
+<p>&nbsp;</p><p>&nbsp;</p>
+<div id="divExecution" align="center" style="display:none">
+<table id="tblSlidersldHours" cellpadding="0" cellspacing="0" border="0"><tr><td class="result">0%</td><td><img src="/images/spacer.gif" border="0" width="5" height="1" /></td><td><a id="slideStartsldHours" /></td><td id="slidesldHours" width="100%" background="/images/gray_dot.gif"><img src="/images/gray_dot.gif" border="0" /></td><td><a id="slideEndsldHours" /></td><td><img src="/images/spacer.gif" border="0" width="10" height="1" /></td><td class="result">100%</td></tr></table><input type="hidden" id="hdnHours" name="hdnHours" />
+</div>
+<a href="#" onClick="ShowHide();">Click me</a>
+</body>
+</html>

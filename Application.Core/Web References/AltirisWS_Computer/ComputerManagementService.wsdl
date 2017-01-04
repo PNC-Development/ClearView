@@ -1,0 +1,1355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://Altiris.ASDK.DS.com" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://Altiris.ASDK.DS.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://Altiris.ASDK.DS.com">
+      <s:element name="GetComputerID">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerIDResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetComputerIDResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DSCredentialsHeader" type="tns:DSCredentialsHeader" />
+      <s:complexType name="DSCredentialsHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AddVirtualComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="computerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="assetTag" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="serialNumber" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="macAddress" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="domainMembership" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="domain" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="preferredServer" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="preferredTree" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ndsContext" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="loginToTree" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="runScripts" type="s:boolean" />
+            <s:element minOccurs="0" maxOccurs="1" name="osUser" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="osOrganization" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="osKey" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddVirtualComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddVirtualComputerResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddBasicVirtualComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="computerName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="assetTag" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="serialNumber" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="macAddress" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="domainMembership" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="domain" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddBasicVirtualComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddBasicVirtualComputerResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerInfoByAttribute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="filterType" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerInfoByAttributeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetComputerInfoByAttributeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerInfo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="filterType" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetComputerInfoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputerByGroupName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="groupSearchPhrase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputerByGroupNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveComputerByGroupNameResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputerByAttribute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputerByAttributeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveComputerByAttributeResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="MoveComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="MoveComputerResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteComputerByAttribute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteComputerByAttributeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteComputerByAttributeResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="DeleteComputerResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerList">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetComputerListResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetSchedulesByAttribute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSchedulesByAttributeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSchedulesByAttributeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerSchedules">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerSchedulesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetComputerSchedulesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameComputerByAttribute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="computerSearchPhrase" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="computerSearchType" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="computerName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameComputerByAttributeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RenameComputerByAttributeResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameComputer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="computerID" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="computerName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RenameComputerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RenameComputerResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerIDsInGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="groupID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetComputerIDsInGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetComputerIDsInGroupResult" type="tns:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="int" type="s:int" />
+      <s:element name="string" nillable="true" type="s:string" />
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="ArrayOfInt" nillable="true" type="tns:ArrayOfInt" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetComputerIDSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerID" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerIDResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:AddVirtualComputer" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:AddVirtualComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:AddBasicVirtualComputer" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:AddBasicVirtualComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerInfoByAttribute" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerInfoByAttributeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerInfo" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveComputerByGroupName" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveComputerByGroupNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveComputerByAttribute" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveComputerByAttributeResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:MoveComputer" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:MoveComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteComputerByAttribute" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteComputerByAttributeResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteComputer" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerList" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerListResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSchedulesByAttribute" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSchedulesByAttributeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerSchedules" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerSchedulesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeSoapIn">
+    <wsdl:part name="parameters" element="tns:RenameComputerByAttribute" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeSoapOut">
+    <wsdl:part name="parameters" element="tns:RenameComputerByAttributeResponse" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerSoapIn">
+    <wsdl:part name="parameters" element="tns:RenameComputer" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerSoapOut">
+    <wsdl:part name="parameters" element="tns:RenameComputerResponse" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:GetComputerIDsInGroup" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:GetComputerIDsInGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupDSCredentialsHeader">
+    <wsdl:part name="DSCredentialsHeader" element="tns:DSCredentialsHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerHttpGetIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="assetTag" type="s:string" />
+    <wsdl:part name="serialNumber" type="s:string" />
+    <wsdl:part name="macAddress" type="s:string" />
+    <wsdl:part name="domainMembership" type="s:string" />
+    <wsdl:part name="domain" type="s:string" />
+    <wsdl:part name="preferredServer" type="s:string" />
+    <wsdl:part name="preferredTree" type="s:string" />
+    <wsdl:part name="ndsContext" type="s:string" />
+    <wsdl:part name="userName" type="s:string" />
+    <wsdl:part name="loginToTree" type="s:string" />
+    <wsdl:part name="runScripts" type="s:string" />
+    <wsdl:part name="osUser" type="s:string" />
+    <wsdl:part name="osOrganization" type="s:string" />
+    <wsdl:part name="osKey" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerHttpGetIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="assetTag" type="s:string" />
+    <wsdl:part name="serialNumber" type="s:string" />
+    <wsdl:part name="macAddress" type="s:string" />
+    <wsdl:part name="domainMembership" type="s:string" />
+    <wsdl:part name="domain" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerHttpGetOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="filterType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="filterType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="groupSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeHttpGetIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerHttpGetIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupHttpGetIn">
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerHttpPostIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="assetTag" type="s:string" />
+    <wsdl:part name="serialNumber" type="s:string" />
+    <wsdl:part name="macAddress" type="s:string" />
+    <wsdl:part name="domainMembership" type="s:string" />
+    <wsdl:part name="domain" type="s:string" />
+    <wsdl:part name="preferredServer" type="s:string" />
+    <wsdl:part name="preferredTree" type="s:string" />
+    <wsdl:part name="ndsContext" type="s:string" />
+    <wsdl:part name="userName" type="s:string" />
+    <wsdl:part name="loginToTree" type="s:string" />
+    <wsdl:part name="runScripts" type="s:string" />
+    <wsdl:part name="osUser" type="s:string" />
+    <wsdl:part name="osOrganization" type="s:string" />
+    <wsdl:part name="osKey" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="AddVirtualComputerHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerHttpPostIn">
+    <wsdl:part name="groupID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+    <wsdl:part name="assetTag" type="s:string" />
+    <wsdl:part name="serialNumber" type="s:string" />
+    <wsdl:part name="macAddress" type="s:string" />
+    <wsdl:part name="domainMembership" type="s:string" />
+    <wsdl:part name="domain" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="AddBasicVirtualComputerHttpPostOut">
+    <wsdl:part name="Body" element="tns:int" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="filterType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoByAttributeHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="filterType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerInfoHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="groupSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByGroupNameHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerByAttributeHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="MoveComputerHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerByAttributeHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="DeleteComputerHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerListHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedulesByAttributeHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerSchedulesHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeHttpPostIn">
+    <wsdl:part name="computerSearchPhrase" type="s:string" />
+    <wsdl:part name="computerSearchType" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerByAttributeHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerHttpPostIn">
+    <wsdl:part name="computerID" type="s:string" />
+    <wsdl:part name="computerName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="RenameComputerHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupHttpPostIn">
+    <wsdl:part name="groupID" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetComputerIDsInGroupHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfInt" />
+  </wsdl:message>
+  <wsdl:portType name="ComputerManagementServiceSoap">
+    <wsdl:operation name="GetComputerID">
+      <wsdl:input message="tns:GetComputerIDSoapIn" />
+      <wsdl:output message="tns:GetComputerIDSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <wsdl:input message="tns:AddVirtualComputerSoapIn" />
+      <wsdl:output message="tns:AddVirtualComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <wsdl:input message="tns:AddBasicVirtualComputerSoapIn" />
+      <wsdl:output message="tns:AddBasicVirtualComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <wsdl:input message="tns:GetComputerInfoByAttributeSoapIn" />
+      <wsdl:output message="tns:GetComputerInfoByAttributeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <wsdl:input message="tns:GetComputerInfoSoapIn" />
+      <wsdl:output message="tns:GetComputerInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <wsdl:input message="tns:MoveComputerByGroupNameSoapIn" />
+      <wsdl:output message="tns:MoveComputerByGroupNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <wsdl:input message="tns:MoveComputerByAttributeSoapIn" />
+      <wsdl:output message="tns:MoveComputerByAttributeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <wsdl:input message="tns:MoveComputerSoapIn" />
+      <wsdl:output message="tns:MoveComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <wsdl:input message="tns:DeleteComputerByAttributeSoapIn" />
+      <wsdl:output message="tns:DeleteComputerByAttributeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <wsdl:input message="tns:DeleteComputerSoapIn" />
+      <wsdl:output message="tns:DeleteComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <wsdl:input message="tns:GetComputerListSoapIn" />
+      <wsdl:output message="tns:GetComputerListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <wsdl:input message="tns:GetSchedulesByAttributeSoapIn" />
+      <wsdl:output message="tns:GetSchedulesByAttributeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <wsdl:input message="tns:GetComputerSchedulesSoapIn" />
+      <wsdl:output message="tns:GetComputerSchedulesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <wsdl:input message="tns:RenameComputerByAttributeSoapIn" />
+      <wsdl:output message="tns:RenameComputerByAttributeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <wsdl:input message="tns:RenameComputerSoapIn" />
+      <wsdl:output message="tns:RenameComputerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <wsdl:input message="tns:GetComputerIDsInGroupSoapIn" />
+      <wsdl:output message="tns:GetComputerIDsInGroupSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ComputerManagementServiceHttpGet">
+    <wsdl:operation name="GetComputerID">
+      <wsdl:input message="tns:GetComputerIDHttpGetIn" />
+      <wsdl:output message="tns:GetComputerIDHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <wsdl:input message="tns:AddVirtualComputerHttpGetIn" />
+      <wsdl:output message="tns:AddVirtualComputerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <wsdl:input message="tns:AddBasicVirtualComputerHttpGetIn" />
+      <wsdl:output message="tns:AddBasicVirtualComputerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <wsdl:input message="tns:GetComputerInfoByAttributeHttpGetIn" />
+      <wsdl:output message="tns:GetComputerInfoByAttributeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <wsdl:input message="tns:GetComputerInfoHttpGetIn" />
+      <wsdl:output message="tns:GetComputerInfoHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <wsdl:input message="tns:MoveComputerByGroupNameHttpGetIn" />
+      <wsdl:output message="tns:MoveComputerByGroupNameHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <wsdl:input message="tns:MoveComputerByAttributeHttpGetIn" />
+      <wsdl:output message="tns:MoveComputerByAttributeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <wsdl:input message="tns:MoveComputerHttpGetIn" />
+      <wsdl:output message="tns:MoveComputerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <wsdl:input message="tns:DeleteComputerByAttributeHttpGetIn" />
+      <wsdl:output message="tns:DeleteComputerByAttributeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <wsdl:input message="tns:DeleteComputerHttpGetIn" />
+      <wsdl:output message="tns:DeleteComputerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <wsdl:input message="tns:GetComputerListHttpGetIn" />
+      <wsdl:output message="tns:GetComputerListHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <wsdl:input message="tns:GetSchedulesByAttributeHttpGetIn" />
+      <wsdl:output message="tns:GetSchedulesByAttributeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <wsdl:input message="tns:GetComputerSchedulesHttpGetIn" />
+      <wsdl:output message="tns:GetComputerSchedulesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <wsdl:input message="tns:RenameComputerByAttributeHttpGetIn" />
+      <wsdl:output message="tns:RenameComputerByAttributeHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <wsdl:input message="tns:RenameComputerHttpGetIn" />
+      <wsdl:output message="tns:RenameComputerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <wsdl:input message="tns:GetComputerIDsInGroupHttpGetIn" />
+      <wsdl:output message="tns:GetComputerIDsInGroupHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="ComputerManagementServiceHttpPost">
+    <wsdl:operation name="GetComputerID">
+      <wsdl:input message="tns:GetComputerIDHttpPostIn" />
+      <wsdl:output message="tns:GetComputerIDHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <wsdl:input message="tns:AddVirtualComputerHttpPostIn" />
+      <wsdl:output message="tns:AddVirtualComputerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <wsdl:input message="tns:AddBasicVirtualComputerHttpPostIn" />
+      <wsdl:output message="tns:AddBasicVirtualComputerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <wsdl:input message="tns:GetComputerInfoByAttributeHttpPostIn" />
+      <wsdl:output message="tns:GetComputerInfoByAttributeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <wsdl:input message="tns:GetComputerInfoHttpPostIn" />
+      <wsdl:output message="tns:GetComputerInfoHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <wsdl:input message="tns:MoveComputerByGroupNameHttpPostIn" />
+      <wsdl:output message="tns:MoveComputerByGroupNameHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <wsdl:input message="tns:MoveComputerByAttributeHttpPostIn" />
+      <wsdl:output message="tns:MoveComputerByAttributeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <wsdl:input message="tns:MoveComputerHttpPostIn" />
+      <wsdl:output message="tns:MoveComputerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <wsdl:input message="tns:DeleteComputerByAttributeHttpPostIn" />
+      <wsdl:output message="tns:DeleteComputerByAttributeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <wsdl:input message="tns:DeleteComputerHttpPostIn" />
+      <wsdl:output message="tns:DeleteComputerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <wsdl:input message="tns:GetComputerListHttpPostIn" />
+      <wsdl:output message="tns:GetComputerListHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <wsdl:input message="tns:GetSchedulesByAttributeHttpPostIn" />
+      <wsdl:output message="tns:GetSchedulesByAttributeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <wsdl:input message="tns:GetComputerSchedulesHttpPostIn" />
+      <wsdl:output message="tns:GetComputerSchedulesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <wsdl:input message="tns:RenameComputerByAttributeHttpPostIn" />
+      <wsdl:output message="tns:RenameComputerByAttributeHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <wsdl:input message="tns:RenameComputerHttpPostIn" />
+      <wsdl:output message="tns:RenameComputerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <wsdl:input message="tns:GetComputerIDsInGroupHttpPostIn" />
+      <wsdl:output message="tns:GetComputerIDsInGroupHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ComputerManagementServiceSoap" type="tns:ComputerManagementServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetComputerID">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerID" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerIDDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/AddVirtualComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:AddVirtualComputerDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/AddBasicVirtualComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:AddBasicVirtualComputerDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerInfoByAttribute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerInfoByAttributeDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerInfoDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveComputerByGroupName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveComputerByGroupNameDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveComputerByAttribute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveComputerByAttributeDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/MoveComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:MoveComputerDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteComputerByAttribute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteComputerByAttributeDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/DeleteComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:DeleteComputerDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerListDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetSchedulesByAttribute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetSchedulesByAttributeDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerSchedules" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerSchedulesDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/RenameComputerByAttribute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:RenameComputerByAttributeDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/RenameComputer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:RenameComputerDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <soap:operation soapAction="http://Altiris.ASDK.DS.com/GetComputerIDsInGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetComputerIDsInGroupDSCredentialsHeader" part="DSCredentialsHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ComputerManagementServiceHttpGet" type="tns:ComputerManagementServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetComputerID">
+      <http:operation location="/GetComputerID" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <http:operation location="/AddVirtualComputer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <http:operation location="/AddBasicVirtualComputer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <http:operation location="/GetComputerInfoByAttribute" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <http:operation location="/GetComputerInfo" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <http:operation location="/MoveComputerByGroupName" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <http:operation location="/MoveComputerByAttribute" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <http:operation location="/MoveComputer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <http:operation location="/DeleteComputerByAttribute" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <http:operation location="/DeleteComputer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <http:operation location="/GetComputerList" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <http:operation location="/GetSchedulesByAttribute" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <http:operation location="/GetComputerSchedules" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <http:operation location="/RenameComputerByAttribute" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <http:operation location="/RenameComputer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <http:operation location="/GetComputerIDsInGroup" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ComputerManagementServiceHttpPost" type="tns:ComputerManagementServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetComputerID">
+      <http:operation location="/GetComputerID" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddVirtualComputer">
+      <http:operation location="/AddVirtualComputer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddBasicVirtualComputer">
+      <http:operation location="/AddBasicVirtualComputer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfoByAttribute">
+      <http:operation location="/GetComputerInfoByAttribute" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerInfo">
+      <http:operation location="/GetComputerInfo" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByGroupName">
+      <http:operation location="/MoveComputerByGroupName" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputerByAttribute">
+      <http:operation location="/MoveComputerByAttribute" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MoveComputer">
+      <http:operation location="/MoveComputer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputerByAttribute">
+      <http:operation location="/DeleteComputerByAttribute" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteComputer">
+      <http:operation location="/DeleteComputer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerList">
+      <http:operation location="/GetComputerList" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedulesByAttribute">
+      <http:operation location="/GetSchedulesByAttribute" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerSchedules">
+      <http:operation location="/GetComputerSchedules" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputerByAttribute">
+      <http:operation location="/RenameComputerByAttribute" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RenameComputer">
+      <http:operation location="/RenameComputer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetComputerIDsInGroup">
+      <http:operation location="/GetComputerIDsInGroup" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ComputerManagementService">
+    <wsdl:port name="ComputerManagementServiceSoap" binding="tns:ComputerManagementServiceSoap">
+      <soap:address location="http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ComputerManagementServiceHttpGet" binding="tns:ComputerManagementServiceHttpGet">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ComputerManagementServiceHttpPost" binding="tns:ComputerManagementServiceHttpPost">
+      <http:address location="http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

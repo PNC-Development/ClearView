@@ -1,0 +1,68 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="clearview.master.cs" Inherits="NCC.ClearView.Presentation.Web.clearview"  %>
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+<title id="Title1" runat="server">ClearView | PNC Bank</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+<script type="text/javascript" src="/javascript/ajax.js"></script>
+<script type="text/javascript" src="/javascript/both.js"></script>
+<script type="text/javascript" src="/javascript/detect.js"></script>
+</head>
+<body bgcolor="#F8F8F8" leftmargin="0" topmargin="0" onload="BrowserDetect();">
+<form id="Form1" runat="server" enctype="multipart/form-data">
+<table width="100%" height="100%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr height="1">
+        <td rowspan="6"><img src="/images/spacer.gif" width="25" height="1" /></td>
+        <td colspan="3">&nbsp;</td>
+        <td rowspan="6"><img src="/images/spacer.gif" width="25" height="1" /></td>
+    </tr>
+    <tr height="1"> 
+        <td><img src="/images/topLeft.gif" width="9" height="9"></td>
+        <td background="/images/top.gif"><img src="/images/top.gif" width="9" height="9"></td>
+        <td><img src="/images/topRight.gif" width="9" height="9"></td>
+    </tr>
+    <tr> 
+        <td background="/images/left.gif"><img src="/images/left.gif" width="9" height="9"></td>
+        <td valign="top" height="100%" width="100%">
+        
+             <asp:ValidationSummary ID="vsValidationSummary" runat="Server"  DisplayMode="BulletList" 
+             HeaderText="The following problems have occured on the page:" ShowMessageBox="true" ShowSummary="false" 
+             EnableClientScript="true" />
+                        
+            <asp:contentplaceholder id="AllContent" runat="server">
+            <img src="/images/alert.gif" border="0" align="absmiddle" /> This page has not been defined.
+                
+            </asp:contentplaceholder>
+        </td>
+        <td background="/images/right.gif"><img src="/images/right.gif" width="9" height="9"></td>
+    </tr>
+    <tr height="1"> 
+        <td><img src="/images/bottomLeft.gif" width="9" height="9"></td>
+        <td background="/images/bottom.gif"><img src="/images/bottom.gif" width="9" height="9"></td>
+        <td><img src="/images/bottomRight.gif" width="9" height="9"></td>
+    </tr>
+    <tr height="1">
+        <td>&nbsp;</td>
+        <td class="legal">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="bottomnav">
+                <tr>
+                    <td>Copyright <asp:Label ID="lblHidden" runat="server" Text="&copy;" /> <%=DateTime.Now.Year.ToString() %> | PNC Financial Services Group, Inc.&reg;</td>
+                    <td align="right" class="bottomnav">
+                        <asp:HyperLink ID="btnAbout" runat="server" Text="Visit the ClearView Community" Target="_blank" CssClass="bottomnav" /> | <asp:Label ID="lblVersion" runat="server" CssClass="bottomnav" />
+                    </td>
+                </tr>
+            </table>
+        <td>&nbsp;</td>
+    </tr>
+    <tr height="1">
+        <td colspan="3">&nbsp;</td>
+    </tr>
+</table>
+<div id="divLine" style="BORDER-RIGHT: gray 1px dashed; DISPLAY: none; WIDTH: 2px; POSITION: absolute; TOP: 58px; HEIGHT: 100%"></div>
+<div id="divLineCover" style="DISPLAY: none; FILTER: alpha(opacity=25); WIDTH: 100%; CURSOR: e-resize; POSITION: absolute; TOP: 58px; HEIGHT: 100%; BACKGROUND-COLOR: #666666"></div>
+<div id="divLiveCover" style="DISPLAY:none; WIDTH:100%; POSITION:absolute; HEIGHT:100%; FILTER:alpha(opacity=25); BACKGROUND-COLOR:#333333"	onclick="window.top.HidePanel();" oncontextmenu="return false;"></div>
+<iframe id="frmLiveCover" frameborder="0" scrolling="no" style="z-index:400; display:none;position:absolute;FILTER:alpha(opacity=0)" src="javascript:''"></iframe>
+<iframe id="frmLiveShow" frameborder="0" scrolling="no" style="z-index:401; display:none;position:absolute;" src="javascript:''"></iframe>
+</form>
+</body>
+</html>

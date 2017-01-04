@@ -1,0 +1,443 @@
+<%@ Page Language="C#" Debug="false" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intProfile;
+    private AccountRequest oAccountRequest;
+    private Users oUser;
+    private Variables oVariable;
+    private VirtualBuilds oVirtualBuild;
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private void Page_Load()
+    {
+//        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        intProfile = 39254;
+        oAccountRequest = new AccountRequest(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oVariable = new Variables(intEnvironment);
+        oVirtualBuild = new VirtualBuilds(intProfile, dsn);
+        if (Request.QueryString["rid"] != null && Request.QueryString["rid"] != "" && Request.QueryString["n"] != null && Request.QueryString["n"] != "" && Request.QueryString["bid"] != null && Request.QueryString["bid"] != "" && Request.QueryString["s"] != null && Request.QueryString["s"] != "")
+        {
+            int intRequest = Int32.Parse(Request.QueryString["rid"]);
+            int intNumber = Int32.Parse(Request.QueryString["n"]);
+            lblBuild.Text = Request.QueryString["bid"];
+            lblStep.Text = Request.QueryString["s"];
+            if (!IsPostBack)
+            {
+                DataSet ds = oVirtualBuild.GetNumber(intRequest, intNumber);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    Requests oRequest = new Requests(intProfile, dsn);
+                    //            if (oRequest.GetUser(intRequest) == intProfile)
+                    if (true)
+                    {
+                        //if (Request.QueryString["add"] != null)
+                        //    lblSaved.Visible = true;
+                        //if (Request.QueryString["delete"] != null)
+                        //    lblDelete.Visible = true;
+                        if (Request.QueryString["done"] != null)
+                            lblDone.Visible = true;
+                        lblServer.Text = ds.Tables[0].Rows[0]["servername"].ToString().ToUpper();
+                        int intDomain = Int32.Parse(ds.Tables[0].Rows[0]["domain"].ToString());
+                        Variables oDomain = new Variables(intDomain);
+                        lblDomain.Text = oDomain.Domain().ToUpper();
+                        panPermit.Visible = true;
+                        txtUser.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divAJAX.ClientID + "','" + lstAJAX.ClientID + "','" + hdnUser.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+                        lstAJAX.Attributes.Add("ondblclick", "AJAXClickRow();");
+                        chkAdmin.Attributes.Add("onclick", "CheckAdmin(this);");
+                        ds = oAccountRequest.Gets(intRequest, 1);
+                        rptAccounts.DataSource = ds;
+                        rptAccounts.DataBind();
+                        foreach (RepeaterItem ri in rptAccounts.Items)
+                        {
+                            LinkButton _delete = (LinkButton)ri.FindControl("btnDelete");
+                            _delete.Attributes.Add("onclick", "return confirm('Are you sure you want to delete this account?');");
+                            Label _local = (Label)ri.FindControl("lblLocal");
+                            Label _global = (Label)ri.FindControl("lblGlobal");
+                            Label _permissions = (Label)ri.FindControl("lblPermissions");
+                            string strPermission = _global.Text;
+                            string strPermissions = "";
+                            if (strPermission.Contains("GSGu_" + lblServer.Text + "Adm"))
+                                strPermissions += "ADMINISTRATOR<br/>";
+                            strPermission = _local.Text;
+                            if (strPermission.Contains("GLCfsaRO_SysVol"))
+                                strPermissions += "SYS_VOL (C:) - Read Only<br/>";
+                            else if (strPermission.Contains("GLCfsaRW_SysVol"))
+                                strPermissions += "SYS_VOL (C:) - Read / Write<br/>";
+                            else if (strPermission.Contains("GLCfsaFC_SysVol"))
+                                strPermissions += "SYS_VOL (C:) - Full Control<br/>";
+                            if (strPermission.Contains("GLCfsaRO_UtlVol"))
+                                strPermissions += "UTL_VOL (E:) - Read Only<br/>";
+                            else if (strPermission.Contains("GLCfsaRW_UtlVol"))
+                                strPermissions += "UTL_VOL (E:) - Read / Write<br/>";
+                            else if (strPermission.Contains("GLCfsaFC_UtlVol"))
+                                strPermissions += "UTL_VOL (E:) - Full Control<br/>";
+                            if (strPermission.Contains("GLCfsaRO_AppVol"))
+                                strPermissions += "APP_VOL (F:) - Read Only<br/>";
+                            else if (strPermission.Contains("GLCfsaRW_AppVol"))
+                                strPermissions += "APP_VOL (F:) - Read / Write<br/>";
+                            else if (strPermission.Contains("GLCfsaFC_AppVol"))
+                                strPermissions += "APP_VOL (F:) - Full Control<br/>";
+                            if (strPermissions == "")
+                                strPermissions = "-----";
+                            _permissions.Text = strPermissions;
+                        }
+                        if (rptAccounts.Items.Count == 0)
+                        {
+                            lblNone.Visible = true;
+                            btnSubmit.Attributes.Add("onclick", "alert('You must add at least one account or select the skip button');return false;");
+                        }
+                    }
+                    else
+                        panDenied.Visible = true;
+                }
+                else
+                    panDenied.Visible = true;
+            }
+        }
+        else
+            panDenied.Visible = true;
+        btnSkip.Attributes.Add("onclick", "return confirm('Are you sure you want to skip the account request process?');");
+        btnAdd.Attributes.Add("onclick", "return ValidateHidden('" + hdnUser.ClientID + "','" + txtUser.ClientID + "','Please enter a username, first name or last name');");
+    }
+    
+    private void btnAdd_Click(Object Sender, EventArgs e)
+    {
+        int intUser = Int32.Parse(Request.Form[hdnUser.UniqueID]);
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        int intNumber = Int32.Parse(Request.QueryString["n"]);
+        string strLocal = "";
+        string strGlobal = "";
+        if (chkAdmin.Checked == true)
+            strGlobal = "GSGu_" + lblServer.Text + "Adm";
+        else
+        {
+            switch (radSysVol.SelectedItem.Value)
+            {
+                case "R":
+                    strLocal += "GLCfsaRO_SysVol;";
+                    break;
+                case "W":
+                    strLocal += "GLCfsaRW_SysVol;";
+                    break;
+                case "F":
+                    strLocal += "GLCfsaFC_SysVol;";
+                    break;
+            }
+            switch (radUtlVol.SelectedItem.Value)
+            {
+                case "R":
+                    strLocal += "GLCfsaRO_UtlVol;";
+                    break;
+                case "W":
+                    strLocal += "GLCfsaRW_UtlVol;";
+                    break;
+                case "F":
+                    strLocal += "GLCfsaFC_UtlVol;";
+                    break;
+            }
+            switch (radAppVol.SelectedItem.Value)
+            {
+                case "R":
+                    strLocal += "GLCfsaRO_AppVol;";
+                    break;
+                case "W":
+                    strLocal += "GLCfsaRW_AppVol;";
+                    break;
+                case "F":
+                    strLocal += "GLCfsaFC_AppVol;";
+                    break;
+            }
+        }
+        oAccountRequest.Add(intRequest, oUser.GetName(intUser), oVariable.DomainID(lblDomain.Text), strGlobal, strLocal, 0, 0);
+        Response.Redirect(Request.Path + "?rid=" + Request.QueryString["rid"] + "&n=" + Request.QueryString["n"] + "&bid=" + Request.QueryString["bid"] + "&s=" + Request.QueryString["s"] + "&add=true");
+    }
+
+    private void btnDelete_Click(Object Sender, EventArgs e)
+    {
+        LinkButton oDelete = (LinkButton)Sender;
+        oAccountRequest.Delete(Int32.Parse(oDelete.CommandArgument));
+        Response.Redirect(Request.Path + "?rid=" + Request.QueryString["rid"] + "&n=" + Request.QueryString["n"] + "&bid=" + Request.QueryString["bid"] + "&s=" + Request.QueryString["s"] + "&delete=true");
+    }
+
+    private void btnSkip_Click(Object Sender, EventArgs e)
+    {
+        int intStep = Int32.Parse(lblStep.Text);
+        oVirtualBuild.Update(Int32.Parse(lblBuild.Text), intStep);
+        Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "reload", "<script type=\"text/javascript\">window.opener.location.reload();window.close();<" + "/" + "script>");
+    }
+
+    private void btnSubmit_Click(Object Sender, EventArgs e)
+    {
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        int intDomain = oVariable.DomainID(lblDomain.Text);
+        oAccountRequest.Process(intRequest, lblServer.Text, "Abcd1234", intEnvironment, 1);
+        if (chkNotify.Checked == true)
+        {
+            // Notify the requestor the results of this request
+            Functions oFunction = new Functions(intProfile, dsn, intEnvironment);
+            Requests oRequest = new Requests(intProfile, dsn);
+            DataSet ds = oRequest.GetResult(intRequest);
+            string strNotify = "";
+            foreach (DataRow dr in ds.Tables[0].Rows)
+                strNotify += dr["result"].ToString();
+            oFunction.SendEmail("ClearView Account Request", oUser.GetName(intProfile), "", strBCC, "ClearView Account Request", strNotify, true, false);
+        }
+        int intStep = Int32.Parse(lblStep.Text);
+        oVirtualBuild.Update(Int32.Parse(lblBuild.Text), intStep);
+        // Close Window and Update Parent Screen
+        Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "reload", "<script type=\"text/javascript\">window.opener.location.reload();window.close();<" + "/" + "script>");
+    }
+</script>
+<html>
+<head>
+<title>ClearView Account Request</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script type="text/javascript" src="/javascript/default.js"></script>
+<script type="text/javascript" src="/javascript/ajax.js"></script>
+<script type="text/javascript">
+    function CheckAdmin(oCheck, oDDL1) {
+        oDDL1 = document.getElementById(oDDL1);
+        if (oCheck.checked == true) {
+        }
+        else {
+        }
+    }
+    function ShowAccountDetail(oDiv) {
+        oDiv = document.getElementById(oDiv);
+        if (oDiv.style.display == 'inline')
+            oDiv.style.display = 'none';
+        else
+            oDiv.style.display = 'inline';
+    }
+</script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form runat="server">
+<asp:Panel ID="panPermit" runat="server" Visible="false">
+<table width="100%" cellpadding="0" cellspacing="5" border="0">
+    <tr>
+        <td rowspan="2"><img src="/images/account_request.gif" border="0" align="absmiddle" /></td>
+        <td class="hugeheader" width="100%" valign="bottom">ClearView Account Request</td>
+    </tr>
+    <tr>
+        <td width="100%" valign="top">Automate the creation of your user accounts by completing the following form and clicking <b>Submit Request</b></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="2" cellspacing="3">
+    <tr>
+        <td width="50%" height="100%" valign="top">
+            <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr height="1">
+                    <td><img src="/images/table_topleft.gif" border="0" width="5" height="26"></td>
+                    <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%">Account Properties</td>
+                    <td><img src="/images/table_topright.gif" border="0" width="5" height="26"></td>
+                </tr>
+                <tr>
+                    <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+                    <td width="100%" bgcolor="#FFFFFF" valign="top">
+                        <table width="100%" border="0" cellspacing="4" cellpadding="4">
+                            <tr>
+                                <td nowrap>Server:</td>
+                                <td width="100%"><asp:Label ID="lblServer" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Domain:</td>
+                                <td width="100%"><asp:Label ID="lblDomain" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>User:</td>
+                                <td width="100%">
+                        <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td><asp:TextBox ID="txtUser" runat="server" Width="300" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="divAJAX" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                        <asp:ListBox ID="lstAJAX" runat="server" CssClass="default" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap class="footer">&nbsp;</td>
+                                <td class="footer">(Please enter a valid LAN ID, First Name, or Last Name)</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+                </tr>
+                <tr height="1">
+                    <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+                    <td width="100%" background="/images/table_bottom.gif"></td>
+                    <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+                </tr>
+            </table>
+        </td>
+        <td width="50%" height="100%" valign="top">
+            <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr height="1">
+                    <td><img src="/images/table_topleft.gif" border="0" width="5" height="26"></td>
+                    <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%">Account Permissions</td>
+                    <td><img src="/images/table_topright.gif" border="0" width="5" height="26"></td>
+                </tr>
+                <tr>
+                    <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+                    <td width="100%" bgcolor="#FFFFFF" valign="top">
+                        <table width="100%" border="0" cellspacing="2" cellpadding="2">
+                            <tr>
+                                <td nowrap>Administrator:</td>
+                                <td width="100%"><asp:CheckBox ID="chkAdmin" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>SYS_VOL (C:)</td>
+                                <td width="100%">
+                                    <asp:RadioButtonList ID="radSysVol" runat="server" CssClass="default" RepeatDirection="Horizontal">
+                                        <asp:ListItem Text="None" Value="N" Selected="True" />
+                                        <asp:ListItem Text="Read" Value="R" />
+                                        <asp:ListItem Text="Write" Value="W" />
+                                        <asp:ListItem Text="Full" Value="F" />
+                                    </asp:RadioButtonList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap>UTL_VOL (E:)</td>
+                                <td width="100%">
+                                    <asp:RadioButtonList ID="radUtlVol" runat="server" CssClass="default" RepeatDirection="Horizontal">
+                                        <asp:ListItem Text="None" Value="N" Selected="True" />
+                                        <asp:ListItem Text="Read" Value="R" />
+                                        <asp:ListItem Text="Write" Value="W" />
+                                        <asp:ListItem Text="Full" Value="F" />
+                                    </asp:RadioButtonList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap>APP_VOL (F:)</td>
+                                <td width="100%">
+                                    <asp:RadioButtonList ID="radAppVol" runat="server" CssClass="default" RepeatDirection="Horizontal">
+                                        <asp:ListItem Text="None" Value="N" Selected="True" />
+                                        <asp:ListItem Text="Read" Value="R" />
+                                        <asp:ListItem Text="Write" Value="W" />
+                                        <asp:ListItem Text="Full" Value="F" />
+                                    </asp:RadioButtonList>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+                </tr>
+                <tr height="1">
+                    <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+                    <td width="100%" background="/images/table_bottom.gif"></td>
+                    <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" align="right"><asp:LinkButton ID="btnAdd" runat="server" OnClick="btnAdd_Click" Text="<img src='/images/bigplus.gif' border='0' align='absmiddle'/><img src='/images/spacer.gif' border='0' width='10' height='20' align='absmiddle'/>Add Account" /><img src="/images/spacer.gif" border="0" width="10" height="1" /></td>
+    </tr>
+    <tr>
+        <td colspan="2" align="center" class="bigcheck">
+            <asp:Label ID="lblSaved" runat="server" Text="<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Account Added" Visible="false" />
+            <asp:Label ID="lblDelete" runat="server" Text="<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Account Deleted" Visible="false" />
+            <asp:Label ID="lblDone" runat="server" Text="<img src='/images/bigCheck.gif' border='0' align='absmiddle' /> Account Request Completed!" Visible="false" />
+        </td>
+    </tr>
+    <tr><td colspan="2">&nbsp;</td></tr>
+    <tr>
+        <td colspan="2">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td><img src="/images/table_topleft.gif" border="0" width="5" height="26"></td>
+                    <td nowrap background="/images/table_top.gif" class="greentableheader" width="100%">Current Account Requests</td>
+                    <td><img src="/images/table_topright.gif" border="0" width="5" height="26"></td>
+                </tr>
+                <tr>
+                    <td background="/images/table_left.gif"><img src="/images/table_left.gif" width="5" height="10"></td>
+                    <td width="100%" bgcolor="#FFFFFF">
+            <div style="height:100%; width:100%; overflow:auto">
+            <table width="100%" cellpadding="4" cellspacing="0" border="0" align="center">
+                <tr>
+                    <td><b><u>Username:</u></b></td>
+                    <td><b><u>Permissions:</u></b></td>
+                    <td></td>
+                </tr>
+                <asp:repeater ID="rptAccounts" runat="server">
+                    <ItemTemplate>
+                        <tr>
+                            <asp:Label ID="lblLocal" runat="server" Visible="false" Text='<%# DataBinder.Eval(Container.DataItem, "localgroups") %>' />
+                            <asp:Label ID="lblGlobal" runat="server" Visible="false" Text='<%# DataBinder.Eval(Container.DataItem, "adgroups") %>' />
+                            <td valign="top"><%# oUser.GetFullName(DataBinder.Eval(Container.DataItem, "xid").ToString()) %> (<%# DataBinder.Eval(Container.DataItem, "xid") %>)</td>
+                            <td valign="top"><asp:Label ID="lblPermissions" runat="server" CssClass="default" /></td>
+                            <td valign="top" align="right"><asp:LinkButton ID="btnDelete" runat="server" Text="Delete" OnClick="btnDelete_Click" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "id") %>' /></td>
+                        </tr>
+                    </ItemTemplate>
+                    <AlternatingItemTemplate>
+                        <tr bgcolor="F6F6F6">
+                            <asp:Label ID="lblLocal" runat="server" Visible="false" Text='<%# DataBinder.Eval(Container.DataItem, "localgroups") %>' />
+                            <asp:Label ID="lblGlobal" runat="server" Visible="false" Text='<%# DataBinder.Eval(Container.DataItem, "adgroups") %>' />
+                            <td valign="top"><%# oUser.GetFullName(DataBinder.Eval(Container.DataItem, "xid").ToString()) %> (<%# DataBinder.Eval(Container.DataItem, "xid") %>)</td>
+                            <td valign="top"><asp:Label ID="lblPermissions" runat="server" CssClass="default" /></td>
+                            <td valign="top" align="right"><asp:LinkButton ID="btnDelete" runat="server" Text="Delete" OnClick="btnDelete_Click" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "id") %>' /></td>
+                        </tr>
+                    </AlternatingItemTemplate>
+                </asp:repeater>
+                <tr>
+                    <td colspan="2">
+                        <asp:Label ID="lblNone" runat="server" CssClass="default" Visible="false" Text="<img src='/images/spacer.gif' border='0' height='1' width='25' /><img src='/images/alert.gif' border='0' align='absmiddle'> You have not added any accounts to this request" />
+                    </td>
+                </tr>
+            </table>
+            </div>
+                    </td>
+                    <td background="/images/table_right.gif"><img src="/images/table_right.gif" width="5" height="10"></td>
+                </tr>
+                <tr>
+                    <td><img src="/images/table_bottomLeft.gif" border="0" width="5" height="9"></td>
+                    <td width="100%" background="/images/table_bottom.gif"></td>
+                    <td><img src="/images/table_bottomRight.gif" border="0" width="5" height="9"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td><asp:CheckBox ID="chkNotify" runat="server" CssClass="default" Text="Email me the results of this account request" Checked="true" /></td>
+        <td align="right"><asp:LinkButton ID="btnSkip" runat="server" OnClick="btnSkip_Click" Text="<img src='/images/bigError.gif' border='0' align='absmiddle'/><img src='/images/spacer.gif' border='0' width='10' height='20' align='absmiddle'/>Skip Accounts" /><img src="/images/spacer.gif" border="0" width="25" height="1" /><asp:LinkButton ID="btnSubmit" runat="server" OnClick="btnSubmit_Click" Text="<img src='/images/bigCheckBox.gif' border='0' align='absmiddle'/><img src='/images/spacer.gif' border='0' width='10' height='20' align='absmiddle'/>Submit Request" /><img src="/images/spacer.gif" border="0" width="10" height="1" /></td>
+    </tr>
+</table>
+</asp:Panel>
+<asp:Panel ID="panDenied" runat="server" Visible="false">
+    <table width="100%" cellpadding="2" cellspacing="2" border="0">
+        <tr>
+            <td class="header"><img src="/images/bigX.gif" border="0" align="absmiddle" /> Access Denied</td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr>
+            <td>You do not have rights to view this item.</td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr>
+            <td><hr size="1" noshade /></td>
+        </tr>
+        <tr>
+            <td align="right">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td class="footer"></td>
+                        <td align="right"><asp:Button ID="btnClose" runat="server" CssClass="default" Width="75" Text="Close" /></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</asp:Panel>
+<asp:HiddenField ID="hdnUser" runat="server" />
+<asp:Label ID="lblBuild" runat="server" Visible="false" />
+<asp:Label ID="lblStep" runat="server" Visible="false" />
+</form>
+</body>
+</html>

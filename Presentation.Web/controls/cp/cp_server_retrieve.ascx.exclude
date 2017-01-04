@@ -1,0 +1,120 @@
+<%@ Control Language="C#" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intAssignPage = Int32.Parse(ConfigurationManager.AppSettings["AssignWorkload"]);
+    private int intViewPage = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private int intResourceRequestApprove = Int32.Parse(ConfigurationManager.AppSettings["ResourceRequestApprove"]);
+    private string strBCC = ConfigurationManager.AppSettings["WorkflowBCC"];
+    private string strDone = "";
+    private int intProfile = 0;
+    private string strVirtual = ConfigurationManager.AppSettings["VirtualGatekeeper"];
+    private int intWorkloadPage = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private void Page_Load()
+    {
+        Requests oRequest = new Requests(intProfile, dsn);
+        RequestItems oRequestItem = new RequestItems(intProfile, dsn);
+        RequestFields oRequestField = new RequestFields(intProfile, dsn);
+        ServiceRequests oServiceRequest = new ServiceRequests(intProfile, dsn);
+        Services oService = new Services(intProfile, dsn);
+        int intRequest = Int32.Parse(Request.QueryString["rid"]);
+        int intProject = oRequest.GetProjectNumber(intRequest);
+        string strStatus = oServiceRequest.Get(intRequest, "checkout");
+        DataSet dsItems = oRequestItem.GetForms(intRequest);
+        int intItem = 0;
+        int intService = 0;
+        int intNumber = 0;
+        if (dsItems.Tables[0].Rows.Count > 0)
+        {
+            bool boolBreak = false;
+            foreach (DataRow drItem in dsItems.Tables[0].Rows)
+            {
+                if (boolBreak == true)
+                    break;
+                if (drItem["done"].ToString() == "0")
+                {
+                    intItem = Int32.Parse(drItem["itemid"].ToString());
+                    intService = Int32.Parse(drItem["serviceid"].ToString());
+                    intNumber = Int32.Parse(drItem["number"].ToString());
+                    boolBreak = true;
+                }
+                if (intItem > 0 && (strStatus == "1" || strStatus == "2"))
+                {
+                    bool boolSuccess = true;
+                    string strResult = oService.GetName(intService) + " Completed";
+                    string strError = oService.GetName(intService) + " Error";
+                    // ********* BEGIN PROCESSING **************
+                    Customized oCustomized = new Customized(intProfile, dsn);
+                    DataSet ds = oCustomized.GetServerRetrieve(intRequest, intItem, intNumber);
+                    if (ds.Tables[0].Rows.Count > 0)
+                    {
+                        if (ds.Tables[0].Rows[0]["backto"].ToString() == "Virtual")
+                        {
+                            // Send to Virtual Gatekeepers
+                            ResourceRequest oResourceRequest = new ResourceRequest(intProfile, dsn);
+                            Users oUser = new Users(intProfile, dsn);
+                            Functions oFunction = new Functions(intProfile, dsn, intEnvironment);
+                            Variables oVariable = new Variables(intEnvironment);
+                            Pages oPage = new Pages(intProfile, dsn);
+                            string[] strEmail;
+                            char[] strSplit = { ';' };
+                            strEmail = strVirtual.Split(strSplit);
+                            for (int ii = 0; ii < strEmail.Length; ii++)
+                            {
+                                if (strEmail[ii].Trim() != "")
+                                {
+                                    int intUser = oUser.GetId(strEmail[ii]);
+                                    int intResource = oServiceRequest.AddRequest(intRequest, intItem, intService, intUser, 0, 0.00, 2, 0, 1, intNumber);
+                                    strEmail[ii] = intResource.ToString();
+                                }
+                            }
+                            for (int ii = 0; ii < strEmail.Length; ii++)
+                            {
+                                if (strEmail[ii].Trim() != "")
+                                {
+                                    int intNew = Int32.Parse(strEmail[ii]);
+                                    if (intNew > 0)
+                                    {
+                                        ds = oResourceRequest.Get(intNew);
+                                        if (ds.Tables[0].Rows.Count > 0)
+                                        {
+                                            int intUser = Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+                                            string strDefault = oUser.GetApplicationUrl(intUser, intWorkloadPage);
+                                            if (strDefault == "")
+                                                oFunction.SendEmail("ClearView - " + oService.GetName(intService) + " Request", oUser.GetName(intUser), "", strBCC, "ClearView " + oService.GetName(intService) + " Request", "<p><b>A server retrieve request has been initiated. As the virtual gatekeeper, you need to review this request.</b></p>", true, false);
+                                            else
+                                            {
+                                                if (intProject > 0)
+                                                    oFunction.SendEmail("ClearView - " + oService.GetName(intService) + " Request", oUser.GetName(intUser), "", strBCC, "ClearView " + oService.GetName(intService) + " Request", "<p><b>A server retrieve request has been initiated. As the virtual gatekeeper, you need to review this request.</b></p><p><a href=\"" + oVariable.URL() + "/redirect.aspx?referrer=/" + strDefault + oPage.GetFullLink(intWorkloadPage) + "?pid=" + intProject.ToString() + "\" target=\"_blank\">Click here to review this request.</a></p>", true, false);
+                                                else
+                                                    oFunction.SendEmail("ClearView - " + oService.GetName(intService) + " Request", oUser.GetName(intUser), "", strBCC, "ClearView " + oService.GetName(intService) + " Request", "<p><b>A server retrieve request has been initiated. As the virtual gatekeeper, you need to review this request.</b></p><p><a href=\"" + oVariable.URL() + "/redirect.aspx?referrer=/" + strDefault + oPage.GetFullLink(intWorkloadPage) + "?rrid=" + intNew.ToString() + "\" target=\"_blank\">Click here to review this request.</a></p>", true, false);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Send to Test Center
+                            int intResource = oServiceRequest.AddRequest(intRequest, intItem, intService, 0, 0, 0.00, 2, 0, 0, intNumber);
+                            if (oServiceRequest.NotifyApproval(intRequest, intResourceRequestApprove, intEnvironment, strBCC, "") == false)
+                                oServiceRequest.NotifyTeamLead(intItem, intResource, intAssignPage, intViewPage, intEnvironment, strBCC, "");
+                        }
+                    }
+                    // ******** END PROCESSING **************
+                    if (oService.Get(intService, "automate") == "1" && boolSuccess == true)
+                        strDone += "<p><span class=\"biggerbold\"><img src=\"/images/bigCheck.gif\" border=\"0\" align=\"absmiddle\"/> " + strResult + "</span></p>";
+                    else
+                    {
+                        if (boolSuccess == false)
+                            strDone += "<p><span class=\"biggerbold\"><img src=\"/images/bigError.gif\" border=\"0\" align=\"absmiddle\"/> " + strError + "</span></p>";
+                        else
+                            strDone += "<p><span class=\"biggerbold\"><img src=\"/images/bigCheck.gif\" border=\"0\" align=\"absmiddle\"/> " + oService.GetName(intService) + " Submitted</span></p>";
+                    }
+                    oRequestItem.UpdateFormDone(intRequest, intItem, intNumber, 1);
+                }
+            }
+        }
+    }
+</script><%=strDone%>

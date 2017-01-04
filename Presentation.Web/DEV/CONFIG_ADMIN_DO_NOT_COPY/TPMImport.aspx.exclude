@@ -1,0 +1,190 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        int intCount = 0;
+        string strConn = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=F:\\TPM.xls;Extended Properties=Excel 8.0;";
+        OleDbDataAdapter myCommand = new OleDbDataAdapter("SELECT * FROM [Sheet1$]", strConn);
+        DataSet ds = new DataSet();
+        myCommand.Fill(ds, "ExcelInfo");
+        Requests oRequest = new Requests(0, dsn);
+        Projects oProject = new Projects(0, dsn);
+        ServiceRequests oServiceRequest = new ServiceRequests(0, dsn);
+        ResourceRequest oResourceRequest = new ResourceRequest(0, dsn);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intProject = 0;
+            string strNumber = dr[0].ToString().Trim();
+            string strName = dr[1].ToString().Trim();
+            DataSet dsProject = oProject.Get(strNumber);
+            if (dsProject.Tables[0].Rows.Count > 0)
+                intProject = Int32.Parse(dsProject.Tables[0].Rows[0]["projectid"].ToString());
+            int intPortfolio = GetOrganization(dr[2].ToString().Trim());
+            DateTime datStart = (dr[3].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[3].ToString().Trim()));
+            DateTime datApprovedEnd = (dr[4].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[4].ToString().Trim()));
+            DateTime datForecastedEnd = (dr[5].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[5].ToString().Trim()));
+            string strCurrentPhase = dr[6].ToString().Trim();
+            int intStatus = GetStatus(strCurrentPhase);
+            DateTime datAppPhaseEnd = (dr[7].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[7].ToString().Trim()));
+            DateTime datForecastedPhaseEnd = (dr[8].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[8].ToString().Trim()));
+            int intWorking = GetUser(dr[9].ToString().Trim(), false);
+            int intExecutive = GetUser(dr[10].ToString().Trim(), false);
+            int intSubmittedBy = GetUser(dr[11].ToString().Trim(), false);
+            DateTime datSubmittedDate = (dr[12].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[12].ToString().Trim()));
+            string strDescription = dr[13].ToString().Trim();
+            DateTime datRequestedStart = (dr[14].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[14].ToString().Trim()));
+            DateTime datRequestedEnd = (dr[15].ToString().Trim() == "" ? DateTime.Now : DateTime.Parse(dr[15].ToString().Trim()));
+            int intTPM = GetUser(dr[16].ToString().Trim(), true);
+            int intItem = GetItem(dr[17].ToString().Trim());
+            int intPriority = GetPriority(dr[18].ToString().Trim());
+            
+            // Load Values
+            bool boolLoad = false;
+            if (boolLoad == true)
+            {
+                intCount++;
+                if (intSubmittedBy == 0)
+                    intSubmittedBy = 15686;
+                if (intProject == 0)
+                    intProject = oProject.Add(strName, "Base", strNumber, intSubmittedBy, intPortfolio, intStatus);
+                int intRequest = oRequest.Add(intProject, intSubmittedBy, strDescription, datRequestedStart, datRequestedEnd);
+                oServiceRequest.Add(intRequest, 1, 1);
+                oResourceRequest.Add(intRequest, intItem, (intItem + 1), 0, "", intTPM, 0, 0, intStatus, 0, 1, 1, 0, 0);
+            }
+            else if (false)
+            {
+                oProject.Update(intProject, intTPM, intExecutive, intWorking, 0, 0);
+            }
+            if (intWorking == 0)
+                Response.Write(strName + " (" + strNumber + " ) is missing the <b>working sponsor</b> information for &quot;" + dr[2].ToString().Trim() + "&quot;<br/>");
+            if (intExecutive == 0)
+                Response.Write(strName + " (" + strNumber + " ) is missing the <b>executive sponsor</b> information for &quot;" + dr[10].ToString().Trim() + "&quot;<br/>");
+            if (intSubmittedBy == 0)
+                Response.Write(strName + " (" + strNumber + " ) is missing the <b>submitted by</b> information for &quot;" + dr[11].ToString().Trim() + "&quot;<br/>");
+            if (intTPM == 0)
+                Response.Write(strName + " (" + strNumber + " ) is missing the <b>technical project manager</b> assigned for &quot;" + dr[16].ToString().Trim() + "&quot;<br/>");
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected<br/>");
+    }
+    private int GetOrganization(string _value)
+    {
+        if (_value == "EPS")
+            return 1;
+        else
+        {
+            object o = SqlHelper.ExecuteScalar(dsn, CommandType.Text, "SELECT organizationid FROM cv_organizations WHERE name LIKE '" + _value + "'");
+            if (o == null)
+                return 0;
+            else
+                return Int32.Parse(o.ToString());
+        }
+    }
+    private int GetStatus(string _value)
+    {
+        if (_value == "Canceled")
+            return -2;
+        else if (_value == "Closed")
+            return 3;
+        else if (_value == "Closing")
+            return 3;
+        else if (_value == "On Hold")
+            return 5;
+        else
+            return 2;
+    }
+    private int GetUser(string _value, bool _comma)
+    {
+        string strFirst = "";
+        string strLast = "";
+        if (_value.Contains("O'Mara") == true)
+            return 14471;
+        if (_comma == true)
+        {
+            if (_value.IndexOf(",") > -1)
+            {
+                strLast = _value.Substring(0, _value.IndexOf(","));
+                strFirst = _value.Substring(_value.IndexOf(",") + 1).Trim();
+            }
+            else
+                return 0;
+        }
+        else
+        {
+            if (_value.Trim() != "" && _value.IndexOf(" ") > -1)
+            {
+                strFirst = _value.Substring(0, _value.IndexOf(" "));
+                strLast = _value.Substring(_value.IndexOf(" ") + 1);
+            }
+            else
+                return 0;
+        }
+        object o = SqlHelper.ExecuteScalar(dsn, CommandType.Text, "SELECT userid FROM cv_users WHERE fname LIKE '" + strFirst + "' AND lname LIKE '" + strLast + "' AND enabled = 1 AND deleted = 0");
+        if (o == null)
+            return GetUser(strLast);
+        else
+            return Int32.Parse(o.ToString());
+    }
+    private int GetUser(string _value)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT userid FROM cv_users WHERE lname LIKE '" + _value + "' AND enabled = 1 AND deleted = 0");
+        if (ds.Tables[0].Rows.Count == 1)
+            return Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+        else
+            return 0;
+    }
+    private int GetItem(string _value)
+    {
+        if (_value == "Baker")
+            return 4;
+        else if (_value == "Keller")
+            return 1;
+        else if (_value == "Rufener")
+            return 3;
+        else if (_value == "Wolff")
+            return 2;
+        else
+            return 0;
+    }
+    private int GetPriority(string _value)
+    {
+        if (_value == "High")
+            return 5;
+        else if (_value == "Medium")
+            return 3;
+        else if (_value == "Low")
+            return 1;
+        else
+            return 3;
+    }
+</script>
+<html>
+<head>
+<title>II Database WAN Import</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">II Database WAN Import</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

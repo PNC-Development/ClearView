@@ -1,0 +1,39 @@
+<%@ Master Language="C#" AutoEventWireup="true" %>
+<script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+</script>
+<script type="text/javascript">
+</script>
+<html>
+<head>
+<title runat="server">National City</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+<script type="text/javascript" src="/javascript/ajax.js"></script>
+<script type="text/javascript" src="/javascript/both.js"></script>
+<script src="/javascript/swfobject.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+<table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr> 
+        <td valign="top" width="100%" height="100%" bgcolor="#FFFFFF">
+            <asp:contentplaceholder id="AllContent" runat="server">
+                <img src="/images/alert.gif" border="0" align="absmiddle" /> This page has not been defined.
+            </asp:contentplaceholder>
+        </td>
+    </tr>
+</table>
+</form>
+</body>
+</html><div id="divLine" style="BORDER-RIGHT: gray 1px dashed; DISPLAY: none; WIDTH: 2px; POSITION: absolute; TOP: 58px; HEIGHT: 100%"></div>
+<div id="divLineCover" style="DISPLAY: none; FILTER: alpha(opacity=25); WIDTH: 100%; CURSOR: e-resize; POSITION: absolute; TOP: 58px; HEIGHT: 100%; BACKGROUND-COLOR: #666666"></div>
+<div id="divLiveCover" style="DISPLAY:none; WIDTH:100%; POSITION:absolute; HEIGHT:100%; FILTER:alpha(opacity=25); BACKGROUND-COLOR:#333333"	onclick="window.top.HidePanel();" oncontextmenu="return false;"></div>
+<iframe id="frmLiveCover" frameborder="0" scrolling="no" style="z-index:400; display:none;position:absolute;FILTER:alpha(opacity=0)" src="javascript:''"></iframe>
+<iframe id="frmLiveShow" frameborder="0" scrolling="no" style="z-index:401; display:none;position:absolute;" src="javascript:''"></iframe>
+</form>
+</body>
+</html>

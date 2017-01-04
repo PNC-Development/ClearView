@@ -1,0 +1,78 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intCount = 0;
+    private void Page_Load()
+    {
+        intCount = 0;
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT cv_resource_requests.id, cv_requests.requestid, cv_requests.projectid, cv_resource_requests.allocated, cv_requests.end_date FROM cv_resource_requests INNER JOIN cv_requests ON cv_resource_requests.requestid = cv_requests.requestid AND cv_requests.deleted = 0 AND DATEPART(yyyy, cv_requests.end_date) < 2006");
+        ResourceRequest oResourceRequest = new ResourceRequest(0, dsn);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            intCount++;
+            int intID = Int32.Parse(dr["id"].ToString());
+            int intRequest = Int32.Parse(dr["requestid"].ToString());
+            int intProject = Int32.Parse(dr["projectid"].ToString());
+            double dblAllocated = double.Parse(dr["allocated"].ToString());
+            DateTime datEnd = DateTime.Parse(dr["end_date"].ToString());
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "DELETE FROM cv_resource_requests_hours WHERE parent = " + intID.ToString());
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "INSERT INTO cv_resource_requests_hours VALUES(" + intID.ToString() + "," + dblAllocated.ToString("F") + ",'" + datEnd.ToShortDateString() + "',0)");
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_requests SET modified = '" + datEnd.ToShortDateString() + "', completed = '" + datEnd.ToShortDateString() + "' WHERE requestid = " + intRequest.ToString());
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_projects SET modified = '" + datEnd.ToShortDateString() + "', completed = '" + datEnd.ToShortDateString() + "' WHERE projectid = " + intProject.ToString());
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+    private void btnLoad2_Click(Object Sender, EventArgs e)
+    {
+        Projects oProject = new Projects(0, dsn);
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT cv_resource_requests.id, cv_resource_requests.requestid, cv_resource_requests.allocated, cv_resource_requests.completed FROM cv_resource_requests WHERE cv_resource_requests.completed is not null");
+        ResourceRequest oResourceRequest = new ResourceRequest(0, dsn);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            intCount++;
+            int intID = Int32.Parse(dr["id"].ToString());
+            int intRequest = Int32.Parse(dr["requestid"].ToString());
+            double dblAllocated = double.Parse(dr["allocated"].ToString());
+            DateTime datEnd = DateTime.Parse(dr["completed"].ToString());
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "DELETE FROM cv_resource_requests_hours WHERE parent = " + intID.ToString());
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "INSERT INTO cv_resource_requests_hours VALUES(" + intID.ToString() + "," + dblAllocated.ToString("F") + ",'" + datEnd.ToShortDateString() + "',0)");
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_requests SET completed = '" + datEnd.ToShortDateString() + "' WHERE requestid = " + intRequest.ToString());
+        }
+        Response.Write("Finished - " + intCount.ToString() + " Rows Affected");
+    }
+</script>
+<html>
+<head>
+<title>Truth</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Truth</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad2" runat="server" CssClass="default" Width="150" Text="Load2" OnClick="btnLoad2_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

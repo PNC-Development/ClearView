@@ -1,0 +1,151 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intOrganization = Int32.Parse(ConfigurationManager.AppSettings["EPS_ORGANIZATION"]);
+    private Projects oProject;
+    private Requests oRequest;
+    private RequestFields oRequestField;
+    private ProjectNumber oProjectNumber;
+    private Users oUser;
+    private ServiceRequests oServiceRequest;
+    private ResourceRequest oResourceRequest;
+    private void Page_Load()
+    {
+        oProject = new Projects(0, dsn);
+        oRequest = new Requests(0, dsn);
+        oRequestField = new RequestFields(0, dsn);
+        oProjectNumber = new ProjectNumber(0, dsn);
+        oUser = new Users(0, dsn);
+        oServiceRequest = new ServiceRequests(0, dsn);
+        oResourceRequest = new ResourceRequest(0, dsn);
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        DataSet dsP = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM tblProject");
+        foreach (DataRow drP in dsP.Tables[0].Rows)
+        {
+            string strProject = drP["ProjectId"].ToString();
+            int intUser = oUser.GetId(drP["Manager"].ToString());
+            int intProject = GetProject(drP["Name"].ToString(), drP["ProjectType"].ToString(), intUser, Int32.Parse(drP["Status"].ToString()));
+            DateTime _start = DateTime.Today;
+            DateTime _end = DateTime.Today;
+            int intRequest = oRequest.Add(intProject, intUser, drP["Scope"].ToString(), _start, _end);
+            oServiceRequest.Add(intRequest, 1, 1, 0);
+            DataSet dsR = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM tblProjectDetails WHERE projectid = " + strProject);
+            foreach (DataRow dr in dsR.Tables[0].Rows)
+            {
+                int intTechy = GetUser(dr["Technician"].ToString().Trim());
+                int intItem = GetItem(dr["Technician"].ToString().Trim());
+                int intStatus = Int32.Parse(dr["Status"].ToString());
+                try { _start = DateTime.Parse(dr["StartDate"].ToString()); }
+                catch { }
+                try { _end = DateTime.Parse(dr["EndDate"].ToString()); }
+                catch { }
+                oRequest.UpdateStartDate(intRequest, _start);
+                oRequest.UpdateEndDate(intRequest, _end);
+                oResourceRequest.Add(intRequest, intItem, 0, intTechy, Int32.Parse(dr["DeviceCount"].ToString()), double.Parse(dr["Hours"].ToString()), (intStatus == 3 ? double.Parse(dr["Hours"].ToString()) : 0.00), intStatus, 1, 1, 1, 0, 0, 1, 0);
+                oRequestField.AddItemValue(intRequest, intItem, 10000, intUser.ToString(), 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10001, "Remediation", 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10002, "Other...", 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10003, "$0 - No Funding Required", 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10004, "4", 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10005, "NO", 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10006, drP["Scope"].ToString(), 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10007, dr["DeviceCount"].ToString(), 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10008, dr["Hours"].ToString(), 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10009, _start.ToShortDateString(), 1);
+                oRequestField.AddItemValue(intRequest, intItem, 10010, _end.ToShortDateString(), 1);
+            }
+        }
+        Response.Write("DONE");
+    }
+    private int GetProject(string _name, string _type, int _userid, int _status)
+    {
+        int intProject = 0;
+        DataSet dsProject = oProject.GetName(_name);
+        if (dsProject.Tables[0].Rows.Count > 0)
+            intProject = Int32.Parse(dsProject.Tables[0].Rows[0]["projectid"].ToString());
+        else
+            intProject = oProject.Add(_name, _type, oProjectNumber.New(), _userid, intOrganization, _status);
+        return intProject;
+    }
+    private int GetUser(string _tech)
+    {
+        if (_tech == "Davis, Charles")
+            return 15667;
+        else if (_tech == "Hamilton, Brian")
+            return 14796;
+        else if (_tech == "Boron, Chris")
+            return 15126;
+        else if (_tech == "Tilton, Lisa")
+            return 14874;
+        else if (_tech == "Leither, Steve")
+            return 14824;
+        else if (_tech == "Hornbeck, Tim")
+            return 15115;
+        else if (_tech == "Slater, Jarrod")
+            return 15096;
+        else
+            return 999999;
+    }
+    private int GetItem(string _tech)
+    {
+        if (_tech == "Davis, Charles")
+            return 6;
+        else if (_tech == "Hamilton, Brian")
+            return 5;
+        else if (_tech == "Boron, Chris")
+            return 6;
+        else if (_tech == "Tilton, Lisa")
+            return 5;
+        else if (_tech == "Leither, Steve")
+            return 5;
+        else if (_tech == "Hornbeck, Tim")
+            return 5;
+        else if (_tech == "Slater, Jarrod")
+            return 6;
+        else
+            return 999999;
+    }
+    private void btnLoad2_Click(Object Sender, EventArgs e)
+    {
+        DataSet dsValues = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_request_field_values WHERE nameid = 10000 AND deleted = 0");
+        foreach (DataRow drValue in dsValues.Tables[0].Rows)
+        {
+            int intUser = oUser.GetIdName(drValue["value"].ToString().Trim());
+            if (intUser > 0)
+                SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_request_field_values SET value = '" + intUser.ToString() + "' WHERE requestid = " + drValue["requestid"].ToString() + " AND itemid = " + drValue["itemid"].ToString() + " AND nameid = 10000 AND deleted = 0");
+        }
+    }
+</script>
+<html>
+<head>
+<title>Remediation DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Remediation Data LOAD</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Second" OnClick="btnLoad_Click" /></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad2" runat="server" CssClass="default" Width="150" Text="First" OnClick="btnLoad2_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

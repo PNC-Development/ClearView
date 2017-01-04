@@ -1,0 +1,960 @@
+<%@ Page Language="C#" Debug="false" %>
+<script runat="server">
+    private ResourceRequest oResourceRequest;
+    private Projects oProject;
+    private Users oUser;
+    private RequestFields oRequestField;
+    private ProjectRequest oProjectRequest;
+    private TPM oTPM;
+    private Variables oVariable;
+    private Customized oCustomized;
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private int intCSRCPage = Int32.Parse(ConfigurationManager.AppSettings["CSRC_WORKFLOW"]);
+    private int intPCRPage = Int32.Parse(ConfigurationManager.AppSettings["PCR_WORKFLOW"]);
+    private int intWorkloadManager = Int32.Parse(ConfigurationManager.AppSettings["ViewWorkload"]);
+    private int intProfile = 0;
+    private int intProject = 0;
+    private int intRequest = 0;
+    private int intItem = 0;
+    private int intNumber = 0;
+    private int intLead = 0;
+    private int intWorking = 0;
+    private int intExecutive = 0;
+    private string strCSRC = "";
+    private string strPCR = "";
+    private void Page_Load()
+    {
+        intProfile = Int32.Parse(Request.Cookies["profileid"].Value);
+        oResourceRequest = new ResourceRequest(intProfile, dsn);
+        oProject = new Projects(intProfile, dsn);
+        oUser = new Users(intProfile, dsn);
+        oRequestField = new RequestFields(intProfile, dsn);
+        oProjectRequest = new ProjectRequest(intProfile, dsn);
+        oTPM = new TPM(intProfile, dsn, intEnvironment);
+        oVariable = new Variables(intEnvironment);
+        oCustomized = new Customized(intProfile, dsn);
+        if (Request.QueryString["pid"] != null && Request.QueryString["pid"] != "")
+        {
+            intProject = Int32.Parse(Request.QueryString["pid"]);
+            if (Request.QueryString["pcr"] != null && Request.QueryString["pcr"] != "")
+                Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "saved", "<script type=\"text/javascript\">alert('PCR Form Submitted Successfully');<" + "/" + "script>");
+            if (Request.QueryString["csrc"] != null && Request.QueryString["csrc"] != "")
+                Page.ClientScript.RegisterClientScriptBlock(typeof(Page), "saved", "<script type=\"text/javascript\">alert('CSRC Form Submitted Successfully');<" + "/" + "script>");
+            DataSet ds = oProject.GetCoordinator(intProject, 0);
+            int intResource = 0;
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                if (Int32.Parse(dr["userid"].ToString()) == intProfile)
+                {
+                    intResource = Int32.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+                    intRequest = Int32.Parse(ds.Tables[0].Rows[0]["requestid"].ToString());
+                    intItem = Int32.Parse(ds.Tables[0].Rows[0]["itemid"].ToString());
+                    intNumber = Int32.Parse(ds.Tables[0].Rows[0]["number"].ToString());
+                    int intUser = Int32.Parse(ds.Tables[0].Rows[0]["userid"].ToString());
+                    intLead = oUser.GetManager(intUser, true);
+                }
+            }
+            if (intResource > 0)
+            {
+                intWorking = Int32.Parse(oProject.Get(intProject, "working"));
+                intExecutive = Int32.Parse(oProject.Get(intProject, "executive"));
+                lblCSRCW.Text = oUser.GetFullName(intWorking);
+                lblCSRCE.Text = oUser.GetFullName(intExecutive);
+                lblPCRW.Text = oUser.GetFullName(intWorking);
+                lblPCRE.Text = oUser.GetFullName(intExecutive);
+                DataSet dsResource = oCustomized.GetTPM(intRequest, intItem, intNumber);
+                if (dsResource.Tables[0].Rows.Count > 0)
+                {
+                    if (dsResource.Tables[0].Rows[0]["start_d"].ToString() == "" || dsResource.Tables[0].Rows[0]["end_d"].ToString() == "")
+                    {
+                        chkPCRScheduleD.Enabled = false;
+                        lblPCRScheduleD.Text = "N / A";
+                    }
+                    else
+                        lblPCRScheduleD.Text = DateTime.Parse(dsResource.Tables[0].Rows[0]["start_d"].ToString()).ToShortDateString() + " - " + DateTime.Parse(dsResource.Tables[0].Rows[0]["end_d"].ToString()).ToShortDateString();
+                    if (dsResource.Tables[0].Rows[0]["start_p"].ToString() == "" || dsResource.Tables[0].Rows[0]["end_p"].ToString() == "")
+                    {
+                        chkPCRScheduleP.Enabled = false;
+                        lblPCRScheduleP.Text = "N / A";
+                    }
+                    else
+                        lblPCRScheduleP.Text = DateTime.Parse(dsResource.Tables[0].Rows[0]["start_p"].ToString()).ToShortDateString() + " - " + DateTime.Parse(dsResource.Tables[0].Rows[0]["end_p"].ToString()).ToShortDateString();
+                    if (dsResource.Tables[0].Rows[0]["start_e"].ToString() == "" || dsResource.Tables[0].Rows[0]["end_e"].ToString() == "")
+                    {
+                        chkPCRScheduleE.Enabled = false;
+                        lblPCRScheduleE.Text = "N / A";
+                    }
+                    else
+                        lblPCRScheduleE.Text = DateTime.Parse(dsResource.Tables[0].Rows[0]["start_e"].ToString()).ToShortDateString() + " - " + DateTime.Parse(dsResource.Tables[0].Rows[0]["end_e"].ToString()).ToShortDateString();
+                    if (dsResource.Tables[0].Rows[0]["start_c"].ToString() == "" || dsResource.Tables[0].Rows[0]["end_c"].ToString() == "")
+                    {
+                        chkPCRScheduleC.Enabled = false;
+                        lblPCRScheduleC.Text = "N / A";
+                    }
+                    else
+                        lblPCRScheduleC.Text = DateTime.Parse(dsResource.Tables[0].Rows[0]["start_c"].ToString()).ToShortDateString() + " - " + DateTime.Parse(dsResource.Tables[0].Rows[0]["end_c"].ToString()).ToShortDateString();
+                }
+            }
+            if (!IsPostBack)
+            {
+                LoadCSRC();
+                LoadPCR();
+            }
+            lblTeamLeadCSRC.Text = oUser.GetFullName(intLead);
+            lblTeamLeadPCR.Text = oUser.GetFullName(intLead);
+            txtCSRCD.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divCSRCD.ClientID + "','" + lstCSRCD.ClientID + "','" + hdnCSRCD.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+            lstCSRCD.Attributes.Add("ondblclick", "AJAXClickRow();");
+            txtCSRCC.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divCSRCC.ClientID + "','" + lstCSRCC.ClientID + "','" + hdnCSRCC.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+            lstCSRCC.Attributes.Add("ondblclick", "AJAXClickRow();");
+            txtPCRD.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divPCRD.ClientID + "','" + lstPCRD.ClientID + "','" + hdnPCRD.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+            lstPCRD.Attributes.Add("ondblclick", "AJAXClickRow();");
+            txtPCRC.Attributes.Add("onkeyup", "return AJAXTextBoxGet(this,'300','195','" + divPCRC.ClientID + "','" + lstPCRC.ClientID + "','" + hdnPCRC.ClientID + "','" + oVariable.URL() + "/frame/users.aspx',2);");
+            lstPCRC.Attributes.Add("ondblclick", "AJAXClickRow();");
+            chkDiscovery.Attributes.Add("onclick", "CheckCSRC('" + chkDiscovery.ClientID + "','" + chkPlanning.ClientID + "','" + chkExecution.ClientID + "','" + chkClosing.ClientID + "','" + divCSRC.ClientID + "');ShowHideDivCheck('" + divDiscovery.ClientID + "',this);");
+            chkPlanning.Attributes.Add("onclick", "CheckCSRC('" + chkDiscovery.ClientID + "','" + chkPlanning.ClientID + "','" + chkExecution.ClientID + "','" + chkClosing.ClientID + "','" + divCSRC.ClientID + "');ShowHideDivCheck('" + divPlanning.ClientID + "',this);");
+            chkExecution.Attributes.Add("onclick", "CheckCSRC('" + chkDiscovery.ClientID + "','" + chkPlanning.ClientID + "','" + chkExecution.ClientID + "','" + chkClosing.ClientID + "','" + divCSRC.ClientID + "');ShowHideDivCheck('" + divExecution.ClientID + "',this);");
+            chkClosing.Attributes.Add("onclick", "CheckCSRC('" + chkDiscovery.ClientID + "','" + chkPlanning.ClientID + "','" + chkExecution.ClientID + "','" + chkClosing.ClientID + "','" + divCSRC.ClientID + "');ShowHideDivCheck('" + divClosing.ClientID + "',this);");
+            chkPCR.Attributes.Add("onclick", "ShowHideDivCheck('" + divPCR.ClientID + "',this);");
+            chkSchedule.Attributes.Add("onclick", "ShowHideDivCheck('" + divSchedule.ClientID + "',this);");
+            chkFinancial.Attributes.Add("onclick", "ShowHideDivCheck('" + divFinancial.ClientID + "',this);");
+            chkReason.Attributes.Add("onclick", "ShowHideDivCheck('" + divReason.ClientID + "',this);");
+            imgCSRCEC.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCEC.ClientID + "');");
+            imgCSRCED.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCED.ClientID + "');");
+            imgCSRCEE.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCEE.ClientID + "');");
+            imgCSRCEP.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCEP.ClientID + "');");
+            imgCSRCExC.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCExC.ClientID + "');");
+            imgCSRCExD.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCExD.ClientID + "');");
+            imgCSRCExE.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCExE.ClientID + "');");
+            imgCSRCExP.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCExP.ClientID + "');");
+            imgCSRCHC.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCHC.ClientID + "');");
+            imgCSRCHD.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCHD.ClientID + "');");
+            imgCSRCHE.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCHE.ClientID + "');");
+            imgCSRCHP.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCHP.ClientID + "');");
+            imgCSRCIC.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCIC.ClientID + "');");
+            imgCSRCID.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCID.ClientID + "');");
+            imgCSRCIE.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCIE.ClientID + "');");
+            imgCSRCIP.Attributes.Add("onclick", "return ShowCalculator('" + txtCSRCIP.ClientID + "');");
+            imgCSRCSC.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCSC.ClientID + "');");
+            imgCSRCSD.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCSD.ClientID + "');");
+            imgCSRCSE.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCSE.ClientID + "');");
+            imgCSRCSP.Attributes.Add("onclick", "return ShowCalendar('" + txtCSRCSP.ClientID + "');");
+            imgPCRScheduleCE.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleCE.ClientID + "');");
+            imgPCRScheduleCS.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleCS.ClientID + "');");
+            imgPCRScheduleDE.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleDE.ClientID + "');");
+            imgPCRScheduleDS.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleDS.ClientID + "');");
+            imgPCRScheduleEE.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleEE.ClientID + "');");
+            imgPCRScheduleES.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRScheduleES.ClientID + "');");
+            imgPCRSchedulePE.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRSchedulePE.ClientID + "');");
+            imgPCRSchedulePS.Attributes.Add("onclick", "return ShowCalendar('" + txtPCRSchedulePS.ClientID + "');");
+            imgPCRFinancialC.Attributes.Add("onclick", "return ShowCalculator('" + txtPCRFinancialC.ClientID + "');");
+            imgPCRFinancialD.Attributes.Add("onclick", "return ShowCalculator('" + txtPCRFinancialD.ClientID + "');");
+            imgPCRFinancialE.Attributes.Add("onclick", "return ShowCalculator('" + txtPCRFinancialE.ClientID + "');");
+            imgPCRFinancialP.Attributes.Add("onclick", "return ShowCalculator('" + txtPCRFinancialP.ClientID + "');");
+            btnCSRC.Attributes.Add("onclick", "return ValidateCSRC('" + chkDiscovery.ClientID + "'" +
+                ",'" + chkPlanning.ClientID + "'" +
+                ",'" + chkExecution.ClientID + "'" +
+                ",'" + chkClosing.ClientID + "'" +
+                ",'" + oCSRC.ClientID + "'" +
+                ",'" + txtCSRCSD.ClientID + "'" +
+                ",'" + txtCSRCED.ClientID + "'" +
+                ",'" + txtCSRCID.ClientID + "'" +
+                ",'" + txtCSRCExD.ClientID + "'" +
+                ",'" + txtCSRCHD.ClientID + "'" +
+                ",'" + txtCSRCSP.ClientID + "'" +
+                ",'" + txtCSRCEP.ClientID + "'" +
+                ",'" + txtCSRCIP.ClientID + "'" +
+                ",'" + txtCSRCExP.ClientID + "'" +
+                ",'" + txtCSRCHP.ClientID + "'" +
+                ",'" + txtCSRCSE.ClientID + "'" +
+                ",'" + txtCSRCEE.ClientID + "'" +
+                ",'" + txtCSRCIE.ClientID + "'" +
+                ",'" + txtCSRCExE.ClientID + "'" +
+                ",'" + txtCSRCHE.ClientID + "'" +
+                ",'" + txtCSRCSC.ClientID + "'" +
+                ",'" + txtCSRCEC.ClientID + "'" +
+                ",'" + txtCSRCIC.ClientID + "'" +
+                ",'" + txtCSRCExC.ClientID + "'" +
+                ",'" + txtCSRCHC.ClientID + "'" +
+                ");");
+            btnPCR.Attributes.Add("onclick", "return ValidatePCR('" + chkScope.ClientID + "'" +
+                ",'" + chkSchedule.ClientID + "'" +
+                ",'" + chkPCRScheduleD.ClientID + "'" +
+                ",'" + txtPCRScheduleDS.ClientID + "'" +
+                ",'" + txtPCRScheduleDE.ClientID + "'" +
+                ",'" + chkPCRScheduleP.ClientID + "'" +
+                ",'" + txtPCRSchedulePS.ClientID + "'" +
+                ",'" + txtPCRSchedulePE.ClientID + "'" +
+                ",'" + chkPCRScheduleE.ClientID + "'" +
+                ",'" + txtPCRScheduleES.ClientID + "'" +
+                ",'" + txtPCRScheduleEE.ClientID + "'" +
+                ",'" + chkPCRScheduleC.ClientID + "'" +
+                ",'" + txtPCRScheduleCS.ClientID + "'" +
+                ",'" + txtPCRScheduleCE.ClientID + "'" +
+                ",'" + chkFinancial.ClientID + "'" +
+                ",'" + chkPCRFinancialD.ClientID + "'" +
+                ",'" + txtPCRFinancialD.ClientID + "'" +
+                ",'" + chkPCRFinancialP.ClientID + "'" +
+                ",'" + txtPCRFinancialP.ClientID + "'" +
+                ",'" + chkPCRFinancialE.ClientID + "'" +
+                ",'" + txtPCRFinancialE.ClientID + "'" +
+                ",'" + chkPCRFinancialC.ClientID + "'" +
+                ",'" + txtPCRFinancialC.ClientID + "'" +
+                ",'" + oPCR.ClientID + "'" +
+                ");");
+        }
+    }
+    private void LoadCSRC()
+    {
+        DataSet dsNew = oTPM.GetCSRCs(intRequest, intItem, intNumber);
+        int intCount = 0;
+        foreach (DataRow dr in dsNew.Tables[0].Rows)
+        {
+            intCount++;
+            string strStatus = "Pending";
+            if (dr["status"].ToString() == "1")
+                strStatus = "Approved";
+            if (dr["status"].ToString() == "-1")
+                strStatus = "Denied";
+            strCSRC += "<tr><td><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv2('divCSRC" + intCount.ToString() + "');\">" + DateTime.Parse(dr["modified"].ToString()).ToShortDateString() + "</a></td><td>" + strStatus + "</td><td>" + (dr["completed"].ToString() == "" ? "N / A" : DateTime.Parse(dr["completed"].ToString()).ToShortDateString()) + "</td><td><a href=\"" + oVariable.URL() + "/" + dr["path"].ToString().Replace("\\", "/") + "\" target=\"_blank\">View CSRC Document</a></td></tr>";
+            DataSet dsNew2 = oTPM.GetCSRCDetail(Int32.Parse(dr["id"].ToString()));
+            string strTemp2 = "";
+            foreach (DataRow dr2 in dsNew2.Tables[0].Rows)
+            {
+                string strRole = "Additional";
+                if (dr2["step"].ToString() == "1")
+                    strRole = "Team Lead";
+                if (dr2["step"].ToString() == "2")
+                    strRole = "Working Sponsor";
+                if (dr2["step"].ToString() == "3")
+                    strRole = "Executive Sponsor";
+                strStatus = "Pending";
+                if (dr2["status"].ToString() == "1")
+                    strStatus = "Approved";
+                if (dr2["status"].ToString() == "-1")
+                    strStatus = "Denied";
+                strTemp2 += "<tr><td nowrap valign=\"top\">" + oUser.GetFullName(Int32.Parse(dr2["userid"].ToString())) + "</td><td nowrap valign=\"top\">" + strRole + "</td><td nowrap valign=\"top\">" + strStatus + "</td><td valign=\"top\">" + (dr2["comments"].ToString() == "" ? "---" : dr2["comments"].ToString()) + "</td></tr>";
+            }
+            if (strTemp2 != "")
+            {
+                strTemp2 = "<tr><td><b>Approver</b></td><td><b>Role</b></td><td><b>Status</b></td><td><b>Comments</b></td></tr>" + strTemp2;
+                strTemp2 = "<table width=\"100%\" cellpadding=\"4\" cellspacing=\"0\" border=\"0\" style=\"border:dashed 1px #CCCCCC\" class=\"lightdefault\">" + strTemp2 + "</table>";
+            }
+            strCSRC += "<tr><td colspan=\"4\"><div id=\"divCSRC" + intCount.ToString() + "\" style=\"display:none\">" + strTemp2 + "</div></td></tr>";
+        }
+        if (strCSRC == "")
+            strCSRC = "<tr><td colspan=\"4\">&nbsp;<img src='/images/alert.gif' border='0' align='absmiddle'> No CSRC Documents</td></tr>";
+    }
+    private void LoadPCR()
+    {
+        DataSet dsNew = oTPM.GetPCRs(intRequest, intItem, intNumber);
+        int intCount = 0;
+        foreach (DataRow dr in dsNew.Tables[0].Rows)
+        {
+            intCount++;
+            string strStatus = "Pending";
+            if (dr["status"].ToString() == "1")
+                strStatus = "Approved";
+            if (dr["status"].ToString() == "-1")
+                strStatus = "Denied";
+            strPCR += "<tr><td><a href=\"javascript:void(0);\" onclick=\"ShowHideDiv2('divPCR" + intCount.ToString() + "');\">" + DateTime.Parse(dr["modified"].ToString()).ToShortDateString() + "</a></td><td>" + strStatus + "</td><td>" + (dr["completed"].ToString() == "" ? "N / A" : DateTime.Parse(dr["completed"].ToString()).ToShortDateString()) + "</td><td align=\"center\">" + (dr["scope"].ToString() == "0" ? "No" : "Yes") + "</td><td align=\"center\">" + (dr["s"].ToString() == "0" ? "No" : "Yes") + "</td><td align=\"center\">" + (dr["f"].ToString() == "0" ? "No" : "Yes") + "</td><td><a href=\"" + oVariable.URL() + "/" + dr["path"].ToString().Replace("\\", "/") + "\" target=\"_blank\">View PCR Document</a></td></tr>";
+            DataSet dsNew2 = oTPM.GetPCRDetail(Int32.Parse(dr["id"].ToString()));
+            string strTemp2 = "";
+            foreach (DataRow dr2 in dsNew2.Tables[0].Rows)
+            {
+                string strRole = "Additional";
+                if (dr2["step"].ToString() == "1")
+                    strRole = "Team Lead";
+                if (dr2["step"].ToString() == "2")
+                    strRole = "Working Sponsor";
+                if (dr2["step"].ToString() == "3")
+                    strRole = "Executive Sponsor";
+                strStatus = "Pending";
+                if (dr2["status"].ToString() == "1")
+                    strStatus = "Approved";
+                if (dr2["status"].ToString() == "-1")
+                    strStatus = "Denied";
+                strTemp2 += "<tr><td nowrap valign=\"top\">" + oUser.GetFullName(Int32.Parse(dr2["userid"].ToString())) + "</td><td nowrap valign=\"top\">" + strRole + "</td><td nowrap valign=\"top\">" + strStatus + "</td><td valign=\"top\">" + (dr2["comments"].ToString() == "" ? "---" : dr2["comments"].ToString()) + "</td></tr>";
+            }
+            if (strTemp2 != "")
+            {
+                strTemp2 = "<tr><td><b>Approver</b></td><td><b>Role</b></td><td><b>Status</b></td><td><b>Comments</b></td></tr>" + strTemp2;
+                strTemp2 = "<table width=\"100%\" cellpadding=\"4\" cellspacing=\"0\" border=\"0\" style=\"border:dashed 1px #CCCCCC\" class=\"lightdefault\">" + strTemp2 + "</table>";
+            }
+            strPCR += "<tr><td colspan=\"7\"><div id=\"divPCR" + intCount.ToString() + "\" style=\"display:none\">" + strTemp2 + "</div></td></tr>";
+        }
+        if (strPCR == "")
+            strPCR = "<tr><td colspan=\"7\">&nbsp;<img src='/images/alert.gif' border='0' align='absmiddle'> No PCR Documents</td></tr>";
+    }
+    private void btnCSRC_Click(Object Sender, EventArgs e)
+    {
+        if (oCSRC.PostedFile != null && oCSRC.FileName != "")
+        {
+            DateTime datNow = DateTime.Now;
+            string strDocument = datNow.Month.ToString() + datNow.Day.ToString() + datNow.Year.ToString() + datNow.Hour.ToString() + datNow.Minute.ToString() + datNow.Second.ToString();
+            string strDirectory = "uploads\\projects\\" + intProject.ToString();
+            if (Directory.Exists(Request.PhysicalApplicationPath + strDirectory) == false)
+                Directory.CreateDirectory(Request.PhysicalApplicationPath + strDirectory);
+            strDirectory += "\\csrc";
+            if (Directory.Exists(Request.PhysicalApplicationPath + strDirectory) == false)
+                Directory.CreateDirectory(Request.PhysicalApplicationPath + strDirectory);
+            string strPath = strDirectory + "\\" + strDocument + oCSRC.FileName.Substring(oCSRC.FileName.LastIndexOf("."));
+            oCSRC.PostedFile.SaveAs(Request.PhysicalApplicationPath + strPath);
+            int intCC = 0;
+            if (Request.Form[hdnCSRCC.UniqueID] != "")
+                intCC = Int32.Parse(Request.Form[hdnCSRCC.UniqueID]);
+            int intId = oTPM.AddCSRC(intRequest, intItem, intNumber, (chkDiscovery.Checked ? 1 : 0), (chkPlanning.Checked ? 1 : 0), (chkExecution.Checked ? 0 : 1), (chkClosing.Checked ? 0 : 1), strPath, txtCSRCSD.Text, txtCSRCED.Text, txtCSRCID.Text, txtCSRCExD.Text, txtCSRCHD.Text, txtCSRCSP.Text, txtCSRCEP.Text, txtCSRCIP.Text, txtCSRCExP.Text, txtCSRCHP.Text, txtCSRCSE.Text, txtCSRCEE.Text, txtCSRCIE.Text, txtCSRCExE.Text, txtCSRCHE.Text, txtCSRCSC.Text, txtCSRCEC.Text, txtCSRCIC.Text, txtCSRCExC.Text, txtCSRCHC.Text, intCC);
+            // Run routing
+            oTPM.AddCSRCDetail(intId, 1, intLead, 0);
+            oTPM.AddCSRCDetail(intId, 2, intWorking, -10);
+            oTPM.AddCSRCDetail(intId, 3, intExecutive, -10);
+            if (Request.Form[hdnCSRCD.UniqueID] != "")
+                oTPM.AddCSRCDetail(intId, 4, Int32.Parse(Request.Form[hdnCSRCD.UniqueID]), -10);
+            oTPM.ApproveCSRC(intId, 1, 0, intCSRCPage, intWorkloadManager);
+            Response.Redirect(Request.Path + "?pid=" + intProject.ToString() + "&csrc=true");
+        }
+        Response.Redirect(Request.Path + "?pid=" + intProject.ToString());
+    }
+    private void btnPCR_Click(Object Sender, EventArgs e)
+    {
+        if (oPCR.PostedFile != null && oPCR.FileName != "")
+        {
+            DateTime datNow = DateTime.Now;
+            string strDocument = datNow.Month.ToString() + datNow.Day.ToString() + datNow.Year.ToString() + datNow.Hour.ToString() + datNow.Minute.ToString() + datNow.Second.ToString();
+            string strDirectory = "uploads\\projects\\" + intProject.ToString();
+            if (Directory.Exists(Request.PhysicalApplicationPath + strDirectory) == false)
+                Directory.CreateDirectory(Request.PhysicalApplicationPath + strDirectory);
+            strDirectory += "\\pcr";
+            if (Directory.Exists(Request.PhysicalApplicationPath + strDirectory) == false)
+                Directory.CreateDirectory(Request.PhysicalApplicationPath + strDirectory);
+            string strPath = strDirectory + "\\" + strDocument + oPCR.FileName.Substring(oPCR.FileName.LastIndexOf("."));
+            oCSRC.PostedFile.SaveAs(Request.PhysicalApplicationPath + strPath);
+            string strReason = "";
+            for (int ii = 0; ii < chkPCRReason.Items.Count; ii++)
+            {
+                if (chkPCRReason.Items[ii].Selected == true)
+                    strReason += chkPCRReason.Items[ii].Value + ";";
+            }
+            int intCC = 0;
+            if (Request.Form[hdnPCRC.UniqueID] != "")
+                intCC = Int32.Parse(Request.Form[hdnPCRC.UniqueID]);
+            int intId = oTPM.AddPCR(intRequest, intItem, intNumber, (chkScope.Checked ? 1 : 0), (chkSchedule.Checked ? 1 : 0), txtPCRScheduleDS.Text, txtPCRScheduleDE.Text, txtPCRSchedulePS.Text, txtPCRSchedulePE.Text, txtPCRScheduleES.Text, txtPCRScheduleEE.Text, txtPCRScheduleCS.Text, txtPCRScheduleCE.Text, (chkFinancial.Checked ? 1 : 0), txtPCRFinancialD.Text, txtPCRFinancialP.Text, txtPCRFinancialE.Text, txtPCRFinancialC.Text, strReason, strPath, intCC);
+            // Run routing
+            oTPM.AddPCRDetail(intId, 1, intLead, 0);
+            oTPM.AddPCRDetail(intId, 2, intWorking, -10);
+            oTPM.AddPCRDetail(intId, 3, intExecutive, -10);
+            if (Request.Form[hdnPCRD.UniqueID] != "")
+                oTPM.AddPCRDetail(intId, 4, Int32.Parse(Request.Form[hdnPCRD.UniqueID]), -10);
+            oTPM.ApprovePCR(intId, 1, 0, intPCRPage, intWorkloadManager);
+            Response.Redirect(Request.Path + "?pid=" + intProject.ToString() + "&pcr=true");
+        }
+        Response.Redirect(Request.Path + "?pid=" + intProject.ToString());
+    }
+</script>
+<script type="text/javascript">
+    function CheckCSRC(o1,o2,o3,o4,oDiv) {
+        o1 = document.getElementById(o1);
+        o2 = document.getElementById(o2);
+        o3 = document.getElementById(o3);
+        o4 = document.getElementById(o4);
+        oDiv = document.getElementById(oDiv);
+        if (o1.checked == true || o2.checked == true || o3.checked == true || o4.checked == true)
+            oDiv.style.display = "inline";
+        else
+            oDiv.style.display = "none";
+    }
+    function ValidateCSRC(chkD,chkP,chkE,chkC,oFile,SD,ED,ID,ExD,HD,SP,EP,IP,ExP,HP,SE,EE,IE,ExE,HE,SC,EC,IC,ExC,HC) {
+        chkD = document.getElementById(chkD);
+        chkP = document.getElementById(chkP);
+        chkE = document.getElementById(chkE);
+        chkC = document.getElementById(chkC);
+        if (chkD.checked == false && chkP.checked == false && chkE.checked == false && chkC.checked == false) {
+            alert('You must select at least on phase');
+            return false;
+        }
+        else {
+            oFile = document.getElementById(oFile);
+            if (oFile.value == "") {
+                alert('Please select a CSRC document to attach to this request');
+                oFile.focus();
+                return false;
+            }
+            if ((chkD.checked == false || (chkD.checked == true && ValidateDate(SD,'Please enter a valid start date') && ValidateDate(ED,'Please enter a valid end date') && ValidateNumber(ID,'Please enter a valid cost') && ValidateNumber(ExD,'Please enter a valid cost') && ValidateNumber(HD,'Please enter a valid cost')))
+                     && (chkP.checked == false || (chkP.checked == true && ValidateDate(SP,'Please enter a valid start date') && ValidateDate(EP,'Please enter a valid end date') && ValidateNumber(IP,'Please enter a valid cost') && ValidateNumber(ExP,'Please enter a valid cost') && ValidateNumber(HP,'Please enter a valid cost')))
+                     && (chkE.checked == false || (chkE.checked == true && ValidateDate(SE,'Please enter a valid start date') && ValidateDate(EE,'Please enter a valid end date') && ValidateNumber(IE,'Please enter a valid cost') && ValidateNumber(ExE,'Please enter a valid cost') && ValidateNumber(HE,'Please enter a valid cost')))
+                     && (chkC.checked == false || (chkC.checked == true && ValidateDate(SC,'Please enter a valid start date') && ValidateDate(EC,'Please enter a valid end date') && ValidateNumber(IC,'Please enter a valid cost') && ValidateNumber(ExC,'Please enter a valid cost') && ValidateNumber(HC,'Please enter a valid cost'))))
+                return true;
+            else
+                return false;
+        }
+        return true;
+    }
+    function ValidatePCR(chkScope,chkSched,chkSD,DS,DE,chkSP,PS,PE,chkSE,ES,EE,chkSC,CS,CE,chkF,chkFD,D,chkFP,P,chkFE,E,chkFC,C,oFile) {
+        chkScope = document.getElementById(chkScope);
+        chkSched = document.getElementById(chkSched);
+        chkF = document.getElementById(chkF);
+        if (chkScope.checked == false && chkSched.checked == false && chkF.checked == false) {
+            alert('Please select at least one cause for the change: Scope, Schedule and/or Financial');
+            return false;
+        }
+        var oStop = false;
+        if (chkSched.checked == true) {
+            chkSD = document.getElementById(chkSD);
+            chkSP = document.getElementById(chkSP);
+            chkSE = document.getElementById(chkSE);
+            chkSC = document.getElementById(chkSC);
+            if (chkSD.checked == false && chkSP.checked == false && chkSE.checked == false && chkSC.checked == false) {
+                oStop = true;
+                alert('Please select at least one phase to change');
+            }
+            else if ((chkSD.checked == false || (chkSD.checked == true && ValidateDate(DS,'Please enter a valid start date') && ValidateDate(DE,'Please enter a valid end date')))
+                    && (chkSP.checked == false || (chkSP.checked == true && ValidateDate(PS,'Please enter a valid start date') && ValidateDate(PE,'Please enter a valid end date')))
+                    && (chkSE.checked == false || (chkSE.checked == true && ValidateDate(ES,'Please enter a valid start date') && ValidateDate(EE,'Please enter a valid end date')))
+                    && (chkSC.checked == false || (chkSC.checked == true && ValidateDate(CS,'Please enter a valid start date') && ValidateDate(CE,'Please enter a valid end date'))))
+                oStop = false;
+            else
+                oStop = true;
+        }
+        if (oStop == true)
+            return false;
+        if (chkF.checked == true) {
+            chkFD = document.getElementById(chkFD);
+            chkFP = document.getElementById(chkFP);
+            chkFE = document.getElementById(chkFE);
+            chkFC = document.getElementById(chkFC);
+            if (chkFD.checked == false && chkFP.checked == false && chkFE.checked == false && chkFC.checked == false) {
+                oStop = true;
+                alert('Please select at least one phase to change');
+            }
+            else if ((chkFD.checked == false || (chkFD.checked == true && ValidateNumber(D,'Please enter a valid dollar amount')))
+                    && (chkFP.checked == false || (chkFP.checked == true && ValidateNumber(P,'Please enter a valid dollar amount')))
+                    && (chkFE.checked == false || (chkFE.checked == true && ValidateNumber(E,'Please enter a valid dollar amount')))
+                    && (chkFC.checked == false || (chkFC.checked == true && ValidateNumber(C,'Please enter a valid dollar amount'))))
+                oStop = false;
+             else
+                oStop = true;
+        }
+        if (oStop == true)
+            return false;
+        oFile = document.getElementById(oFile);
+        if (oFile.value == "") {
+            alert('Please select a PCR document to attach to this request');
+            oFile.focus();
+            return false;
+        }
+        else
+            return true;
+    }
+</script>
+<html>
+<head>
+<title>PCR | CSRC</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script type="text/javascript" src="/javascript/default.js"></script>
+<script type="text/javascript" src="/javascript/ajax.js"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+            <table width="100%" height="100%" cellpadding="2" cellspacing="0" border="0">
+                <tr>
+                    <td colspan="2" height="100%" valign="top">
+                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                    <tr>
+                                                        <td colspan="2" class="hugeheader">Capital Service Review Committee (CSRC) Form</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap><b>PMM Phase:</b></td>
+                                                        <td width="100%">
+                                                            <asp:CheckBox ID="chkDiscovery" Text="Discovery" runat="server" CssClass="default" /> 
+                                                            <asp:CheckBox ID="chkPlanning" Text="Planning" runat="server" CssClass="default" /> 
+                                                            <asp:CheckBox ID="chkExecution" Text="Execution" runat="server" CssClass="default" /> 
+                                                            <asp:CheckBox ID="chkClosing" Text="Closing" runat="server" CssClass="default" />
+                                                        </td>
+                                                    </tr>
+                                                    </tr>
+                                                </table>
+                                                <div id="divCSRC" runat="server" style="display:none">
+                                                    <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                        <tr>
+                                                            <td nowrap><b>CSRC Document:</b></td>
+                                                            <td width="100%"><asp:FileUpload runat="server" ID="oCSRC" Width="500" CssClass="default" /></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                <div id="divDiscovery" runat="server" style="display:none">
+                                                                    <br />
+                                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                                        <tr>
+                                                                            <td colspan="3" bgcolor="#6A8359" class="whitedefault"><div style="padding:3"><b>Discovery</b></div></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="3" style="border-left:solid 1px #999999;border-right:solid 1px #999999;border-top:solid 1px #999999;">
+                                                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase Start Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCSD" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCSD" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>Internal Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCID" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCID" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase End Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCED" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCED" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>External Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCExD" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCExD" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap>&nbsp;</td>
+                                                                                        <td width="50%">&nbsp;</td>
+                                                                                        <td nowrap><b>HW/SW/One Time Cost:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCHD" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCHD" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><img src="/images/shadow_box_l.gif" border="0" width="5" height="12"></td>
+                                                                            <td width="100%" background="/images/shadow_box.gif"></td>
+                                                                            <td><img src="/images/shadow_box_r.gif" border="0" width="5" height="12"></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                <div id="divPlanning" runat="server" style="display:none">
+                                                                    <br />
+                                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                                        <tr>
+                                                                            <td colspan="3" bgcolor="#6A8359" class="whitedefault"><div style="padding:3"><b>Planning</b></div></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="3" style="border-left:solid 1px #999999;border-right:solid 1px #999999;border-top:solid 1px #999999;">
+                                                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase Start Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCSP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCSP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>Internal Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCIP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCIP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase End Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCEP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCEP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>External Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCExP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCExP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap>&nbsp;</td>
+                                                                                        <td width="50%">&nbsp;</td>
+                                                                                        <td nowrap><b>HW/SW/One Time Cost:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCHP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCHP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><img src="/images/shadow_box_l.gif" border="0" width="5" height="12"></td>
+                                                                            <td width="100%" background="/images/shadow_box.gif"></td>
+                                                                            <td><img src="/images/shadow_box_r.gif" border="0" width="5" height="12"></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                <div id="divExecution" runat="server" style="display:none">
+                                                                    <br />
+                                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                                        <tr>
+                                                                            <td colspan="3" bgcolor="#6A8359" class="whitedefault"><div style="padding:3"><b>Execution</b></div></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="3" style="border-left:solid 1px #999999;border-right:solid 1px #999999;border-top:solid 1px #999999;">
+                                                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase Start Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCSE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCSE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>Internal Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCIE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCIE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase End Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCEE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCEE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>External Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCExE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCExE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap>&nbsp;</td>
+                                                                                        <td width="50%">&nbsp;</td>
+                                                                                        <td nowrap><b>HW/SW/One Time Cost:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCHE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCHE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><img src="/images/shadow_box_l.gif" border="0" width="5" height="12"></td>
+                                                                            <td width="100%" background="/images/shadow_box.gif"></td>
+                                                                            <td><img src="/images/shadow_box_r.gif" border="0" width="5" height="12"></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                <div id="divClosing" runat="server" style="display:none">
+                                                                    <br />
+                                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                                                        <tr>
+                                                                            <td colspan="3" bgcolor="#6A8359" class="whitedefault"><div style="padding:3"><b>Closing</b></div></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="3" style="border-left:solid 1px #999999;border-right:solid 1px #999999;border-top:solid 1px #999999;">
+                                                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase Start Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCSC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCSC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>Internal Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCIC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCIC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap><b>Phase End Date:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCEC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCEC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                        <td nowrap><b>External Labor:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCExC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCExC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td nowrap>&nbsp;</td>
+                                                                                        <td width="50%">&nbsp;</td>
+                                                                                        <td nowrap><b>HW/SW/One Time Cost:</b></td>
+                                                                                        <td width="50%"><asp:TextBox ID="txtCSRCHC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgCSRCHC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><img src="/images/shadow_box_l.gif" border="0" width="5" height="12"></td>
+                                                                            <td width="100%" background="/images/shadow_box.gif"></td>
+                                                                            <td><img src="/images/shadow_box_r.gif" border="0" width="5" height="12"></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="2"><b>Approvals:</b></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                <table cellpadding="2" cellspacing="1" border="0" class="default">
+                                                                    <tr>
+                                                                        <td rowspan="5"><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                                                                        <td class="greenheader"><b>Team Lead:</b></td>
+                                                                        <td><asp:Label ID="lblTeamLeadCSRC" runat="server" CssClass="default" /></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="greenheader"><b>Working Sponsor:</b></td>
+                                                                        <td><asp:Label ID="lblCSRCW" runat="server" CssClass="default" /></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="greenheader"><b>Executive Sponsor:</b></td>
+                                                                        <td><asp:Label ID="lblCSRCE" runat="server" CssClass="default" /></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="greenheader"><b>Director:</b></td>
+                                                                        <td>
+                                                                            <table cellpadding="0" cellspacing="0" border="0">
+                                                                                <tr>
+                                                                                    <td><asp:TextBox ID="txtCSRCD" runat="server" Width="200" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div id="divCSRCD" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                                                                            <asp:ListBox ID="lstCSRCD" runat="server" CssClass="default" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="greenheader"><b>CC:</b></td>
+                                                                        <td>
+                                                                            <table cellpadding="0" cellspacing="0" border="0">
+                                                                                <tr>
+                                                                                    <td><asp:TextBox ID="txtCSRCC" runat="server" Width="200" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div id="divCSRCC" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                                                                            <asp:ListBox ID="lstCSRCC" runat="server" CssClass="default" />
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="2" align="right"><asp:Button ID="btnCSRC" runat="server" CssClass="default" Text="Route for Approval" Width="150" OnClick="btnCSRC_Click" /></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <table width="100%" cellpadding="3" cellspacing="0" border="0" class="default">
+                                                    <tr bgcolor="#EEEEEE">
+                                                        <td><b>Current CSRC Submissions</b></td>
+                                                        <td><b>Status</b></td>
+                                                        <td><b>Approved Date</b></td>
+                                                        <td><b>Link</b></td>
+                                                    </tr>
+                                                    <%=strCSRC %>
+                                                </table>
+                                                <p><hr size="1" noshade /></p>
+                                                <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                    <tr>
+                                                        <td colspan="2" class="hugeheader">Project Change Request (PCR) Form</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap><b>Show PCR Form:</b></td>
+                                                        <td width="100%">
+                                                            <asp:CheckBox ID="chkPCR" runat="server" CssClass="default" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div id="divPCR" runat="server" style="display:none">
+                                                    <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                        <tr>
+                                                            <td colspan="2">
+                                                                <table width="100%" cellpadding="0" cellspacing="0" border="0" class="default">
+                                                                    <tr>
+                                                                        <td colspan="3" bgcolor="#6A8359" class="whitedefault"><div style="padding:3"><b>Approved PCR Information</b></div></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td colspan="3" style="border-left:solid 1px #999999;border-right:solid 1px #999999;border-top:solid 1px #999999;">
+                                                                            <table width="100%" cellpadding="4" cellspacing="3" border="0" class="default">
+                                                                                <tr>
+                                                                                    <td nowrap><b>Scope:</b></td>
+                                                                                    <td width="100%"><asp:CheckBox ID="chkScope" runat="server" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td nowrap><b>Schedule:</b></td>
+                                                                                    <td width="100%"><asp:CheckBox ID="chkSchedule" runat="server" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <div id="divSchedule" runat="server" style="display:none">
+                                                                                            <table width="100%" cellpadding="3" cellspacing="0" border="0" style="border:dashed 1px #CCCCCC">
+                                                                                                <tr>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader"><b>Phase</b></td>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader" align="center"><b>Approved Dates</b></td>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader" align="center"><b>Modified Dates</b></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRScheduleD" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Discovery</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRScheduleD" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRScheduleDS" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleDS" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /> - <asp:TextBox ID="txtPCRScheduleDE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleDE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRScheduleP" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Planning</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRScheduleP" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRSchedulePS" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRSchedulePS" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /> - <asp:TextBox ID="txtPCRSchedulePE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRSchedulePE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRScheduleE" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Execution</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRScheduleE" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRScheduleES" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleES" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /> - <asp:TextBox ID="txtPCRScheduleEE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleEE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRScheduleC" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Closing</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRScheduleC" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRScheduleCS" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleCS" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /> - <asp:TextBox ID="txtPCRScheduleCE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRScheduleCE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calendar.gif" /></td>
+                                                                                                </tr>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td nowrap><b>Financial:</b></td>
+                                                                                    <td width="100%"><asp:CheckBox ID="chkFinancial" runat="server" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <div id="divFinancial" runat="server" style="display:none">
+                                                                                            <table width="100%" cellpadding="3" cellspacing="0" border="0" style="border:dashed 1px #CCCCCC">
+                                                                                                <tr>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader"><b>Phase</b></td>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader" align="center"><b>Approved Financials</b></td>
+                                                                                                    <td class="greenheader"></td>
+                                                                                                    <td class="greenheader" align="center"><b>Modified Financials</b></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRFinancialD" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Discovery</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRFinancialD" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRFinancialD" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRFinancialD" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRFinancialP" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Planning</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRFinancialP" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRFinancialP" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRFinancialP" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRFinancialE" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Execution</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRFinancialE" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRFinancialE" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRFinancialE" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td><asp:CheckBox ID="chkPCRFinancialC" runat="server" CssClass="default" /></td>
+                                                                                                    <td>Closing</td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:Label ID="lblPCRFinancialC" runat="server" CssClass="default" /></td>
+                                                                                                    <td align="center"><img src="/images/green_arrow.gif" border="0" align="absmiddle" /></td>
+                                                                                                    <td align="center"><asp:TextBox ID="txtPCRFinancialC" runat="server" CssClass="default" Width="100" MaxLength="10" /> <asp:ImageButton ID="imgPCRFinancialC" runat="server" ImageAlign="AbsMiddle" ImageUrl="/images/calculator.gif" /></td>
+                                                                                                </tr>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td nowrap><b>Reason for PCR:</b></td>
+                                                                                    <td width="100%"><asp:CheckBox ID="chkReason" runat="server" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <div id="divReason" runat="server" style="display:none">
+                                                                                        <asp:CheckBoxList ID="chkPCRReason" runat="server" CssClass="default" RepeatColumns="3" RepeatDirection="horizontal">
+                                                                                            <asp:ListItem Value="Resource Constraints (internal and external)" />
+                                                                                            <asp:ListItem Value="Estimates" />
+                                                                                            <asp:ListItem Value="Scope change" />
+                                                                                            <asp:ListItem Value="Vendor issues" />
+                                                                                            <asp:ListItem Value="Technical issues" />
+                                                                                            <asp:ListItem Value="Dependencies (other projects or other...)" />
+                                                                                            <asp:ListItem Value="Unknown components" />
+                                                                                            <asp:ListItem Value="Unknown resources" />
+                                                                                            <asp:ListItem Value="IP/Audit requirements" />
+                                                                                            <asp:ListItem Value="Prioritization change" />
+                                                                                            <asp:ListItem Value="Sponsor mis-communication" />
+                                                                                        </asp:CheckBoxList>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td nowrap><b>PCR Document:</b></td>
+                                                                                    <td width="100%"><asp:FileUpload runat="server" ID="oPCR" Width="500" CssClass="default" /></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2"><b>Approvals:</b></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <table cellpadding="2" cellspacing="1" border="0" class="default">
+                                                                                            <tr>
+                                                                                                <td rowspan="5"><img src="/images/spacer.gif" border="0" width="15" height="1" /></td>
+                                                                                                <td class="greenheader"><b>Team Lead:</b></td>
+                                                                                                <td><asp:Label ID="lblTeamLeadPCR" runat="server" CssClass="default" /></td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td class="greenheader"><b>Working Sponsor:</b></td>
+                                                                                                <td><asp:Label ID="lblPCRW" runat="server" CssClass="default" /></td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td class="greenheader"><b>Executive Sponsor:</b></td>
+                                                                                                <td><asp:Label ID="lblPCRE" runat="server" CssClass="default" /></td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td class="greenheader"><b>Director:</b></td>
+                                                                                                <td>
+                                                                                                    <table cellpadding="0" cellspacing="0" border="0">
+                                                                                                        <tr>
+                                                                                                            <td><asp:TextBox ID="txtPCRD" runat="server" Width="200" CssClass="default" /></td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <td>
+                                                                                                                <div id="divPCRD" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                                                                                                    <asp:ListBox ID="lstPCRD" runat="server" CssClass="default" />
+                                                                                                                </div>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td class="greenheader"><b>CC:</b></td>
+                                                                                                <td>
+                                                                                                    <table cellpadding="0" cellspacing="0" border="0">
+                                                                                                        <tr>
+                                                                                                            <td><asp:TextBox ID="txtPCRC" runat="server" Width="200" CssClass="default" /></td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <td>
+                                                                                                                <div id="divPCRC" runat="server" style="overflow:hidden; position:absolute; display:none; background-color:#FFFFFF; border:solid 1px #CCCCCC">
+                                                                                                                    <asp:ListBox ID="lstPCRC" runat="server" CssClass="default" />
+                                                                                                                </div>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><img src="/images/shadow_box_l.gif" border="0" width="5" height="12"></td>
+                                                                        <td width="100%" background="/images/shadow_box.gif"></td>
+                                                                        <td><img src="/images/shadow_box_r.gif" border="0" width="5" height="12"></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="2" align="right"><asp:Button ID="btnPCR" runat="server" CssClass="default" Text="Route for Approval" Width="150" OnClick="btnPCR_Click" /></td>
+                                                        </tr>
+                                                    </table>
+    		                                    </div>
+                                                <table width="100%" cellpadding="3" cellspacing="0" border="0" class="default">
+                                                    <tr bgcolor="#EEEEEE">
+                                                        <td><b>Current PCR Submissions</b></td>
+                                                        <td><b>Status</b></td>
+                                                        <td><b>Approved Date</b></td>
+                                                        <td align="center"><b>Scope Change</b></td>
+                                                        <td align="center"><b>Schedule Change</b></td>
+                                                        <td align="center"><b>Financial Change</b></td>
+                                                        <td><b>Link</b></td>
+                                                    </tr>
+                                                    <%=strPCR %>
+                                                </table>
+                    </td>
+                </tr>
+            </table>
+<asp:HiddenField ID="hdnCSRCD" runat="server" />
+<asp:HiddenField ID="hdnPCRD" runat="server" />
+<asp:HiddenField ID="hdnCSRCC" runat="server" />
+<asp:HiddenField ID="hdnPCRC" runat="server" />
+<div id="divLine" style="BORDER-RIGHT: gray 1px dashed; DISPLAY: none; WIDTH: 2px; POSITION: absolute; TOP: 58px; HEIGHT: 100%"></div>
+<div id="divLineCover" style="DISPLAY: none; FILTER: alpha(opacity=25); WIDTH: 100%; CURSOR: e-resize; POSITION: absolute; TOP: 58px; HEIGHT: 100%; BACKGROUND-COLOR: #666666"></div>
+<div id="divLiveCover" style="DISPLAY:none; WIDTH:100%; POSITION:absolute; HEIGHT:100%; FILTER:alpha(opacity=25); BACKGROUND-COLOR:#333333"	onclick="window.top.HidePanel();" oncontextmenu="return false;"></div>
+<iframe id="frmLiveCover" frameborder="0" scrolling="no" style="z-index:400; display:none;position:absolute;FILTER:alpha(opacity=0)" src="javascript:''"></iframe>
+<iframe id="frmLiveShow" frameborder="0" scrolling="no" style="z-index:401; display:none;position:absolute;" src="javascript:''"></iframe>
+</form>
+</body>
+</html>

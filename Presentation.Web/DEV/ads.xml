@@ -1,0 +1,23 @@
+﻿<Advertisements>
+  <Ad>
+    <ImageUrl>/images/ico_check.gif</ImageUrl>
+    <NavigateUrl>http://www.asp.net</NavigateUrl>
+    <AlternateText>ASP.NET Logo</AlternateText>
+    <Keyword>banner1</Keyword>
+    <Caption>This is the caption for Ad#1</Caption>
+  </Ad>
+  <Ad>
+    <ImageUrl>/images/ico_error.gif</ImageUrl>
+    <NavigateUrl>http://www.sulekha.net</NavigateUrl>
+    <AlternateText>www.Sulekha.net</AlternateText>
+    <Keyword>banner</Keyword>
+    <Caption>This is the caption for Ad#2</Caption>
+  </Ad>
+  <Ad>
+    <ImageUrl>/images/ico_hourglass.gif</ImageUrl>
+    <NavigateUrl>http://www.google.com</NavigateUrl>
+    <AlternateText>www.neostream.net</AlternateText>
+    <Keyword>banner</Keyword>
+    <Caption>This is the caption for Ad#2</Caption>
+  </Ad>
+</Advertisements>

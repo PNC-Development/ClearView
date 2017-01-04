@@ -1,0 +1,44 @@
+/*==============================================================
+The purpose of this script is to create /alter tables, indexes, and constraints
+==============================================================*/
+
+CREATE TABLE [dbo].[cv_incidents](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[errorid] [int] NULL,
+	[workstation] [int] NULL,
+	[kbid] [int] NULL,
+	[created] [datetime] NULL,
+	[retrieved] [datetime] NULL,
+	[incident] [varchar](25) NULL,
+	[resolved] [datetime] NULL,
+	[resolved_by] [varchar](100) NULL,
+	[resolved_comments] [varchar](max) NULL,
+	[deleted] [int] NULL,
+ CONSTRAINT [PK_cv_incidents] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[cv_incidents_kb](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[error] [varchar](max) NULL,
+	[route] [varchar](100) NULL,
+	[automatic] [int] NULL,
+	[message] [varchar](max) NULL,
+	[priority] [int] NULL,
+	[workstation] [int] NULL,
+	[enabled] [int] NULL,
+	[created] [datetime] NULL,
+	[modified] [datetime] NULL,
+	[deleted] [int] NULL,
+ CONSTRAINT [PK_cv_incidents_kb] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+

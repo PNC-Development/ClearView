@@ -1,0 +1,278 @@
+<%@ Page Language="C#" Debug="false" EnableEventValidation="false" ValidateRequest="false" %>
+  <script runat="server">
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private string dsnIP = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["IpDSN"]].ConnectionString;
+    private string dsnAsset = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["AssetDSN"]].ConnectionString;
+    private bool boolUsePNCNaming = (ConfigurationManager.AppSettings["USE_PNC_NAMING"] == "1");
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Request.QueryString["id"] != null)
+        {
+            int intServer = Int32.Parse(Request.QueryString["id"]);
+            Servers oServer = new Servers(0, dsn);
+            Asset oAsset = new Asset(0, dsnAsset);
+            Forecast oForecast = new Forecast(0, dsn);
+            Environments oEnvironment = new Environments(0, dsn);
+            OperatingSystems oOperatingSystem = new OperatingSystems(0, dsn);
+            Classes oClass = new Classes(0, dsn);
+            Requests oRequest = new Requests(0, dsn);
+            Projects oProject = new Projects(0, dsn);
+            ServerName oServerName = new ServerName(0, dsn);
+            ModelsProperties oModelsProperties = new ModelsProperties(0, dsn);
+            Storage oStorage = new Storage(0, dsn);
+            Users oUser = new Users(0, dsn);
+            Organizations oOrganization = new Organizations(0, dsn);
+
+            DataSet ds = oServer.Get(intServer);
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                int intAnswer = Int32.Parse(dr["answerid"].ToString());
+                bool boolOverride = (oForecast.GetAnswer(intAnswer, "storage_override") == "1");
+                int intForecast = Int32.Parse(oForecast.GetAnswer(intAnswer, "forecastid"));
+                int intRequest = Int32.Parse(oForecast.Get(intForecast, "requestid"));
+                int intProject = oRequest.GetProjectNumber(intRequest);
+                lblProjectName.Text = oProject.Get(intProject, "name");
+                lblProjectNumber.Text = oProject.Get(intProject, "number");
+                lblProjectType.Text = oProject.Get(intProject, "bd");
+                lblPortfolio.Text = oOrganization.GetName(Int32.Parse(oProject.Get(intProject, "organization")));
+                string strLead = oProject.Get(intProject, "lead");
+                if (strLead != "")
+                {
+                    lblProjectLead.Text = oUser.GetFullName(Int32.Parse(strLead));
+                    lblProjectLeadPhone.Text = oUser.Get(Int32.Parse(strLead), "phone");
+                }
+                string strRequester = oForecast.Get(intForecast, "userid");
+                if (strRequester != "")
+                {
+                    lblRequester.Text = oUser.GetFullName(Int32.Parse(strRequester));
+                    lblRequesterPhone.Text = oUser.Get(Int32.Parse(strRequester), "phone");
+                }
+
+                int intEnv = Int32.Parse(oForecast.GetAnswer(intAnswer, "environmentid"));
+                lblEnvironment.Text = oEnvironment.Get(intEnv, "name");
+                int intClass = Int32.Parse(oForecast.GetAnswer(intAnswer, "classid"));
+                lblClass.Text = oClass.Get(intClass, "name");
+                int intName = Int32.Parse(dr["nameid"].ToString());
+                lblServer.Text = oServer.GetName(intServer, boolUsePNCNaming);
+                int intModel = Int32.Parse(dr["modelid"].ToString());
+                lblModel.Text = oModelsProperties.Get(intModel, "name");
+                lblHeader.Text = "Server Build Request Form";
+                lblSubHeader.Text = "Racked";
+                int intAsset = 0;
+                if (dr["assetid"].ToString() != "")
+                    intAsset = Int32.Parse(dr["assetid"].ToString());
+                intAsset = 31;
+                if (intAsset > 0)
+                {
+                    lblSerial.Text = oAsset.Get(intAsset, "serial").ToUpper();
+                    lblDummy.Text = oAsset.GetServerOrBlade(intAsset, "dummy_name");
+                }
+                DataSet dsHBA = oAsset.GetHBA(intAsset);
+                foreach (DataRow drHBA in dsHBA.Tables[0].Rows)
+                {
+                    if (lblPortNames.Text != "")
+                        lblPortNames.Text += ", ";
+                    lblPortNames.Text += drHBA["name"].ToString();
+                }
+                int intOS = Int32.Parse(dr["osid"].ToString());
+                lblOS.Text = oOperatingSystem.Get(intOS, "name");
+                lblClusterName.Text = "N / A";
+                lblConsistency.Text = "N / A";
+                // Storage Information
+                DataSet dsLuns = oStorage.GetLuns(intAnswer);
+                string strStorage = "";
+                int intRow = 0;
+                bool boolOther = false;
+                foreach (DataRow drLun in dsLuns.Tables[0].Rows)
+                {
+                    boolOther = !boolOther;
+                    intRow++;
+                    strStorage += "<tr" + (boolOther ? " bgcolor=\"#F6F6F6\"" : "") + ">";
+                    strStorage += "<td>" + intRow.ToString() + "</td>";
+                    string strLetter = drLun["letter"].ToString();
+                    if (strLetter == "")
+                    {
+                        if (drLun["driveid"].ToString() == "-1000")
+                            strLetter = "E";
+                        else if (drLun["driveid"].ToString() == "-100")
+                            strLetter = "F";
+                        else if (drLun["driveid"].ToString() == "-10")
+                            strLetter = "P";
+                        else if (drLun["driveid"].ToString() == "-1")
+                            strLetter = "Q";
+                    }
+                    if ((boolOverride == true && drLun["driveid"].ToString() == "0") || oForecast.IsOSMidrange(intAnswer) == true)
+                        strStorage += "<td>" + drLun["path"].ToString() + "</td>";
+                    else
+                        strStorage += "<td>" + strLetter + ":" + drLun["path"].ToString() + "</td>";
+                    strStorage += "<td>" + drLun["performance"].ToString() + "</td>";
+                    strStorage += "<td>" + drLun["size"].ToString() + " GB</td>";
+                    strStorage += "<td class=\"required\">_____________ GB</td>";
+                    strStorage += "<td>" + drLun["size_qa"].ToString() + " GB</td>";
+                    strStorage += "<td class=\"required\">_____________ GB</td>";
+                    strStorage += "<td>" + drLun["size_test"].ToString() + " GB</td>";
+                    strStorage += "<td class=\"required\">_____________ GB</td>";
+                    strStorage += "<td>" + (drLun["replicated"].ToString() == "0" ? "No" : "Yes") + "</td>";
+                    strStorage += "<td class=\"required\">Yes&nbsp;&nbsp;/&nbsp;&nbsp;No</td>";
+                    strStorage += "<td>" + (drLun["high_availability"].ToString() == "0" ? "No" : "Yes") + "</td>";
+                    strStorage += "<td class=\"required\">Yes&nbsp;&nbsp;/&nbsp;&nbsp;No</td>";
+                    strStorage += "</tr>";
+                    DataSet dsPoints = oStorage.GetMountPoints(Int32.Parse(drLun["id"].ToString()));
+                    int intPoint = 0;
+                    foreach (DataRow drPoint in dsPoints.Tables[0].Rows)
+                    {
+                        boolOther = !boolOther;
+                        intRow++;
+                        intPoint++;
+                        strStorage += "<tr" + (boolOther ? " bgcolor=\"#F6F6F6\"" : "") + ">";
+                        strStorage += "<td>" + intRow.ToString() + "</td>";
+                        if (oForecast.IsOSMidrange(intAnswer) == true)
+                            strStorage += "<td>" + drPoint["path"].ToString() + "</td>";
+                        else
+                            strStorage += "<td>" + strLetter + ":\\SH" + drLun["driveid"].ToString() + "VOL" + (intPoint < 10 ? "0" : "") + intPoint.ToString() + "</td>";
+                        strStorage += "<td>" + drPoint["performance"].ToString() + "</td>";
+                        strStorage += "<td>" + drPoint["size"].ToString() + " GB</td>";
+                        strStorage += "<td class=\"required\">_____________ GB</td>";
+                        strStorage += "<td>" + drPoint["size_qa"].ToString() + " GB</td>";
+                        strStorage += "<td class=\"required\">_____________ GB</td>";
+                        strStorage += "<td>" + drPoint["size_test"].ToString() + " GB</td>";
+                        strStorage += "<td class=\"required\">_____________ GB</td>";
+                        strStorage += "<td>" + (drPoint["replicated"].ToString() == "0" ? "No" : "Yes") + "</td>";
+                        strStorage += "<td class=\"required\">Yes&nbsp;&nbsp;/&nbsp;&nbsp;No</td>";
+                        strStorage += "<td>" + (drPoint["high_availability"].ToString() == "0" ? "No" : "Yes") + "</td>";
+                        strStorage += "<td class=\"required\">Yes&nbsp;&nbsp;/&nbsp;&nbsp;No</td>";
+                        strStorage += "</tr>";
+                    }
+                }
+                if (strStorage != "")
+                {
+                    strStorage = "<tr class=\"bold\" bgcolor=\"#EEEEEE\"><td></td><td>Path</td><td>Performance</td><td>Requested<br/>Size in Prod</td><td>Actual<br/>Size in Prod</td><td>Requested<br/>Size in QA</td><td>Actual<br/>Size in QA</td><td>Requested<br/>Size in Test</td><td>Actual<br/>Size in Test</td><td>Requested<br/>Replication</td><td>Actual<br/>Replication</td><td>Requested<br/>High Availability</td><td>Actual<br/>High Availability</td></tr>" + strStorage;
+                    strStorage = "<table width=\"100%\" cellpadding=\"6\" cellspacing=\"0\" border=\"0\">" + strStorage + "</table>";
+                }
+                lblCapacity.Text += strStorage;
+            }
+        }               
+    }
+</script>
+<html>
+<head>
+<title>ClearView | Backup Sizer</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+<table width="100%" cellpadding="2" cellspacing="2" border="0">
+    <tr>
+        <td align="center">
+            <table cellpadding="2" cellspacing="2">
+                <tr>
+                    <td><a href="javascript:void(0);" onclick="window.print();"><img src='/images/print-icon.gif' border='0' align='absmiddle' />Print Page</a></td>
+                    <td><img src='/images/spacer.gif' border='0' width='10' height='1' /></td>
+                    <td><a href="javascript:void(0);" onclick="window.close();"><img src='/images/close-icon.gif' border='0' align='absmiddle' /><img src='/images/spacer.gif' border='0' width='5' height='1' />Close Window</a></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="100%" cellpadding="3" cellspacing="2" border="0">
+                <tr>
+                    <td colspan="2" class="header"><asp:Label ID="lblHeader" runat="server" CssClass="header" />&nbsp;&nbsp(<asp:Label ID="lblSubHeader" runat="server" CssClass="header" />)</td>
+                </tr>
+                <tr>
+                    <td width="50%" valign="top">
+                        <table cellpadding="3" cellspacing="2" border="0">
+                            <tr>
+                                <td nowrap>Server Name:</td>
+                                <td width="100%"><asp:Label ID="lblServer" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Serial Number:</td>
+                                <td width="100%"><asp:Label ID="lblSerial" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Model:</td>
+                                <td width="100%"><asp:Label ID="lblModel" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Dummy Name:</td>
+                                <td width="100%"><asp:Label ID="lblDummy" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>World Wide Port Name:</td>
+                                <td width="100%"><asp:Label ID="lblPortNames" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Class:</td>
+                                <td width="100%"><asp:Label ID="lblClass" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Environment:</td>
+                                <td width="100%"><asp:Label ID="lblEnvironment" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Operating System:</td>
+                                <td width="100%"><asp:Label ID="lblOS" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Clustered Server Name:</td>
+                                <td width="100%"><asp:Label ID="lblClusterName" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Consistency Group Members:</td>
+                                <td width="100%"><asp:Label ID="lblConsistency" runat="server" CssClass="default" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="50%" valign="top">
+                        <table cellpadding="3" cellspacing="2" border="0">
+                            <tr>
+                                <td nowrap>Project Name:</td>
+                                <td><asp:Label ID="lblProjectName" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Project Number:</td>
+                                <td><asp:Label ID="lblProjectNumber" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Project Type:</td>
+                                <td><asp:Label ID="lblProjectType" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Portfolio:</td>
+                                <td><asp:Label ID="lblPortfolio" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Project Manager:</td>
+                                <td><asp:Label ID="lblProjectLead" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap><img src="/images/down_right.gif" border="0" align="absmiddle" /> Phone Number:</td>
+                                <td><asp:Label ID="lblProjectLeadPhone" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap>Requester:</td>
+                                <td><asp:Label ID="lblRequester" runat="server" CssClass="default" /></td>
+                            </tr>
+                            <tr>
+                                <td nowrap><img src="/images/down_right.gif" border="0" align="absmiddle" /> Phone Number:</td>
+                                <td><asp:Label ID="lblRequesterPhone" runat="server" CssClass="default" /></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="background-color:#FFFFFF; border:solid 1px #CCCCCC"><asp:Label ID="lblCapacity" runat="server" CssClass="default" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</form>
+</body>
+</html>
+

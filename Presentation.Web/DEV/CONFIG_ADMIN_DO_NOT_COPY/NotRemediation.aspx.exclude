@@ -1,0 +1,139 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private int intOrganization = Int32.Parse(ConfigurationManager.AppSettings["EPS_ORGANIZATION"]);
+    private Projects oProject;
+    private Requests oRequest;
+    private RequestFields oRequestField;
+    private ProjectNumber oProjectNumber;
+    private Users oUser;
+    private ServiceRequests oServiceRequest;
+    private ResourceRequest oResourceRequest;
+    private void Page_Load()
+    {
+        oProject = new Projects(0, dsn);
+        oRequest = new Requests(0, dsn);
+        oRequestField = new RequestFields(0, dsn);
+        oProjectNumber = new ProjectNumber(0, dsn);
+        oUser = new Users(0, dsn);
+        oServiceRequest = new ServiceRequests(0, dsn);
+        oResourceRequest = new ResourceRequest(0, dsn);
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        DataSet ds = SqlHelper.ExecuteDataset(dsn, CommandType.StoredProcedure, "DELETE_LOAD_NON_REMEDIATION");
+        int intOldProject = 0;
+        int intOldRequest = 0;
+        int intNumber = 1;
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intUser = 14781;
+            if (dr["managerid"].ToString() != "")
+                intUser = Int32.Parse(dr["managerid"].ToString());
+            int intProjectStatus = Int32.Parse(dr["pstatus"].ToString());
+            int intProject = GetProject(dr["name"].ToString(), dr["number"].ToString(), dr["projecttype"].ToString(), intUser, intProjectStatus);
+            DateTime _start = DateTime.Today;
+            DateTime _end = DateTime.Today;
+            int intRequest = intOldRequest;
+            if (intProject == intOldProject)
+                intNumber++;
+            else
+            {
+                oProject.Enable(intProject, 1);
+                intRequest = oRequest.Add(intProject, intUser, dr["scope"].ToString(), _start, _end);
+                intNumber = 1;
+            }
+            intOldProject = intProject;
+            intOldRequest = intRequest;
+            int intTechnician = 999999;
+            if (dr["technicianid"].ToString() != "")
+                intTechnician = Int32.Parse(dr["technicianid"].ToString());
+            double dblHours = double.Parse(dr["hours"].ToString());
+            int intDevices = Int32.Parse(dr["devicecount"].ToString());
+            try { _start = DateTime.Parse(dr["StartDate"].ToString()); }
+            catch { }
+            try { _end = DateTime.Parse(dr["EndDate"].ToString()); }
+            catch { }
+            oRequest.UpdateStartDate(intRequest, _start);
+            oRequest.UpdateEndDate(intRequest, _end);
+            string strGroup = dr["iigroup"].ToString().ToUpper();
+            int intTechStatus = Int32.Parse(dr["tstatus"].ToString());
+            int intItem = GetItem(strGroup);
+            int intService = 0;
+            bool boolExpedite = (dr["expeditedate"].ToString() == "" ? false : true);
+            oResourceRequest.Add(intRequest, intItem, intService, intTechnician, intDevices, dblHours, (intTechStatus == 3 ? dblHours : 0.00), intTechStatus, 1, 1, 1, 0, 0, intNumber, 0);
+            oRequestField.AddItemValue(intRequest, intItem, 10011, intUser.ToString(), intNumber);
+            oRequestField.AddItemValue(intRequest, intItem, 10012, intUser.ToString(), intNumber);
+            oRequestField.AddItemValue(intRequest, intItem, 10001, dr["activitytype"].ToString(), intNumber);
+            oRequestField.AddItemValue(intRequest, intItem, 10009, _start.ToShortDateString(), intNumber);
+            oRequestField.AddItemValue(intRequest, intItem, 10010, _end.ToShortDateString(), intNumber);
+            if (dr["expeditedate"].ToString() != "")
+                oRequestField.AddItemValue(intRequest, intItem, 10014, "on", intNumber);
+        }
+    }
+    private void btnLoad2_Click(Object Sender, EventArgs e)
+    {
+        for (int ii = 25543; ii <= 28576; ii++)
+        {
+            oServiceRequest.Add(ii, 1, 1, 0);
+        }
+    }
+    private int GetProject(string _name, string _number, string _type, int _userid, int _status)
+    {
+        int intProject = 0;
+        DataSet dsProject = oProject.GetName(_name);
+        if (dsProject.Tables[0].Rows.Count > 0)
+            intProject = Int32.Parse(dsProject.Tables[0].Rows[0]["projectid"].ToString());
+        else
+        {
+            if (_number.Trim() == "")
+                _number = oProjectNumber.New();
+            intProject = oProject.Add(_name, _type, _number, _userid, intOrganization, _status);
+        }
+        return intProject;
+    }
+    private int GetItem(string _iigroup)
+    {
+        if (_iigroup == "LAB")
+            return 14;
+        else if (_iigroup == "WAN")
+            return 9;
+        else if (_iigroup == "SERVER")
+            return 7;
+        else if (_iigroup == "UNIX")
+            return 8;
+        else
+            return -1;
+    }
+</script>
+<html>
+<head>
+<title>Remediation DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script src="/javascript/default.js"type="text/javascript"></script>
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">Non-Remediation Data LOAD</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load" OnClick="btnLoad_Click" /></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad2" runat="server" CssClass="default" Width="150" Text="Fix" OnClick="btnLoad2_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

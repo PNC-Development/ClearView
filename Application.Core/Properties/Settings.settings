@@ -1,0 +1,42 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="NCC.ClearView.Application.Core.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="NCBClass_RSDev_ReportExecutionService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://clearviewreportsdev/ReportServer/ReportService2005.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_REDev_ReportExecutionService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://clearviewreportsdev/ReportServer/ReportExecution2005.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_RSLive_ReportingService2005" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://clearviewreports/ReportServer/ReportService2005.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_RELive_ReportExecutionService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://clearviewreports/ReportServer/ReportExecution2005.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_altirisws_dsjob" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://ohcleutl4035/dsjob/dsjob_fromurl.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_AltirisWS_Computer_ComputerManagementService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://ohcleutl4035/Altiris.ASDK.DS/ComputerManagementService.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_AltirisWS_Group_GroupManagementService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://ohcleutl4035/Altiris.ASDK.DS/GroupManagementService.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_AltirisWS_Schedule_ScheduleManagementService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://ohcleutl4035/Altiris.ASDK.DS/ScheduleManagementService.asmx</Value>
+    </Setting>
+    <Setting Name="NCBClass_AltirisWS_Job_JobManagementService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://ohcleutl4035/Altiris.ASDK.DS/JobManagementService.asmx</Value>
+    </Setting>
+    <Setting Name="NCC_ClearView_Application_Core_ClearViewWS_ClearViewWebServices" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost:55030/ClearViewWebServices.asmx</Value>
+    </Setting>
+    <Setting Name="NCC_ClearView_Application_Core_w08r2_BuildSubmit" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://wcrdp100a.pnceng.pvt/wabebuild/BuildSubmit.asmx</Value>
+    </Setting>
+    <Setting Name="NCC_ClearView_Application_Core_Proteus_ProteusAPI" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://new.server/Services/API</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

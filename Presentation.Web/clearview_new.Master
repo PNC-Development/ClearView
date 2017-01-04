@@ -1,0 +1,38 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="clearview_new.Master.cs" Inherits="NCC.ClearView.Presentation.Web.clearview_new" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head runat="server">
+<title id="Title1" runat="server">National City</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+<script type="text/javascript" src="/javascript/default.js"></script>
+<script type="text/javascript" src="/javascript/both.js"></script>
+<script type="text/javascript" src="/javascript/ajax.js"></script>
+<script type="text/javascript" src="/javascript/detect.js"></script>
+</head>
+<body onload="BrowserDetect();">
+<form id="Form1" runat="server">
+<div id="mainContainer">
+    <div id="headerContainer">
+        <img id="headerLogo" src="/images/masterpage/PNCHeaderLogo.gif" alt="PNC ClearView Logo" />
+        <div id="headerButtonContainer">
+            <asp:ContentPlaceHolder ID="HeaderButtons" runat="server" />
+        </div>
+    </div>
+    <div id="contentContainer">
+        <asp:ValidationSummary ID="vsValidationSummary" runat="Server"  DisplayMode="BulletList" 
+             HeaderText="The following problems have occured on the page:" ShowMessageBox="true" ShowSummary="false" 
+             EnableClientScript="true" />
+        <asp:ContentPlaceHolder id="AllContent" runat="server">
+            <img src="/images/alert.gif" alt="Alert" /> This page has not been defined.
+        </asp:ContentPlaceHolder>
+    </div>
+</div>
+ 
+<div id="divLine" />
+<div id="divLineCover" />
+<div id="divLiveCover" onclick="window.top.HidePanel();" oncontextmenu="return false;" />
+<iframe id="frmLiveCover" frameborder="0" scrolling="no" src="javascript:''" />
+<iframe id="frmLiveShow" frameborder="0" scrolling="no" src="javascript:''" />
+</form>
+</body>
+</html>

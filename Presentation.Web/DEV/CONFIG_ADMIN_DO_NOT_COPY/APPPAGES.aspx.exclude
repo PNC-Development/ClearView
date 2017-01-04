@@ -1,0 +1,64 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private DataSet ds;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        Applications oApplication = new Applications(0, dsn);
+        AppPages oAppPage = new AppPages(0, dsn);
+        ds = oApplication.Gets(1);
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            int intApplication = Int32.Parse(dr["applicationid"].ToString());
+            oAppPage.Add(30, intApplication);
+            oAppPage.Add(37, intApplication);
+            oAppPage.Add(16, intApplication);
+            oAppPage.Add(19, intApplication);
+            oAppPage.Add(26, intApplication);
+            oAppPage.Add(18, intApplication);
+            oAppPage.Add(25, intApplication);
+            oAppPage.Add(2, intApplication);
+            oAppPage.Add(34, intApplication);
+            oAppPage.Add(35, intApplication);
+            oAppPage.Add(36, intApplication);
+            oAppPage.Add(38, intApplication);
+            oAppPage.Add(6, intApplication);
+            oAppPage.Add(41, intApplication);
+            oAppPage.Add(40, intApplication);
+            oAppPage.Add(42, intApplication);
+            oAppPage.Add(39, intApplication);
+            oAppPage.Add(31, intApplication);
+            oAppPage.Add(33, intApplication);
+        }
+        Response.Write("DONE");
+    }
+</script>
+<html>
+<head>
+<title>IMPORT DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">APP PAGES LOAD</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<%@ Page Language="C#" Debug="false" %>
+<%@ Import Namespace="System.Data.OleDb" %>
+<%@ Import Namespace="System.Data" %>
+<%@ Import Namespace="System" %>
+<script runat="server">
+    private DataSet ds;
+    private int intEnvironment = Int32.Parse(ConfigurationManager.AppSettings["Environment"]);
+    private string dsn = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DSN"]].ConnectionString;
+    private void Page_Load()
+    {
+    }
+    private void btnLoad_Click(Object Sender, EventArgs e)
+    {
+        ds = SqlHelper.ExecuteDataset(dsn, CommandType.Text, "SELECT * FROM cv_project_requests WHERE deleted = 0");
+        foreach (DataRow dr in ds.Tables[0].Rows)
+        {
+            string strProject = dr["projectid"].ToString();
+            string strOrg = dr["organization"].ToString();
+            SqlHelper.ExecuteNonQuery(dsn, CommandType.Text, "UPDATE cv_projects SET organization = " + strOrg + " WHERE projectid = " + strProject);
+        }
+        Response.Write("DONE");
+    }
+</script>
+<html>
+<head>
+<title>IMPORT DATA</title>
+<link rel="stylesheet" type="text/css" href="/css/default.css" />
+</head>
+<body leftmargin="0" topmargin="0">
+<form id="Form1" runat="server">
+    <table>
+        <tr>
+            <td colspan="2" class="header">ORGANIZATION FIX</td>
+        </tr>
+        <tr>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td><asp:Button ID="btnLoad" runat="server" CssClass="default" Width="150" Text="Load Data" OnClick="btnLoad_Click" /></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
